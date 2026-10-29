@@ -10,6 +10,7 @@ import '../../core/session/session.dart';
 import '../../design_system/components.dart';
 import '../../design_system/tokens.dart';
 import '../../localization/app_localizations.dart';
+import '../campaigns/campaign_api.dart' show isTeamMemberOf;
 import '../campaigns/campaign_pages.dart';
 import '../profile/avatar.dart';
 import '../registration/registration_pages.dart' show causeLabel;
@@ -199,12 +200,14 @@ class PublicNgoPage extends ConsumerWidget {
           const SizedBox(height: AppSpacing.lg),
           LiveCampaignsStrip(ngoId: ngoId, title: t.navCampaigns),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton.icon(
-            // Donation checkout lands with donation-payment-service (next build).
-            onPressed: n['acceptingDonations'] == true ? () => showSnack(context, t.comingSoonTitle) : null,
-            icon: const Icon(Icons.volunteer_activism),
-            label: Text(t.donate),
-          ),
+          // Owner rule (2026-10-29): an NGO's own admins/staff don't see Donate for their NGO.
+          if (!isTeamMemberOf(ref.watch(meProvider).value, ngoId))
+            FilledButton.icon(
+              // Donation checkout lands with donation-payment-service (next build).
+              onPressed: n['acceptingDonations'] == true ? () => showSnack(context, t.comingSoonTitle) : null,
+              icon: const Icon(Icons.volunteer_activism),
+              label: Text(t.donate),
+            ),
         ]),
       ),
     );

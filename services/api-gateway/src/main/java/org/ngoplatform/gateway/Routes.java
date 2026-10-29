@@ -43,7 +43,8 @@ public class Routes {
                         "/api/v1/ngos/*/receipt-templates", "/api/v1/ngos/*/receipt-templates/**", "/api/v1/receipts/**",
                         "/api/v1/public/receipts/**").uri(receipt))
                 .route("campaign", r -> r.order(1).path("/api/v1/ngos/*/campaigns", "/api/v1/ngos/*/campaigns/**",
-                        "/api/v1/ngos/*/projects", "/api/v1/ngos/*/projects/**", "/api/v1/public/campaigns/**")
+                        "/api/v1/ngos/*/projects", "/api/v1/ngos/*/projects/**", "/api/v1/public/campaigns/**",
+                        "/c/*")
                         .uri(campaign))
                 .route("operations", r -> r.order(1).path("/api/v1/ngos/*/volunteers/**", "/api/v1/ngos/*/volunteers",
                         "/api/v1/ngos/*/beneficiaries/**", "/api/v1/ngos/*/beneficiaries", "/api/v1/ngos/*/finance/**",

@@ -198,26 +198,90 @@ public class CampaignService {
         return c;
     }
 
-    /** Re-encoded cover (metadata stripped) stored as large + small JPEG; the previous files are removed. */
+    // ---------------- photos (up to MAX_PHOTOS; position 0 is the cover)
+
+    public static final int MAX_PHOTOS = 5;
+
+    public record Photo(UUID id, int position, String key) {}
+
+    public List<Photo> photos(UUID campaignId) {
+        return jdbc.query("select id, position, image_key from campaign_photos where campaign_id = ? order by position, created_at",
+                (rs, i) -> new Photo(rs.getObject(1, UUID.class), rs.getInt(2), rs.getString(3)), campaignId);
+    }
+
+    public Photo photo(UUID campaignId, UUID photoId) {
+        return photos(campaignId).stream().filter(p -> p.id().equals(photoId)).findFirst()
+                .orElseThrow(() -> ApiException.notFound("Photo"));
+    }
+
+    /**
+     * Adds a photo (re-encoded: 16:9, 1200 + 480 px JPEG, metadata/GPS stripped). {@code asCover} puts it first; when
+     * the gallery is full, a new cover replaces the current cover, otherwise the request is refused.
+     */
     @Transactional
-    public Campaign setCover(UUID ngoId, Membership m, UUID id, byte[] upload) {
+    public Campaign addPhoto(UUID ngoId, Membership m, UUID id, byte[] upload, boolean asCover) {
         Campaign c = load(ngoId, id);
         CampaignRules.checkEdit(c.getStatus(), m.isAdmin());
         if (upload.length > 5L * 1024 * 1024) throw ApiException.badRequest("IMAGE_TOO_LARGE", "Pictures can be at most 5 MB");
+        List<Photo> existing = photos(id);
+        if (existing.size() >= MAX_PHOTOS) {
+            if (!asCover) throw ApiException.rule("PHOTO_LIMIT", "A campaign can have at most " + MAX_PHOTOS + " photos. Remove one first.");
+            deletePhotoRow(existing.getFirst());
+        }
         CoverImage.Result r = CoverImage.process(upload);
-        String old = c.getImageKey();
-        int v = c.getImageVersion() + 1;
-        String base = "ngos/" + ngoId + "/campaigns/" + id + "/cover-" + v;
+        UUID photoId = UUID.randomUUID();
+        String base = "ngos/" + ngoId + "/campaigns/" + id + "/photo-" + photoId;
         storage.put(base + "-1200.jpg", r.large(), "image/jpeg");
         storage.put(base + "-480.jpg", r.small(), "image/jpeg");
-        c.setImageKey(base);
-        c.editedBy(m.userId());
-        if (old != null) {
-            for (String k : List.of(old + "-1200.jpg", old + "-480.jpg", old)) {
-                try { storage.delete(k); } catch (RuntimeException ignored) { /* best effort */ }
-            }
-        }
+        if (asCover) jdbc.update("update campaign_photos set position = position + 1 where campaign_id = ?", id);
+        jdbc.update("insert into campaign_photos(id, campaign_id, position, image_key, created_by) values (?,?,?,?,?)",
+                photoId, id, asCover ? 0 : photos(id).size(), base, m.userId());
+        renumber(id);
+        syncCover(c, m.userId());
+        audit.record(ngoId, m.userId(), "CAMPAIGN_PHOTO_ADDED", "CAMPAIGN", id, Map.of("photoId", photoId.toString()));
         return c;
+    }
+
+    @Transactional
+    public Campaign removePhoto(UUID ngoId, Membership m, UUID id, UUID photoId) {
+        Campaign c = load(ngoId, id);
+        CampaignRules.checkEdit(c.getStatus(), m.isAdmin());
+        deletePhotoRow(photo(id, photoId));
+        renumber(id);
+        syncCover(c, m.userId());
+        audit.record(ngoId, m.userId(), "CAMPAIGN_PHOTO_REMOVED", "CAMPAIGN", id, Map.of("photoId", photoId.toString()));
+        return c;
+    }
+
+    @Transactional
+    public Campaign makeCover(UUID ngoId, Membership m, UUID id, UUID photoId) {
+        Campaign c = load(ngoId, id);
+        CampaignRules.checkEdit(c.getStatus(), m.isAdmin());
+        Photo p = photo(id, photoId);
+        jdbc.update("update campaign_photos set position = position + 1 where campaign_id = ? and position < ?", id, p.position());
+        jdbc.update("update campaign_photos set position = 0 where id = ?", photoId);
+        renumber(id);
+        syncCover(c, m.userId());
+        return c;
+    }
+
+    private void deletePhotoRow(Photo p) {
+        jdbc.update("delete from campaign_photos where id = ?", p.id());
+        for (String k : List.of(p.key() + "-1200.jpg", p.key() + "-480.jpg")) {
+            try { storage.delete(k); } catch (RuntimeException ignored) { /* best effort; orphan files are harmless */ }
+        }
+    }
+
+    private void renumber(UUID campaignId) {
+        jdbc.update("update campaign_photos p set position = r.rn - 1 from (select id, row_number() over (order by position, created_at) rn "
+                + "from campaign_photos where campaign_id = ?) r where p.id = r.id", campaignId);
+    }
+
+    /** campaigns.image_key mirrors the cover so list views need no extra query; the version busts image caches. */
+    private void syncCover(Campaign c, UUID actor) {
+        List<Photo> ps = photos(c.getId());
+        c.setImageKey(ps.isEmpty() ? null : ps.getFirst().key());
+        c.editedBy(actor);
     }
 
     @Scheduled(cron = "${ngo.campaigns.close-cron:0 15 0 * * *}", zone = "Asia/Kolkata")

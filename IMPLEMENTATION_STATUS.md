@@ -136,6 +136,26 @@ dataset unchanged (2 admins / 2 staff / 3 donors).
 - Not yet: share link (CAMP-010), analytics (CAMP-009), saved campaigns (DAPP-023), campaign updates to followers,
   real donations, cause labels are English-only in all languages (pre-existing causeLabel).
 
+### Session 2026-10-29 (late evening): owner review of campaigns - photos, share link, donate rule, admin limit
+- Who sees Donate (owner rule): never in the NGO app; in the donor app an active member of the campaign's NGO sees
+  "Your organization's campaign" + Share instead of Donate (campaign page and NGO page). Members can still donate to
+  other NGOs. ("Add test donation" in the NGO app is a development-only stand-in, off unless CAMPAIGN_TEST_DONATIONS.)
+- Photo gallery: up to 5 photos per campaign, first = cover (campaign V3 `campaign_photos`, existing covers migrated).
+  API: POST /photos, DELETE /photos/{id}, PUT /photos/{id}/cover, GET team/public photo (16:9, 1200/480 px, metadata
+  stripped, public only when live/closed). App: photo strip in the form (multi-pick, make cover, remove; applied on
+  save), swipeable gallery with dots on team and donor pages; consent/dignity hint for photos of people and children.
+- Share link (CAMP-010): public page GET /c/{id} (campaign-service, via gateway, no login) with Open Graph/Twitter
+  tags (photo, title, summary, NGO) so Facebook/LinkedIn/WhatsApp/X show a rich preview; all text HTML-escaped; 404
+  for drafts. Views carry `shareUrl` (base `ngo.public-web-url` / PUBLIC_WEB_URL - set to the product domain in
+  production). App: "Share campaign" (system share sheet: WhatsApp, Facebook, LinkedIn, Instagram DM/Stories, ...)
+  + "Copy link". Instagram posts cannot carry clickable links - use Stories link sticker / bio.
+- Admin limit: server already refused a 3rd admin (ADMIN_LIMIT_REACHED for invite, promote, reactivate); the app's
+  invite sheet still offered "Secondary admin". Now hidden when 2 admins (active + pending) exist, with an
+  explanation; team card shows "2 of 2 administrators". New e2e `scripts/test-admin-limit.ps1`.
+- Tests: campaign unit 19 (SharePageControllerTest 4 new), e2e test-campaigns 76/76 (photos, share page, XSS).
+- Later: app links so /c/{id} opens the app (needs the domain + assetlinks/apple-app-site-association), referral tag
+  on shared links, Hindi/Marathi share page.
+
 ## Next steps (in order) - agreed with the owner 2026-10-29
 Done since the original plan: first emulator runs, core services built and UI-tested (phase 1), notification-service.
 

@@ -638,5 +638,57 @@
   "sendForApprovalConfirm": "An administrator will review this campaign. Donors see it only after approval.",
   "sentForApproval": "Sent for approval",
   "withdrawRequest": "Withdraw approval request",
-  "verifiedNgos": "Verified NGOs"
+  "verifiedNgos": "Verified NGOs",
+  "adminsUsed": "{count} of {n} administrators",
+  "@adminsUsed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "adminLimitReachedHint": "Your organization already has the maximum of 2 administrators, so new members join as staff. To change an administrator, first change their role or deactivate them.",
+  "campaignPhotos": "Photos",
+  "addPhotos": "Add photos",
+  "campaignPhotosHelp": "Up to 5 photos; the first one is the cover. Show the need with dignity: use photos only with the people's consent and avoid clearly showing children's faces. Location details are removed.",
+  "coverLabel": "Cover",
+  "makeCover": "Make cover photo",
+  "removePhoto": "Remove",
+  "photoOf": "Photo {n} of {count}",
+  "@photoOf": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareCampaign": "Share campaign",
+  "copyLink": "Copy link",
+  "linkCopied": "Link copied",
+  "shareCampaignText": "Please support \"{title}\" on Seva Setu: {url}",
+  "@shareCampaignText": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "yourTeamCampaign": "Your organization's campaign",
+  "yourTeamCampaignHint": "You are part of the {ngo} team, so Donate is hidden for you. Share the campaign to reach more supporters.",
+  "@yourTeamCampaignHint": {
+    "placeholders": {
+      "ngo": {
+        "type": "String"
+      }
+    }
+  }
 }

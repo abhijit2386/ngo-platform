@@ -1,4 +1,4 @@
-# DEV/TEST ONLY: sample campaigns for the standard dataset (run after seed-dataset.ps1). Idempotent by title.
+﻿# DEV/TEST ONLY: sample campaigns for the standard dataset (run after seed-dataset.ps1). Idempotent by title.
 # Shows every workflow state in the app:
 #   live (staff-created, admin-approved, with cover + test donations), live (admin-published), awaiting approval, draft.
 param([string]$NgoId = '0cf945f6-1183-42f5-aeb1-20bab9be302b')
@@ -80,6 +80,15 @@ foreach ($s in $samples) {
     }
   }
   "created: $title -> $($c.status) raised=$($c.raisedAmount)"
+}
+# Gallery for the first live sample (idempotent): 4 photos in total.
+$books = @((Api GET "${base}?size=100" $asha).items | Where-Object { $_.title -eq 'School books for 200 children' })[0]
+if ($books) {
+  $full = Api GET "$base/$($books.id)" $asha
+  $have = @($full.photoIds).Count
+  $extra = @(@('#0E7490', '#67E8F9'), @('#7C3AED', '#C4B5FD'), @('#B45309', '#FCD34D'))
+  for ($i = $have; $i -lt 4; $i++) { Upload "$base/$($books.id)/photos" $asha (Cover $extra[$i - 1][0] $extra[$i - 1][1]) }
+  "gallery: School books has $([Math]::Max($have, 4)) photos"
 }
 $sum = Api GET "$base/summary" $asha
 "summary: " + ($sum.counts | ConvertTo-Json -Compress)

@@ -1,9 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/config/app_config.dart';
 import '../../core/session/session.dart';
 import '../../localization/app_localizations.dart';
 
@@ -62,6 +65,38 @@ final teamCoverProvider = FutureProvider.family<Uint8List, (String, String, int,
   final bytes = await ref.read(apiProvider).bytes('/api/v1/ngos/${k.$1}/campaigns/${k.$2}/image', query: {'size': k.$4});
   return Uint8List.fromList(bytes);
 });
+
+/// One gallery photo of a campaign, for team views (drafts are not public). Key: ngoId, campaignId, photoId, size.
+final teamPhotoProvider = FutureProvider.family<Uint8List, (String, String, String, String)>((ref, k) async {
+  ref.watch(sessionKeyProvider);
+  final bytes = await ref.read(apiProvider).bytes('/api/v1/ngos/${k.$1}/campaigns/${k.$2}/photos/${k.$3}', query: {'size': k.$4});
+  return Uint8List.fromList(bytes);
+});
+
+String publicPhotoUrl(String campaignId, String photoId, {bool small = false}) =>
+    '${AppConfig.apiBaseUrl}/api/v1/public/campaigns/$campaignId/photos/$photoId?size=${small ? 'small' : 'large'}';
+
+/// True when the signed-in user is an active member of [ngoId] (team members don't donate to their own NGO in the app).
+bool isTeamMemberOf(Me? me, Object? ngoId) => me != null && me.activeMemberships.any((m) => m.ngoId == '$ngoId');
+
+/// Opens the system share sheet (WhatsApp, Facebook, LinkedIn, Instagram, ...) with the campaign's public link,
+/// whose page carries link-preview tags (photo, title, summary).
+Future<void> shareCampaign(BuildContext context, Map<String, dynamic> c) async {
+  final url = c['shareUrl'] as String?;
+  if (url == null) return;
+  final t = L10n.of(context);
+  final box = context.findRenderObject() as RenderBox?;
+  await SharePlus.instance.share(ShareParams(
+    text: t.shareCampaignText('${c['title']}', url),
+    subject: '${c['title']}',
+    sharePositionOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+  ));
+}
+
+Future<void> copyCampaignLink(Map<String, dynamic> c) async {
+  final url = c['shareUrl'] as String?;
+  if (url != null) await Clipboard.setData(ClipboardData(text: url));
+}
 
 /// userId -> display name for the current NGO team (to show who drafted / approved).
 final teamNamesProvider = FutureProvider.family<Map<String, String>, String>((ref, ngoId) async {

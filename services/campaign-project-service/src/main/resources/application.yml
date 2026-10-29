@@ -12,6 +12,8 @@ ngo:
     bucket: ${S3_BUCKET:ngo-campaigns}
     access-key: ${S3_ACCESS_KEY:dev-access}
     secret-key: ${S3_SECRET_KEY:dev-secret-change-me}
+  # Base of public share links (https://<product domain> in production). Locally the gateway serves /c/{id}.
+  public-web-url: ${PUBLIC_WEB_URL:http://localhost:8080}
   campaigns:
     # Development only: lets staff credit test donations to a live campaign until online payments exist.
     test-donations: ${CAMPAIGN_TEST_DONATIONS:false}

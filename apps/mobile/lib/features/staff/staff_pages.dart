@@ -22,6 +22,15 @@ final _staffProvider = FutureProvider.family<Map<String, dynamic>, String>((ref,
   return {'members': results[0], 'capacity': results[1], 'invitations': results[2]};
 });
 
+/// The platform allows at most 2 administrators per NGO (server rule ADMIN_LIMIT_REACHED); pending admin
+/// invitations reserve a seat. Unknown capacity -> offer the role and let the server decide.
+bool _adminSeatFree(Object? capacity) {
+  if (capacity is! Map) return true;
+  final max = (capacity['adminMax'] as num?)?.toInt() ?? 2;
+  final used = ((capacity['activeAdmins'] as num?)?.toInt() ?? 0) + ((capacity['pendingAdmins'] as num?)?.toInt() ?? 0);
+  return used < max;
+}
+
 const _roles = ['STAFF', 'FINANCE', 'CAMPAIGN_MANAGER', 'VOLUNTEER_COORDINATOR', 'VOLUNTEER', 'SECONDARY_ADMIN'];
 String roleLabel(L10n t, String r) => t.roleName(r);
 
@@ -41,7 +50,8 @@ class StaffPage extends ConsumerWidget {
       floatingActionButton: canManage
           ? FloatingActionButton.extended(
               onPressed: () => showModalBottomSheet(context: context, isScrollControlled: true,
-                  builder: (_) => _InviteSheet(ngoId: ngoId, isAdmin: m?.isAdmin ?? false)),
+                  builder: (_) => _InviteSheet(ngoId: ngoId, isAdmin: m?.isAdmin ?? false,
+                      adminSeatFree: _adminSeatFree(data.value?['capacity']))),
               icon: const Icon(Icons.person_add),
               label: Text(t.inviteStaff),
             )
@@ -63,6 +73,9 @@ class StaffPage extends ConsumerWidget {
                   Text(t.seatsUsed('$used', max < 0 ? '∞' : '$max'), style: const TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   if (max > 0) LinearProgressIndicator(value: (used / max).clamp(0, 1), minHeight: 8, borderRadius: BorderRadius.circular(8)),
+                  const SizedBox(height: 8),
+                  Text(t.adminsUsed(((cap['activeAdmins'] as num?)?.toInt() ?? 0) + ((cap['pendingAdmins'] as num?)?.toInt() ?? 0),
+                      (cap['adminMax'] as num?)?.toInt() ?? 2), style: const TextStyle(color: AppColors.textMuted)),
                 ]),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -147,9 +160,10 @@ class StaffPage extends ConsumerWidget {
 }
 
 class _InviteSheet extends ConsumerStatefulWidget {
-  const _InviteSheet({required this.ngoId, required this.isAdmin});
+  const _InviteSheet({required this.ngoId, required this.isAdmin, required this.adminSeatFree});
   final String ngoId;
   final bool isAdmin;
+  final bool adminSeatFree;
   @override
   ConsumerState<_InviteSheet> createState() => _InviteSheetState();
 }
@@ -180,10 +194,16 @@ class _InviteSheetState extends ConsumerState<_InviteSheet> {
                 decoration: InputDecoration(labelText: t.role),
                 items: [
                   for (final r in _roles)
-                    if (r != 'SECONDARY_ADMIN' || widget.isAdmin) DropdownMenuItem(value: r, child: Text(roleLabel(t, r))),
+                    if (r != 'SECONDARY_ADMIN' || (widget.isAdmin && widget.adminSeatFree))
+                      DropdownMenuItem(value: r, child: Text(roleLabel(t, r))),
                 ],
                 onChanged: (r) => setState(() => _role = r ?? _role),
               ),
+              if (widget.isAdmin && !widget.adminSeatFree)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(t.adminLimitReachedHint, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                ),
               const SizedBox(height: AppSpacing.lg),
               BusyButton(
                 label: t.invite,

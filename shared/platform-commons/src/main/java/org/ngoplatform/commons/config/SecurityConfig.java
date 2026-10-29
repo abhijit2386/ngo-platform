@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/api/v1/public/**").permitAll()
+                .requestMatchers("/c/**").permitAll() // public campaign share pages (campaign-service)
                 .requestMatchers("/api/v1/webhooks/**").permitAll() // verified by signature in the handler
                 .requestMatchers("/internal/**").hasRole("INTERNAL")
                 .anyRequest().authenticated())

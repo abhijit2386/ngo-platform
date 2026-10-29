@@ -133,6 +133,30 @@ Check 'draft cover is not public (404)' ($img.status -eq 404) (J $img)
 $up = Upload "$base/$id/image" $sunil (Png 200 100)
 Check 'tiny picture rejected' ($up.status -eq 400 -and $up.body -match 'IMAGE_TOO_SMALL') $up.body
 
+# --- photo gallery: up to 5, first is the cover ---
+for ($i = 0; $i -lt 4; $i++) { $up = Upload "$base/$id/photos" $sunil (Png 1200 800) }
+$g = Api GET "$base/$id" $sunil
+Check 'gallery holds 5 photos (cover + 4)' (@($g.photoIds).Count -eq 5) (J $g.photoIds)
+$up = Upload "$base/$id/photos" $sunil (Png 1200 800)
+Check '6th photo refused' ($up.status -eq 422 -and $up.body -match 'PHOTO_LIMIT') $up.body
+$third = @($g.photoIds)[2]
+$g2 = Api PUT "$base/$id/photos/$third/cover" $sunil
+Check 'any photo can become the cover' (@($g2.photoIds)[0] -eq $third -and $g2.imageVersion -gt $g.imageVersion) (J $g2.photoIds)
+$g3 = Api DELETE "$base/$id/photos/$third" $sunil
+Check 'removing the cover promotes the next photo' (@($g3.photoIds).Count -eq 4 -and @($g3.photoIds)[0] -eq @($g.photoIds)[0]) (J $g3.photoIds)
+$img = Status "$base/$id/photos/$(@($g3.photoIds)[1])?size=small" $sunil
+Check 'team can view a gallery photo' ($img.status -eq 200 -and $img.type -like 'image/jpeg*') (J $img)
+$img = Status "/api/v1/public/campaigns/$id/photos/$(@($g3.photoIds)[1])" $null
+Check 'draft gallery is not public (404)' ($img.status -eq 404) (J $img)
+$x = Api DELETE "$base/$id/photos/$([guid]::NewGuid())" $sunil
+Check 'unknown photo -> 404' ($x.__status -eq 404) (J $x)
+$x = Api DELETE "$base/$id/photos/$(@($g3.photoIds)[1])" $meera
+Check 'donor cannot remove photos (403)' ($x.__status -eq 403) (J $x)
+$c0 = Api GET "$base/$id" $sunil
+Check 'no share link while draft' ($null -eq $c0.shareUrl) (J $c0)
+$page = Status "/c/$id" $null
+Check 'draft share page is 404' ($page.status -eq 404) (J $page)
+
 # --- staff cannot approve ---
 $c = Api GET "$base/$id" $sunil
 $x = Api POST "$base/$id/approve" $sunil @{ version = $c.version }
@@ -193,6 +217,27 @@ $pub = Api GET "/api/v1/public/campaigns?q=wadi&cause=EDUCATION" $null
 Check 'public search by text + cause finds it' (@($pub.items | Where-Object { $_.id -eq $id }).Count -eq 1) (J $pub)
 $img = Status "/api/v1/public/campaigns/$id/image?size=small" $null
 Check 'live cover is public' ($img.status -eq 200) (J $img)
+Check 'public detail lists the 4 photos' (@($d.photoIds).Count -eq 4) (J $d.photoIds)
+$img = Status "/api/v1/public/campaigns/$id/photos/$(@($d.photoIds)[3])?size=small" $null
+Check 'live gallery photo is public' ($img.status -eq 200) (J $img)
+
+# --- share link (CAMP-010) ---
+$c = Api GET "$base/$id" $sunil
+Check 'live campaign has a share link' ($c.shareUrl -like "*/c/$id") (J $c)
+Check 'public view carries the same link' ($d.shareUrl -eq $c.shareUrl) $d.shareUrl
+$r = Invoke-WebRequest "$api/c/$id" -UseBasicParsing
+$ms = New-Object IO.MemoryStream; $r.RawContentStream.CopyTo($ms); $html = [Text.Encoding]::UTF8.GetString($ms.ToArray())
+Check 'share page served as HTML' ($r.StatusCode -eq 200 -and $r.Headers['Content-Type'] -like 'text/html*')
+Check 'share page has link-preview tags (title, image, description)' ($html -match '<meta property="og:title" content="E2E School books' -and $html -match 'og:image" content="[^"]+/image\?size=large' -and $html -match 'og:description') ($html.Substring(0, [Math]::Min(600, $html.Length)))
+Check 'share page shows NGO and progress' ($html -match 'by Asha Seva' -and $html -match 'raised')
+Check 'share page allows its own styles/photo but no scripts' ($r.Headers['Content-Security-Policy'] -match "style-src 'unsafe-inline'" -and $r.Headers['Content-Security-Policy'] -notmatch 'script-src') $r.Headers['Content-Security-Policy']
+$xss = @{} + $draft; $xss.title = 'E2E <script>alert(1)</script> & "q"'
+$xc = Api POST $base $asha $xss
+$xc = Api POST "$base/$($xc.id)/approve" $asha @{ version = $xc.version }
+$r = Invoke-WebRequest "$api/c/$($xc.id)" -UseBasicParsing
+$ms = New-Object IO.MemoryStream; $r.RawContentStream.CopyTo($ms); $html = [Text.Encoding]::UTF8.GetString($ms.ToArray())
+Check 'share page escapes user text (no script injection)' (-not ($html -match '<script>') -and $html -match '&lt;script&gt;') ($html.Substring(0, [Math]::Min(400, $html.Length)))
+$null = Api POST "$base/$($xc.id)/close" $asha
 
 # --- live edits: admins only ---
 $cur = Api GET "$base/$id" $sunil

@@ -58,13 +58,16 @@ public class CampaignController {
                                LocalDate endDate, String status, boolean hasImage, int imageVersion, UUID projectId,
                                UUID createdBy, Instant createdAt, UUID updatedBy, Instant updatedAt, UUID submittedBy,
                                Instant submittedAt, String rejectionReason, Instant rejectedAt, UUID approvedBy,
-                               Instant publishedAt, Instant closedAt, long version) {
-        static CampaignView of(Campaign c) {
+                               Instant publishedAt, Instant closedAt, long version, List<UUID> photoIds, String shareUrl) {
+        static CampaignView of(Campaign c) { return of(c, null, null); }
+
+        static CampaignView of(Campaign c, List<UUID> photoIds, String shareUrl) {
             return new CampaignView(c.getId(), c.getNgoId(), c.getTitle(), c.getSlug(), c.getSummary(), c.getStory(), c.getCause(),
                     c.getGoalAmount(), c.getRaisedAmount(), c.getDonationCount(), c.getStartDate(), c.getEndDate(),
                     c.getStatus().name(), c.getImageKey() != null, c.getImageVersion(), c.getProjectId(), c.getCreatedBy(),
                     c.getCreatedAt(), c.getUpdatedBy(), c.getUpdatedAt(), c.getSubmittedBy(), c.getSubmittedAt(),
-                    c.getRejectionReason(), c.getRejectedAt(), c.getApprovedBy(), c.getPublishedAt(), c.getClosedAt(), c.getVersion());
+                    c.getRejectionReason(), c.getRejectedAt(), c.getApprovedBy(), c.getPublishedAt(), c.getClosedAt(), c.getVersion(),
+                    photoIds, shareUrl);
         }
     }
 
@@ -72,13 +75,14 @@ public class CampaignController {
     public record PublicCampaignView(UUID id, UUID ngoId, String ngoName, String ngoCity, String title, String summary,
                                      String story, String cause, BigDecimal goalAmount, BigDecimal raisedAmount,
                                      int donationCount, LocalDate startDate, LocalDate endDate, String phase,
-                                     boolean hasImage, int imageVersion, Instant publishedAt) {
-        static PublicCampaignView of(Campaign c, LocalDate today) {
+                                     boolean hasImage, int imageVersion, Instant publishedAt, List<UUID> photoIds,
+                                     String shareUrl) {
+        static PublicCampaignView of(Campaign c, LocalDate today, List<UUID> photoIds, String shareUrl) {
             String phase = c.getStatus() != Campaign.Status.PUBLISHED || (c.getEndDate() != null && today.isAfter(c.getEndDate()))
                     ? "ENDED" : today.isBefore(c.getStartDate()) ? "UPCOMING" : "LIVE";
             return new PublicCampaignView(c.getId(), c.getNgoId(), c.getNgoName(), c.getNgoCity(), c.getTitle(), c.getSummary(),
                     c.getStory(), c.getCause(), c.getGoalAmount(), c.getRaisedAmount(), c.getDonationCount(), c.getStartDate(),
-                    c.getEndDate(), phase, c.getImageKey() != null, c.getImageVersion(), c.getPublishedAt());
+                    c.getEndDate(), phase, c.getImageKey() != null, c.getImageVersion(), c.getPublishedAt(), photoIds, shareUrl);
         }
     }
 
@@ -114,12 +118,15 @@ public class CampaignController {
     private final JdbcTemplate jdbc;
     private final EntitlementResolver entitlements;
     private final boolean testDonations;
+    private final String publicWebUrl;
 
     public CampaignController(CampaignService svc, AccessGuard guard, Repos.Campaigns campaigns, Repos.Projects projects,
                               ObjectStorage storage, JdbcTemplate jdbc, EntitlementResolver entitlements,
-                              @Value("${ngo.campaigns.test-donations:false}") boolean testDonations) {
+                              @Value("${ngo.campaigns.test-donations:false}") boolean testDonations,
+                              @Value("${ngo.public-web-url:http://localhost:8080}") String publicWebUrl) {
         this.svc = svc; this.guard = guard; this.campaigns = campaigns; this.projects = projects; this.storage = storage;
         this.jdbc = jdbc; this.entitlements = entitlements; this.testDonations = testDonations;
+        this.publicWebUrl = publicWebUrl.replaceAll("/+$", "");
     }
 
     // ---------------- campaigns (NGO)
@@ -153,63 +160,91 @@ public class CampaignController {
     public CampaignView create(@PathVariable UUID ngoId, @Valid @RequestBody CampaignRequest req) {
         Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
         guard.requireOperational(ngoId);
-        return CampaignView.of(svc.create(ngoId, m.userId(), req.input()));
+        return view(svc.create(ngoId, m.userId(), req.input()));
     }
 
     @GetMapping("/api/v1/ngos/{ngoId}/campaigns/{id}")
     public CampaignView get(@PathVariable UUID ngoId, @PathVariable UUID id) {
         guard.require(ngoId, Permissions.CAMPAIGN_VIEW);
-        return CampaignView.of(svc.load(ngoId, id));
+        return view(svc.load(ngoId, id));
     }
 
     @PutMapping("/api/v1/ngos/{ngoId}/campaigns/{id}")
     public CampaignView update(@PathVariable UUID ngoId, @PathVariable UUID id, @Valid @RequestBody CampaignRequest req) {
         Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
         if (req.version() == null) throw ApiException.badRequest("VERSION_REQUIRED", "version is required");
-        return CampaignView.of(svc.update(ngoId, m, id, req.input(), req.version()));
+        return view(svc.update(ngoId, m, id, req.input(), req.version()));
     }
 
     @PostMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/submit")
     public CampaignView submit(@PathVariable UUID ngoId, @PathVariable UUID id) {
         Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
         guard.requireOperational(ngoId);
-        return CampaignView.of(svc.submit(ngoId, m, id));
+        return view(svc.submit(ngoId, m, id));
     }
 
     @PostMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/withdraw")
     public CampaignView withdraw(@PathVariable UUID ngoId, @PathVariable UUID id) {
         Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
-        return CampaignView.of(svc.withdraw(ngoId, m, id));
+        return view(svc.withdraw(ngoId, m, id));
     }
 
     @PostMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/approve")
     public CampaignView approve(@PathVariable UUID ngoId, @PathVariable UUID id, @Valid @RequestBody ApproveRequest req) {
         Membership m = guard.require(ngoId, Permissions.CAMPAIGN_APPROVE);
-        return CampaignView.of(svc.approve(ngoId, m, id, req.version()));
+        return view(svc.approve(ngoId, m, id, req.version()));
     }
 
     @PostMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/reject")
     public CampaignView reject(@PathVariable UUID ngoId, @PathVariable UUID id, @Valid @RequestBody RejectRequest req) {
         Membership m = guard.require(ngoId, Permissions.CAMPAIGN_APPROVE);
-        return CampaignView.of(svc.reject(ngoId, m, id, req.reason()));
+        return view(svc.reject(ngoId, m, id, req.reason()));
     }
 
     @PostMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/close")
     public CampaignView close(@PathVariable UUID ngoId, @PathVariable UUID id) {
         Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
-        return CampaignView.of(svc.close(ngoId, m, id));
+        return view(svc.close(ngoId, m, id));
     }
 
     @PostMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/archive")
     public CampaignView archive(@PathVariable UUID ngoId, @PathVariable UUID id) {
         Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
-        return CampaignView.of(svc.archive(ngoId, m, id));
+        return view(svc.archive(ngoId, m, id));
     }
 
     @PostMapping(value = "/api/v1/ngos/{ngoId}/campaigns/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CampaignView image(@PathVariable UUID ngoId, @PathVariable UUID id, @RequestPart("file") MultipartFile file) throws IOException {
         Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
-        return CampaignView.of(svc.setCover(ngoId, m, id, file.getBytes()));
+        return view(svc.addPhoto(ngoId, m, id, file.getBytes(), true));
+    }
+
+    /** Adds a photo to the gallery (max 5; the first one is the cover). */
+    @PostMapping(value = "/api/v1/ngos/{ngoId}/campaigns/{id}/photos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public CampaignView addPhoto(@PathVariable UUID ngoId, @PathVariable UUID id, @RequestPart("file") MultipartFile file) throws IOException {
+        Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
+        return view(svc.addPhoto(ngoId, m, id, file.getBytes(), false));
+    }
+
+    @DeleteMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/photos/{photoId}")
+    public CampaignView removePhoto(@PathVariable UUID ngoId, @PathVariable UUID id, @PathVariable UUID photoId) {
+        Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
+        return view(svc.removePhoto(ngoId, m, id, photoId));
+    }
+
+    @PutMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/photos/{photoId}/cover")
+    public CampaignView makeCover(@PathVariable UUID ngoId, @PathVariable UUID id, @PathVariable UUID photoId) {
+        Membership m = guard.require(ngoId, Permissions.CAMPAIGN_MANAGE);
+        return view(svc.makeCover(ngoId, m, id, photoId));
+    }
+
+    @GetMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/photos/{photoId}")
+    public ResponseEntity<byte[]> teamPhoto(@PathVariable UUID ngoId, @PathVariable UUID id, @PathVariable UUID photoId,
+                                            @RequestParam(defaultValue = "large") String size) throws IOException {
+        guard.require(ngoId, Permissions.CAMPAIGN_VIEW);
+        svc.load(ngoId, id);
+        return image(svc.photo(id, photoId).key(), size, CacheControl.maxAge(Duration.ofDays(30)).cachePrivate());
     }
 
     @GetMapping("/api/v1/ngos/{ngoId}/campaigns/{id}/image")
@@ -234,7 +269,7 @@ public class CampaignController {
     @ResponseStatus(HttpStatus.CREATED)
     public CampaignView testDonation(@PathVariable UUID ngoId, @PathVariable UUID id, @Valid @RequestBody TestDonation req) {
         Membership m = guard.require(ngoId, Permissions.DONATION_RECORD);
-        return CampaignView.of(svc.recordTestDonation(ngoId, m.userId(), id, req.amount(), req.donorLabel()));
+        return view(svc.recordTestDonation(ngoId, m.userId(), id, req.amount(), req.donorLabel()));
     }
 
     // ---------------- public discovery (DAPP-007/008)
@@ -249,13 +284,22 @@ public class CampaignController {
         if (q != null && q.length() > 60) throw ApiException.badRequest("QUERY_TOO_LONG", "Search text is too long");
         var p = PageRequest.of(Math.max(0, page), Math.min(Math.max(1, size), 50), Sort.by(Sort.Direction.DESC, "publishedAt"));
         LocalDate today = svc.today();
-        return PageResponse.of(campaigns.findAll(Repos.publicCampaigns(ngoId, cause, q), p), c -> PublicCampaignView.of(c, today));
+        return PageResponse.of(campaigns.findAll(Repos.publicCampaigns(ngoId, cause, q), p),
+                c -> PublicCampaignView.of(c, today, null, shareUrl(c)));
     }
 
     @GetMapping("/api/v1/public/campaigns/{id}")
     public PublicCampaignView publicGet(@PathVariable UUID id) {
         return campaigns.findById(id).filter(c -> c.getStatus() == Campaign.Status.PUBLISHED || c.getStatus() == Campaign.Status.CLOSED)
-                .map(c -> PublicCampaignView.of(c, svc.today())).orElseThrow(() -> ApiException.notFound("Campaign"));
+                .map(c -> PublicCampaignView.of(c, svc.today(), photoIds(c), shareUrl(c))).orElseThrow(() -> ApiException.notFound("Campaign"));
+    }
+
+    @GetMapping("/api/v1/public/campaigns/{id}/photos/{photoId}")
+    public ResponseEntity<byte[]> publicPhoto(@PathVariable UUID id, @PathVariable UUID photoId,
+                                              @RequestParam(defaultValue = "large") String size) throws IOException {
+        campaigns.findById(id).filter(CampaignController::isPublic).orElseThrow(() -> ApiException.notFound("Photo"));
+        // Photo keys contain the photo id, so a replaced photo gets a new URL: safe to cache for long.
+        return image(svc.photo(id, photoId).key(), size, CacheControl.maxAge(Duration.ofDays(30)).cachePublic());
     }
 
     @GetMapping("/api/v1/public/campaigns/{id}/image")
@@ -266,8 +310,24 @@ public class CampaignController {
         return cover(c, size, CacheControl.maxAge(Duration.ofHours(1)).cachePublic());
     }
 
+    static boolean isPublic(Campaign c) {
+        return c.getStatus() == Campaign.Status.PUBLISHED || c.getStatus() == Campaign.Status.CLOSED;
+    }
+
+    /** Full team view: gallery ids and, once public, the share link. */
+    private CampaignView view(Campaign c) { return CampaignView.of(c, photoIds(c), shareUrl(c)); }
+
+    private List<UUID> photoIds(Campaign c) { return svc.photos(c.getId()).stream().map(CampaignService.Photo::id).toList(); }
+
+    /** Public web page with link-preview tags (SharePageController); null until the campaign is public. */
+    private String shareUrl(Campaign c) { return isPublic(c) ? publicWebUrl + "/c/" + c.getId() : null; }
+
     private ResponseEntity<byte[]> cover(Campaign c, String size, CacheControl cache) throws IOException {
-        String key = c.getImageKey() + ("small".equals(size) ? "-480.jpg" : "-1200.jpg");
+        return image(c.getImageKey(), size, cache);
+    }
+
+    private ResponseEntity<byte[]> image(String base, String size, CacheControl cache) throws IOException {
+        String key = base + ("small".equals(size) ? "-480.jpg" : "-1200.jpg");
         try (InputStream in = storage.get(key)) {
             return ResponseEntity.ok().cacheControl(cache).contentType(MediaType.IMAGE_JPEG).body(in.readAllBytes());
         }

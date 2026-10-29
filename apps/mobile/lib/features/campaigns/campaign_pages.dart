@@ -68,6 +68,95 @@ class CampaignCover extends ConsumerWidget {
   }
 }
 
+/// Swipeable photo gallery (16:9) with page dots; falls back to the cover/placeholder when there are no photos.
+class CampaignGallery extends ConsumerStatefulWidget {
+  const CampaignGallery({super.key, required this.campaign, this.ngoId});
+  final Map<String, dynamic> campaign;
+  /// Team view (needs token) when set; public URLs otherwise.
+  final String? ngoId;
+  @override
+  ConsumerState<CampaignGallery> createState() => _CampaignGalleryState();
+}
+
+class _CampaignGalleryState extends ConsumerState<CampaignGallery> {
+  int _page = 0;
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.campaign;
+    final ids = (c['photoIds'] as List? ?? const []).map((e) => '$e').toList();
+    if (ids.isEmpty) return CampaignCover(campaign: c, ngoId: widget.ngoId);
+    final t = L10n.of(context);
+    Widget photo(String id) {
+      if (widget.ngoId == null) {
+        return Image.network(publicPhotoUrl('${c['id']}', id), fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const ColoredBox(color: AppColors.primarySoft));
+      }
+      final b = ref.watch(teamPhotoProvider((widget.ngoId!, '${c['id']}', id, 'large')));
+      return b.when(data: (x) => Image.memory(x, fit: BoxFit.cover),
+          loading: () => const ColoredBox(color: AppColors.primarySoft), error: (_, __) => const ColoredBox(color: AppColors.primarySoft));
+    }
+    return Column(children: [
+      AspectRatio(
+        aspectRatio: 16 / 9,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          child: Semantics(
+            label: t.photoOf(_page + 1, ids.length),
+            child: PageView(onPageChanged: (i) => setState(() => _page = i), children: [for (final id in ids) photo(id)]),
+          ),
+        ),
+      ),
+      if (ids.length > 1)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            for (var i = 0; i < ids.length; i++)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: i == _page ? 18 : 7,
+                height: 7,
+                decoration: BoxDecoration(color: i == _page ? AppColors.primary : AppColors.outline, borderRadius: BorderRadius.circular(4)),
+              ),
+          ]),
+        ),
+    ]);
+  }
+}
+
+/// "Share" + "Copy link" for a public campaign.
+class CampaignShareRow extends StatelessWidget {
+  const CampaignShareRow({super.key, required this.campaign});
+  final Map<String, dynamic> campaign;
+  @override
+  Widget build(BuildContext context) {
+    final t = L10n.of(context);
+    if (campaign['shareUrl'] == null) return const SizedBox.shrink();
+    return Row(children: [
+      Expanded(
+        child: Builder(
+          builder: (bc) => OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(kMinTouchTarget)),
+            onPressed: () => shareCampaign(bc, campaign),
+            icon: const Icon(Icons.share_outlined),
+            label: Text(t.shareCampaign),
+          ),
+        ),
+      ),
+      const SizedBox(width: AppSpacing.sm),
+      IconButton.outlined(
+        tooltip: t.copyLink,
+        constraints: const BoxConstraints(minWidth: kMinTouchTarget, minHeight: kMinTouchTarget),
+        onPressed: () async {
+          await copyCampaignLink(campaign);
+          if (context.mounted) showSnack(context, t.linkCopied);
+        },
+        icon: const Icon(Icons.link),
+      ),
+    ]);
+  }
+}
+
 /// Progress bar with raised / goal, number of donations and time left.
 class CampaignProgress extends StatelessWidget {
   const CampaignProgress({super.key, required this.campaign, this.compact = false});
@@ -381,7 +470,7 @@ class _CampaignDetailBody extends ConsumerWidget {
     }
 
     return ListView(padding: const EdgeInsets.all(AppSpacing.md), children: [
-      CampaignCover(campaign: c, ngoId: ngoId),
+      CampaignGallery(campaign: c, ngoId: ngoId),
       const SizedBox(height: AppSpacing.md),
       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: Text('${c['title']}', style: Theme.of(context).textTheme.titleLarge)),
@@ -400,6 +489,10 @@ class _CampaignDetailBody extends ConsumerWidget {
       if (status == CampaignStatus.live && !admin && canManage)
         _Notice(icon: Icons.info_outline, color: AppColors.growth, title: t.campaignStatusLabel(status), body: t.liveEditAdminOnly),
       AppCard(child: CampaignProgress(campaign: c)),
+      if (c['shareUrl'] != null) ...[
+        const SizedBox(height: AppSpacing.sm),
+        CampaignShareRow(campaign: c),
+      ],
       const SizedBox(height: AppSpacing.md),
       AppCard(child: Column(children: [
         KeyValueRow(t.campaignCause, c['cause'] == null ? '—' : causeLabel('${c['cause']}')),
@@ -600,7 +693,9 @@ class _CampaignFormPageState extends ConsumerState<CampaignFormPage> {
   String? _cause;
   DateTime? _start;
   DateTime? _end;
-  Uint8List? _cover;
+  /// Gallery as it will be after saving: first item = cover. Existing photos have an id, new ones bytes.
+  final List<_PhotoItem> _photos = [];
+  final Set<String> _removed = {};
   bool _loaded = false;
   bool _saving = false;
   String? _dateError;
@@ -636,6 +731,7 @@ class _CampaignFormPageState extends ConsumerState<CampaignFormPage> {
     _cause = c['cause'] as String?;
     _start = parseDay(c['startDate']);
     _end = parseDay(c['endDate']);
+    _photos..clear()..addAll([for (final id in (c['photoIds'] as List? ?? const [])) _PhotoItem(id: '$id')]);
     _loaded = true;
   }
 
@@ -663,11 +759,47 @@ class _CampaignFormPageState extends ConsumerState<CampaignFormPage> {
     });
   }
 
-  Future<void> _pickCover() async {
-    final file = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 2400, maxHeight: 2400, imageQuality: 90);
-    if (file == null) return;
-    final b = await file.readAsBytes();
-    if (mounted) setState(() => _cover = b);
+  Future<void> _addPhotos() async {
+    final room = maxCampaignPhotos - _photos.length;
+    if (room <= 0) return;
+    final files = await ImagePicker().pickMultiImage(maxWidth: 2400, maxHeight: 2400, imageQuality: 90, limit: room > 1 ? room : null);
+    if (files.isEmpty) return;
+    final picked = <_PhotoItem>[];
+    for (final f in files.take(room)) {
+      picked.add(_PhotoItem(bytes: await f.readAsBytes()));
+    }
+    if (mounted) setState(() => _photos.addAll(picked));
+  }
+
+  void _photoAction(int i, String action) => setState(() {
+        final p = _photos.removeAt(i);
+        if (action == 'cover') {
+          _photos.insert(0, p);
+        } else if (p.id != null) {
+          _removed.add(p.id!);
+        }
+      });
+
+  /// Applies gallery changes after the campaign itself is saved: removals, uploads (in order), then the cover.
+  Future<void> _savePhotos(String ngoId, String id) async {
+    final api = ref.read(apiProvider);
+    final base = '/api/v1/ngos/$ngoId/campaigns/$id/photos';
+    for (final r in _removed) {
+      await api.delete('$base/$r');
+    }
+    String? coverId = _photos.isEmpty ? null : _photos.first.id;
+    for (var i = 0; i < _photos.length; i++) {
+      final p = _photos[i];
+      if (p.bytes == null) continue;
+      final r = await api.upload(base, bytes: p.bytes!, filename: 'photo-${i + 1}.jpg');
+      final ids = (r['photoIds'] as List? ?? const []).map((e) => '$e').toList();
+      if (i == 0 && ids.isNotEmpty) coverId = ids.last; // new photos are appended
+    }
+    if (coverId != null) {
+      final current = await api.getJson('/api/v1/ngos/$ngoId/campaigns/$id');
+      final ids = (current['photoIds'] as List? ?? const []).map((e) => '$e').toList();
+      if (ids.isNotEmpty && ids.first != coverId) await api.put('$base/$coverId/cover');
+    }
   }
 
   String? _validateDates(L10n t) {
@@ -701,12 +833,10 @@ class _CampaignFormPageState extends ConsumerState<CampaignFormPage> {
           ? await api.put('/api/v1/ngos/$ngoId/campaigns/${widget.campaignId}', body: body)
           : await api.post('/api/v1/ngos/$ngoId/campaigns', body: body);
       final id = '${saved['id']}';
-      if (_cover != null) {
-        try {
-          await api.upload('/api/v1/ngos/$ngoId/campaigns/$id/image', bytes: _cover!, filename: 'cover.jpg');
-        } catch (e) {
-          if (mounted) showSnack(context, '${t.coverNotSaved}: ${ApiError.from(e).message}', error: true);
-        }
+      try {
+        await _savePhotos(ngoId, id);
+      } catch (e) {
+        if (mounted) showSnack(context, '${t.coverNotSaved}: ${ApiError.from(e).message}', error: true);
       }
       invalidateCampaigns(ref, ngoId, id);
       if (!mounted) return;
@@ -745,50 +875,54 @@ class _CampaignFormPageState extends ConsumerState<CampaignFormPage> {
     }
     final v = V(t);
     final live = _existing?['status'] == CampaignStatus.live;
-    final existingCover = _existing != null && _existing!['hasImage'] == true;
     return Scaffold(
       appBar: AppBar(title: Text(_editing ? t.editCampaign : t.newCampaign)),
       body: Form(
         key: _key,
         child: ListView(padding: const EdgeInsets.all(AppSpacing.md), children: [
-          // Cover photo
-          InkWell(
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            onTap: _saving ? null : _pickCover,
-            child: Stack(children: [
-              if (_cover != null)
-                AspectRatio(aspectRatio: 16 / 9,
-                    child: ClipRRect(borderRadius: BorderRadius.circular(AppRadius.card), child: Image.memory(_cover!, fit: BoxFit.cover)))
-              else if (existingCover && ngoId != null)
-                CampaignCover(campaign: _existing!, ngoId: ngoId)
-              else
-                AspectRatio(
-                  aspectRatio: 16 / 9,
+          // Photo gallery (max 5, first = cover)
+          Row(children: [
+            Expanded(child: Text(t.campaignPhotos, style: Theme.of(context).textTheme.titleSmall)),
+            Text('${_photos.length}/$maxCampaignPhotos', style: const TextStyle(color: AppColors.textMuted)),
+          ]),
+          const SizedBox(height: AppSpacing.sm),
+          SizedBox(
+            height: 96,
+            child: ListView(scrollDirection: Axis.horizontal, children: [
+              for (var i = 0; i < _photos.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _PhotoThumb(
+                    item: _photos[i],
+                    ngoId: ngoId ?? '',
+                    campaignId: widget.campaignId,
+                    isCover: i == 0,
+                    onAction: _saving ? null : (a) => _photoAction(i, a),
+                  ),
+                ),
+              if (_photos.length < maxCampaignPhotos)
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: _saving ? null : _addPhotos,
                   child: Container(
+                    width: 150,
                     decoration: BoxDecoration(
                       color: AppColors.primarySoft,
-                      borderRadius: BorderRadius.circular(AppRadius.card),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                     ),
                     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      const Icon(Icons.add_photo_alternate_outlined, size: 40, color: AppColors.primary),
-                      const SizedBox(height: 6),
-                      Text(t.addCoverPhoto, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                      const Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary),
+                      const SizedBox(height: 4),
+                      Text(t.addPhotos, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
                     ]),
                   ),
-                ),
-              if (_cover != null || existingCover)
-                Positioned(
-                  right: 8,
-                  bottom: 8,
-                  child: FilledButton.tonalIcon(onPressed: _saving ? null : _pickCover, icon: const Icon(Icons.photo_camera_outlined),
-                      label: Text(t.changeCoverPhoto)),
                 ),
             ]),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: AppSpacing.md),
-            child: Text(t.campaignCoverHelp, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+            padding: const EdgeInsets.only(top: 6, bottom: AppSpacing.md),
+            child: Text(t.campaignPhotosHelp, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
           ),
           TextFormField(
             controller: _title,
@@ -858,6 +992,57 @@ class _CampaignFormPageState extends ConsumerState<CampaignFormPage> {
           ),
         ]),
       ),
+    );
+  }
+}
+
+const maxCampaignPhotos = 5;
+
+class _PhotoItem {
+  _PhotoItem({this.id, this.bytes});
+  final String? id;
+  final Uint8List? bytes;
+}
+
+class _PhotoThumb extends ConsumerWidget {
+  const _PhotoThumb({required this.item, required this.ngoId, required this.campaignId, required this.isCover, required this.onAction});
+  final _PhotoItem item;
+  final String ngoId;
+  final String? campaignId;
+  final bool isCover;
+  final void Function(String)? onAction;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = L10n.of(context);
+    Widget img;
+    if (item.bytes != null) {
+      img = Image.memory(item.bytes!, fit: BoxFit.cover);
+    } else {
+      final b = ref.watch(teamPhotoProvider((ngoId, campaignId ?? '', item.id!, 'small')));
+      img = b.when(data: (x) => Image.memory(x, fit: BoxFit.cover),
+          loading: () => const ColoredBox(color: AppColors.primarySoft), error: (_, __) => const ColoredBox(color: AppColors.primarySoft));
+    }
+    return SizedBox(
+      width: 150,
+      child: Stack(fit: StackFit.expand, children: [
+        ClipRRect(borderRadius: BorderRadius.circular(12), child: img),
+        if (isCover)
+          Positioned(left: 6, top: 6, child: StatusBadge(t.coverLabel, color: AppColors.primary)),
+        Positioned(
+          right: 0,
+          top: 0,
+          child: PopupMenuButton<String>(
+            enabled: onAction != null,
+            icon: const CircleAvatar(radius: 14, backgroundColor: Colors.black54, child: Icon(Icons.more_vert, size: 18, color: Colors.white)),
+            onSelected: onAction,
+            itemBuilder: (_) => [
+              if (!isCover) PopupMenuItem(value: 'cover', child: Text(t.makeCover)),
+              PopupMenuItem(value: 'remove', child: Text(t.removePhoto)),
+            ],
+          ),
+        ),
+      ]),
     );
   }
 }
@@ -1002,8 +1187,9 @@ class PublicCampaignPage extends ConsumerWidget {
         error: (e, _) => ErrorState(message: ApiError.from(e).message, onRetry: () => ref.invalidate(publicCampaignProvider(campaignId))),
         data: (c) {
           final phase = '${c['phase']}';
+          final team = isTeamMemberOf(ref.watch(meProvider).value, c['ngoId']);
           return ListView(padding: const EdgeInsets.all(AppSpacing.md), children: [
-            CampaignCover(campaign: c),
+            CampaignGallery(campaign: c),
             const SizedBox(height: AppSpacing.md),
             Text('${c['title']}', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 4),
@@ -1036,6 +1222,10 @@ class PublicCampaignPage extends ConsumerWidget {
             const SizedBox(height: AppSpacing.xl),
             if (phase == 'ENDED')
               _Notice(icon: Icons.event_busy, color: AppColors.textMuted, title: t.campaignEnded, body: t.campaignEndedHint)
+            else if (team)
+              // Owner rule (2026-10-29): the NGO's own admins/staff don't donate here; they spread the word.
+              _Notice(icon: Icons.groups_outlined, color: AppColors.primary, title: t.yourTeamCampaign,
+                  body: t.yourTeamCampaignHint('${c['ngoName'] ?? ''}'))
             else
               FilledButton.icon(
                 // Online checkout arrives with donation-payment-service.
@@ -1043,6 +1233,8 @@ class PublicCampaignPage extends ConsumerWidget {
                 icon: const Icon(Icons.volunteer_activism),
                 label: Text(phase == 'UPCOMING' ? t.startsOn(_day(c['startDate'])) : t.donate),
               ),
+            const SizedBox(height: AppSpacing.sm),
+            CampaignShareRow(campaign: c),
           ]);
         },
       ),

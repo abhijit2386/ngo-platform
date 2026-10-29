@@ -28,7 +28,7 @@ public class GatewaySecurity {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .authorizeExchange(a -> a
                         .pathMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus").permitAll()
-                        .pathMatchers("/api/v1/public/**", "/api/v1/webhooks/**").permitAll()
+                        .pathMatchers("/api/v1/public/**", "/api/v1/webhooks/**", "/c/**").permitAll()
                         .pathMatchers("/api/v1/**").authenticated()
                         .anyExchange().denyAll())
                 .oauth2ResourceServer(o -> o.jwt(j -> {}))
