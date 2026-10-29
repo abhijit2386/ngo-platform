@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: discovery-server
+  threads:
+    virtual:
+      enabled: true
+server:
+  port: ${PORT:8761}
+  # Local only: bind to the loopback interface.
+  address: ${BIND_ADDRESS:127.0.0.1}
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 10000
+    response-cache-update-interval-ms: 3000
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+logging:
+  level:
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN

@@ -1,0 +1,22 @@
+target/
+logs/
+*.log
+.idea/
+.vscode/
+*.iml
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+apps/mobile/android/local.properties
+apps/mobile/android/key.properties
+*.jks
+*.keystore
+infrastructure/podman/secrets/
+.env
+.sync/
+
+# Local dev stack data and remote-session helper
+.local/
+.local-files/
+.agent/

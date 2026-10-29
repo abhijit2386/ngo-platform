@@ -1,0 +1,101 @@
+# Local development infrastructure for ngo-platform (DEV ONLY credentials).
+# Run:  podman kube play --replace infrastructure/podman/ngo-infra.yaml
+# Stop: podman kube down infrastructure/podman/ngo-infra.yaml
+# Host paths assume the repository at D:\ngo-platform (mounted as /mnt/d/ngo-platform in the Podman machine).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ngo-infra
+  labels:
+    app: ngo-infra
+spec:
+  restartPolicy: Always
+  containers:
+    - name: postgres
+      image: docker.io/library/postgres:17-alpine
+      env:
+        - { name: POSTGRES_PASSWORD, value: dev-only-superuser-password }
+        - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+      ports:
+        - { containerPort: 5432, hostPort: 5432 }
+      volumeMounts:
+        - { name: pgdata, mountPath: /var/lib/postgresql/data }
+        - { name: pginit, mountPath: /docker-entrypoint-initdb.d/init.sql, readOnly: true }
+      resources:
+        limits: { memory: 768Mi }
+
+    - name: keycloak
+      image: quay.io/keycloak/keycloak:26.2.5
+      args: ["start-dev", "--import-realm", "--http-port=8180", "--health-enabled=true"]
+      env:
+        - { name: KC_DB, value: postgres }
+        - { name: KC_DB_URL, value: "jdbc:postgresql://localhost:5432/keycloak" }
+        - { name: KC_DB_USERNAME, value: keycloak }
+        - { name: KC_DB_PASSWORD, value: dev-only-password }
+        - { name: KC_BOOTSTRAP_ADMIN_USERNAME, value: kcadmin }
+        - { name: KC_BOOTSTRAP_ADMIN_PASSWORD, value: dev-only-kc-admin }
+        - { name: KC_HOSTNAME_STRICT, value: "false" }
+        - { name: KC_HTTP_ENABLED, value: "true" }
+        - { name: JAVA_OPTS_KC_HEAP, value: "-Xms256m -Xmx512m" }
+      ports:
+        - { containerPort: 8180, hostPort: 8180 }
+      volumeMounts:
+        - { name: kcrealm, mountPath: /opt/keycloak/data/import, readOnly: true }
+      resources:
+        limits: { memory: 900Mi }
+
+    - name: rabbitmq
+      image: docker.io/library/rabbitmq:4.1-management-alpine
+      env:
+        - { name: RABBITMQ_DEFAULT_USER, value: ngo }
+        - { name: RABBITMQ_DEFAULT_PASS, value: dev-only-password }
+      ports:
+        - { containerPort: 5672, hostPort: 5672 }
+        - { containerPort: 15672, hostPort: 15672 }
+      volumeMounts:
+        - { name: rabbitdata, mountPath: /var/lib/rabbitmq }
+      resources:
+        limits: { memory: 512Mi }
+
+    - name: seaweedfs
+      image: docker.io/chrislusf/seaweedfs:3.80
+      args: ["server", "-dir=/data", "-s3", "-s3.port=8333", "-s3.config=/etc/seaweedfs/s3.json",
+             "-master.port=19333", "-volume.port=18080", "-filer.port=18888", "-master.volumeSizeLimitMB=256",
+             "-volume.max=50"]
+      ports:
+        - { containerPort: 8333, hostPort: 8333 }
+      volumeMounts:
+        - { name: seaweeddata, mountPath: /data }
+        - { name: seaweedconf, mountPath: /etc/seaweedfs, readOnly: true }
+      resources:
+        limits: { memory: 384Mi }
+
+    - name: mailpit
+      image: docker.io/axllent/mailpit:v1.24
+      ports:
+        - { containerPort: 8025, hostPort: 8025 }
+        - { containerPort: 1025, hostPort: 1025 }
+      resources:
+        limits: { memory: 128Mi }
+
+    - name: jaeger
+      image: docker.io/jaegertracing/jaeger:2.5.0
+      ports:
+        - { containerPort: 16686, hostPort: 16686 }
+        - { containerPort: 4318, hostPort: 4318 }
+      resources:
+        limits: { memory: 384Mi }
+
+  volumes:
+    - name: pgdata
+      persistentVolumeClaim: { claimName: ngo-pgdata }
+    - name: rabbitdata
+      persistentVolumeClaim: { claimName: ngo-rabbitdata }
+    - name: seaweeddata
+      persistentVolumeClaim: { claimName: ngo-seaweeddata }
+    - name: pginit
+      hostPath: { path: /mnt/d/ngo-platform/infrastructure/database/init-databases.sql, type: File }
+    - name: kcrealm
+      hostPath: { path: /mnt/d/ngo-platform/infrastructure/keycloak, type: Directory }
+    - name: seaweedconf
+      hostPath: { path: /mnt/d/ngo-platform/infrastructure/podman/seaweedfs, type: Directory }

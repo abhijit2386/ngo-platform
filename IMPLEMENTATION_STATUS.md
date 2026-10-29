@@ -1,0 +1,321 @@
+# Implementation status
+
+_Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (session 1)._ Nothing here is production-ready; see "Verified" column._
+
+## Environment (developer PC, Windows 11)
+| Item | State |
+|---|---|
+| Git, Temurin JDK 21.0.12, Maven 3.9.9, Flutter 3.47.8 / Dart 3.13.7 | Installed in D:\tools — verified |
+| Android SDK 36, build-tools 36/35/28.0.3, emulator 37.2 + AVD `ngo_pixel` (Pixel 7, API 35, WHPX) | Installed — verified |
+| Podman (WSL machine) | Pre-existing, running; infra pod images were still downloading |
+| **Constraint** | PC hit 96% RAM / 90% CPU with emulator + Podman + builds. Running all 12 JVM services + emulator together is not feasible on this machine; use `start-backend.cmd -Only identity-service,ngo-registry-service,subscription-service,api-gateway` or more RAM. |
+
+## Backend modules
+| Module | Code | Compiled on PC | Tests | Notes |
+|---|---|---|---|---|
+| platform-commons | done (security, outbox/inbox, audit, idempotency, storage, errors) | yes (build 1) | none yet | |
+| api-gateway | routing, JWT, rate limit, body limit, headers, /internal block | yes | none | |
+| identity-service | users, memberships, roles/permissions, invitations, seat locking, admin safeguards, step-up | yes (before query refactor) | none | |
+| ngo-registry-service | wizard, documents (S3), verification workflow, suspension, change requests, public search | yes (before refactor) | none | |
+| subscription-service | catalog, entitlements, trial, quotes/checkout, proration, blocks, downgrade impact, lifecycle, reminders, invoices PDF, mock billing | NOT YET | none | |
+| donor-service | donors, dedupe/merge, import/export, segments, follows, privacy | NOT YET | none | |
+| donation-payment-service | checkout, mock provider (12 scenarios), webhooks, state machine, ledger, refunds (maker-checker), reconciliation, offline/corrections | NOT YET | none | controllers done |
+| receipt-service | numbering per FY, PDF standard/custom, designers basic/advanced, approvals, versions, retries, signed guest links | NOT YET | none | |
+| campaign-project-service | campaigns: approval workflow, covers, public discovery, test donations (2026-10-29); projects/milestones/budgets drafted only | yes (2026-10-29) | 15 unit; e2e test-campaigns 58/58 | projects not reviewed/tested yet |
+| ngo-operations-service | **not started** (volunteers, beneficiaries, expenses/finance) | | | |
+| helpdesk-service | **not started** | | | |
+| notification-service | done: templates en/hi/mr (10 events x e-mail + in-app), event consumer, in-app inbox, e-mail via SMTP (Mailpit), retries with backoff + dead letter + replay, preferences/opt-outs, history, admin template edit/preview | yes (2026-10-29) | 58 unit tests pass; API e2e `scripts/test-notifications.ps1` | push/SMS/WhatsApp adapters not built (interface ready); receipt e-mails wait for receipt-service |
+| reporting-service | **not started** (dashboard projections) | | | |
+
+## Mobile app
+Done: design system, l10n (en/hi/mr, ~245 keys, hi/mr need native review), onboarding (APP-001..009, 012),
+auth (PKCE via Keycloak), NGO start/invitations, 6-step registration wizard with uploads, NGO home, subscription
+(overview, plans, quote, mock payment, billing/invoice PDF), staff (list, capacity, invite, activate), NGO tabs
+(donors/campaigns/reports lists), donor discover/NGO profile/donations/following/profile, admin verification
+queue/decision, settings. Unit tests: validators, formatting, error mapping (~25 cases).
+Not done: donation checkout UI, receipts UI, campaign/project editors, operations, helpdesk, notifications, designer.
+
+First on-device build was in progress at end of session (run-mobile.cmd).
+
+## Tests executed
+- Backend: `mvn verify` once (commons, gateway, identity, registry compiled; no tests yet).
+- Mobile: none executed yet.
+Target per spec: 1,000+ meaningful tests — current: ~25 written, 0 executed.
+
+### Session 2026-10-29 (night): notification-service built and tested
+- New service (port 8091, DB `notification`, Flyway V1 schema + V2 60 seeded templates; generator `tools/gen_templates.py`).
+- Consumes: ngo.verification.approved/rejected/info-requested, ngo.account.suspended, identity.staff.invited/accepted,
+  subscription.subscription.expiring (D15/D7/D1/EXPIRED/GRACE_ENDING/SUSPENDED), subscription.payment.failed.
+  Recipients/names fetched from identity (`/internal/v1/tenants/{id}/admins`, `/internal/v1/users/lookup` - new) and registry.
+- API: `/api/v1/notifications` (inbox, unread-count, read, read-all, history, preferences),
+  `/api/v1/admin/notification-templates` (list/edit with placeholder + version checks/preview),
+  `/api/v1/notifications/admin/deliveries` (dead letters + retry), `/internal/v1/notifications` (service send).
+- App bug found and fixed: "Switch to NGO app"/"Switch to donor app" changed the saved mode but did not navigate
+  (router now moves /donor/* <-> /ngo/* to the selected app's home).
+- Registry events now carry `displayName` (+ approval message). start-local starts notification-service by default.
+- App: bell with unread badge (NGO home, start page), inbox, preferences (ACCOUNT locked), "Messages sent to you".
+  Verified on the emulator (profile build): bell on the NGO home, inbox list, preferences with ACCOUNT locked.
+- Tests: 58 unit tests (renderer, delivery state machine/backoff, planner rules, event mapping) pass on the PC.
+  API e2e `scripts/test-notifications.ps1` (re-runnable, resets its own test data): 26/26 passed. Verified live: invitation e-mail in Mailpit, in-app inbox,
+  "joined" notice to the admin, preference rules, admin template rules, SMTP outage -> FAILED + retry -> delivered.
+
+### Session 2026-10-29 (morning): profile completion + adults-only gate (plan item A2) - built and tested
+- identity: V2 migration (birth_date, gender, avatar_kind/preset, photo_version, adult_confirmed_at,
+  profile_completed_at, refused_subjects); `PUT /api/v1/me/profile` (birth date fixed once saved -> 409
+  BIRTH_DATE_LOCKED), `PUT /api/v1/me/avatar` (a01..a16), `POST|GET|DELETE /api/v1/me/photo`,
+  `GET /api/v1/users/{id}/photo` (self, same-NGO members, platform support only; others 404),
+  `/internal/v1/users/{id}/profile-status`. Team list carries avatar data.
+- Photo pipeline: magic-byte check (JPEG/PNG <= 5 MB), dimension check before decoding (no decompression bombs),
+  centre square crop, 512 + 128 px JPEG re-encode (all EXIF/GPS removed), versioned keys, old versions deleted.
+- Adults-only gate (commons `ProfileGate` on every servlet service; positive answers cached 10 min, negative never):
+  403 PROFILE_INCOMPLETE until the profile is saved; open: /me, /me/profile, /me/photo, /me/avatar,
+  /me/deletion-request, /public/**; platform staff exempt.
+- Under 18: 403 UNDERAGE; new account deleted in Keycloak (admin client `ngo-identity-admin`, manage-users only;
+  `scripts/fix-identity-admin-client.ps1` for the running realm) and locally, subject blocked for 1 day so an old
+  token cannot recreate it (403 ACCOUNT_REMOVED), audit row without personal data. Accounts already in an NGO are
+  disabled instead (support follows up). Existing e-mail under a new sign-in subject -> 409 ACCOUNT_CONFLICT.
+- App: "Tell us about yourself" (forced after sign-in until saved), "My profile" (Settings / donor Profile), picture
+  menu (camera, gallery via image_picker, 16 built-in avatars, remove), date picker, gender, 18+ confirmation,
+  under-18 warning dialog then local sign-out; avatars in Settings, donor profile, team list.
+- Tests: commons ProfileGateTest 8, identity AgesTest 10 + PhotoProcessingTest 8 + ProfileRulesTest 9 (all pass);
+  API e2e `scripts/test-profile.ps1` 29/29; notifications e2e still 26/26 with the gate on.
+  UI verified on the emulator: Sunil forced to the profile screen, avatar chosen, birth date picked, lands on home;
+  Asha's My profile shows the birth date locked.
+- Pending small polish (built in the next app build): smaller camera badge on the picture, no "0/10" counter.
+
+### Session 2026-10-29 (afternoon): standard dataset + verified mobile (plan items A7, A8) - built and tested
+- `scripts/seed-dataset.ps1` (idempotent; verified twice): Asha (primary admin), Ravi (secondary admin), Sunil (staff),
+  Priya (finance) - all with verified phones; donors Meera (verified phone), Kiran, Anil (no phone); languages en/hi/mr.
+  Documented in docs/testing/TEST_DATASET.md; CLAUDE.md rule added. E2E scripts now run on this dataset.
+- identity V3: phone stored only after SMS OTP (HMAC-hashed codes, 5 min, 5 tries, 60 s resend, 5/day per account
+  and per number), one verified number per account (unique index), old unverified numbers wiped.
+  `POST /api/v1/me/phone/otp`, `POST /api/v1/me/phone/verify`, `DELETE /api/v1/me/phone` (refused for team members).
+  SmsSender adapter + dev adapter delivering to Mailpit; DLT template text in SmsSender.OTP_TEMPLATE.
+- Gate extended: NGO team members (any active membership) need a verified phone (MeService.isUsable; MeView
+  phoneRequired/phoneVerified). Remote gate cache shortened to 1 minute so a new role applies quickly.
+- Contact privacy: phone visible to self, to active members of the same NGO (team list, with call button) and platform
+  support; donors never listed; every team-contacts view audited (TEAM_CONTACTS_VIEWED, no numbers in the log).
+- App: phone row with "Verified" badge and a two-step verify sheet (number -> code, resend countdown, SMS autofill);
+  profile screen explains when an NGO role requires a phone; team list shows numbers + call.
+  App compiled and installed (profile build). Team list shows phones + Call to same-NGO staff (verified on emulator). PhoneVerifySheet hardened: code field autofocus, digits only, auto-verify at 6 digits, Verify disabled until then (empty-code bug found by UI check).
+- Tests: identity unit tests 39 (incl. PhoneVerificationRulesTest 9); e2e test-phone 23/23, test-profile 29/29,
+  test-notifications 26/26 (Priya's invitation now verified to arrive in Marathi).
+- Laptop: `scripts/keep-awake.ps1` (no power-setting change; stops after 12 h; `stop-keep-awake.ps1`).
+
+### Session 2026-10-29 (evening): campaigns module (owner switched priority from plan item A to campaigns)
+Owner decisions: campaigns only this round (projects next); any team member drafts and sends for approval, only NGO
+admins approve/publish, request changes (with reason), edit a live campaign, close and archive; staff/finance/volunteer
+coordinator roles now carry CAMPAIGN_MANAGE (VOLUNTEER does not); test donations until online payments exist;
+dataset unchanged (2 admins / 2 staff / 3 donors).
+- campaign-project-service V2: submitted/rejected/updated by + timestamps, rejection reason, NGO name/city snapshot at
+  approval, image version, cause check; campaign_donations gains is_test/donor_label/recorded_by/created_at.
+- Workflow (CampaignRules, 11 unit tests): DRAFT -submit-> PENDING_APPROVAL -approve(version)-> PUBLISHED -close->
+  CLOSED -archive-> ARCHIVED; reject -> DRAFT + reason; withdraw; admin may publish own draft. Approval needs active
+  subscription, verified NGO (registry donationEligible) and plan live-campaign limit. Goal Rs 1,000-10 crore,
+  end date required, max 1 year, live edits keep start date and goal >= raised. Auto-close after end date (IST).
+- Cover photo: 16:9 crop, 1200 + 480 px JPEG re-encode (metadata/GPS stripped), team endpoint for drafts, public
+  endpoint only when live/closed (CoverImage, 4 tests).
+- API: list (excludes archived) / summary (counts + live limit) / create / get / update / submit / withdraw / approve /
+  reject / close / archive / image / donations / test-donations; public list (cause, text search, NGO) + detail without
+  team data (phase LIVE/UPCOMING/ENDED).
+- Notifications: CAMPAIGN_SUBMITTED (to admins except submitter), CAMPAIGN_APPROVED and CAMPAIGN_REJECTED (to the
+  requester; none when an admin publishes own draft); en/hi/mr templates (notification V3); 4 new listener tests.
+- App: Campaigns tab (filters, pending-approval banner for admins, live count vs plan), detail with workflow actions by
+  role, create/edit form (cover picker, cause, goal, dates), test-donation sheet, donations list; donor home "Live
+  campaigns" strip, all-campaigns page with search/cause, campaign page (Donate shows "coming soon"), NGO page lists
+  its campaigns. 88 new strings en/hi/mr (hi/mr need native review). flutter analyze: no errors/warnings.
+- Tests: campaign unit 15, notification unit 62; e2e `scripts/test-campaigns.ps1` 58/58 with Asha, Ravi, Sunil,
+  Priya, Meera. Sample data `scripts/seed-campaigns.ps1` (2 live, 1 awaiting approval, 1 draft).
+- Emulator check (2026-10-29 evening): Sunil list/pending detail/new form, Asha approval banner + Approve/Request
+  changes, live detail with test donations, donor home "Live campaigns" strip and campaign page - all as designed.
+  Fixed on the way: staff quick actions on NGO home were greyed out because staff cannot read the subscription
+  (now only blocked when the subscription is known to be lapsed; server enforces anyway); closed campaigns show the
+  closing date. Emulator notes: after `adb root` the port reverse (8080/8180) must be re-added; Chrome must stay
+  enabled (sign-in page); unused Google apps (Messages, Dialer, YouTube, Photos, Gmail) disabled in the emulator
+  because they kept raising "not responding" dialogs.
+- Not yet: share link (CAMP-010), analytics (CAMP-009), saved campaigns (DAPP-023), campaign updates to followers,
+  real donations, cause labels are English-only in all languages (pre-existing causeLabel).
+
+## Next steps (in order) - agreed with the owner 2026-10-29
+Done since the original plan: first emulator runs, core services built and UI-tested (phase 1), notification-service.
+
+**A. Accounts, sign-in and profile (next)**
+1. Social sign-in via Keycloak identity brokering: Google, Facebook, Sign in with Apple (required on iOS by App Store
+   guideline 4.8 when Google/Facebook are offered). App buttons "Continue with Google/Facebook/Apple" use
+   `kc_idp_hint` so donors go straight to the provider; first-broker-login creates the account automatically and
+   links to an existing account with the same verified e-mail. Keycloak page kept only as a branded fallback
+   (Seva Setu theme en/hi/mr). Owner action: create Google Cloud OAuth client, Meta developer app, Apple service ID,
+   and publish a privacy policy page. Local testing with test apps/accounts. (~1 day)
+2. [DONE 2026-10-29] "Complete your profile" after first sign-in (profile picture, name, +91 mobile, preferred language saved to the server - also used
+   for e-mail language, date of birth) and "My profile" under Settings; Facebook accounts without e-mail are asked
+   for one. (~1.5 days with the profile picture)
+   PROFILE PICTURE (owner decision 2026-10-29: optional for everyone - staff, admins and donors; shown with the
+   name in NGO activity):
+   - Three choices, same for all users: own photo, one of a set of built-in avatar icons (to hide one's real look),
+     or nothing (initials circle). "Skip" on the profile screen; changeable any time in My profile.
+   - Social sign-in photo is offered, not applied silently ("Use my Google photo?"); copied into our storage, not
+     hot-linked. Own photo via camera or gallery with square crop in the app.
+   - Built-in avatars: ~12-16 neutral illustrated icons shipped with the app (original artwork, no third-party
+     characters), stored as an avatar code - no image upload, no personal data.
+   - Upload rules: JPEG/PNG/WebP checked by content, max 5 MB in, re-encoded server-side to 512px + 128px
+     thumbnails, EXIF/GPS metadata stripped, stored in object storage (local files now, S3-compatible in cloud),
+     served with short-lived links; initials avatar fallback; deleted with the account.
+   - Where shown: NGO team list, activity feed/audit views ("Sunil recorded a donation"), staff assignments,
+     help-desk replies. Public places (supporter walls, campaign pages) only if the donor opts in; otherwise
+     "Anonymous supporter".
+   - Misuse: "report photo" for NGO admins/platform support; support can remove a photo (audited) and ask for a new one.
+   GENDER (owner decision pending; recommendation): optional, default "Prefer not to say"; options Female, Male,
+   Transgender (term used by the Transgender Persons Act 2019), Prefer not to say. Purpose stated on screen. Never
+   shown to NGOs per person; used only in aggregated reports with a minimum group size (e.g. 10) and, with explicit
+   consent, for programmes that need it (e.g. women-only volunteering). Not required for 80G receipts. Messages use
+   the respectful plural (aap/tumhi) so Hindi/Marathi text never depends on gender. Changeable/erasable any time.
+   18+ ONLY (owner decision 2026-10-29: no under-18 accounts, no parental-consent path):
+   - Age gate enforced by identity-service, not only the app: until a date of birth with age >= 18 is saved, every
+     API except /me, profile completion and account deletion answers 403 PROFILE_INCOMPLETE (social sign-in
+     cannot bypass it). Age computed in Asia/Kolkata.
+   - Under 18: friendly refusal screen; the just-created Keycloak user and identity record are deleted at once and
+     no personal data is kept (DPDP: no child data without parental consent). Audit row without personal data.
+   - Date of birth is set once and cannot be edited in the app (corrections via support, audited); never shown to
+     NGOs; "I confirm I am 18 or older" in the terms acceptance.
+   - Applies to every account type (donor, NGO staff/admin). NGO-recorded donors/beneficiaries who never log in
+     are NGO records, not app accounts (separate DPDP guidance for NGOs).
+   - Store listings: 18+ age rating on Google Play and the App Store; not designed for children (Play Families
+     policy not applicable).
+3. Donor tax details captured only when needed: PAN + address at the first donation that wants an 80G receipt,
+   stored in donor-service (DPDP data minimisation). (~0.5 day)
+4. Referral and ad attribution: links `sevasetu.in/r/<code>` and `sevasetu.in/c/<campaign>?utm_*`, Android App
+   Links / iOS Universal Links, Google Play Install Referrer for new installs (Firebase Dynamic Links shut down
+   25 Aug 2025), attribution saved on the donor profile at first sign-in, "where donors came from" report. (~1.5 days)
+5. Account deletion completed end to end (today only a request flag is stored): sign-in blocked on request, 7-30 day
+   grace period with cancel + confirmation e-mail, then a processor deletes the Keycloak user (removes Google/Facebook
+   links) via the admin API, erases/anonymises personal data in identity, donor and notification services, ends
+   memberships; donations and issued 80G receipts are retained as the tax law requires, de-linked from the profile;
+   final e-mail; audit entry without personal data. Meta data-deletion callback starts the same process. (~1.5-2 days)
+6. Notification opt-out completion: one-click unsubscribe link + List-Unsubscribe header in every non-mandatory
+   e-mail (fills the existing `email_opt_outs` table; Gmail/Yahoo bulk-sender rule), consent-based defaults
+   (campaign/marketing updates OFF until the donor opts in; transactional ON), a "pause all non-essential
+   notifications" master switch, push per category + OS permission once push exists, unsubscribe also from the
+   NGO-side donor record (existing donor-service preference). (~1 day)
+   Already correct and unchanged: NGO admin "remove member" ends only that NGO membership (account kept, seat freed,
+   audited; primary/last admin protected; re-invite required).
+
+7. Standard test dataset (owner rule 2026-10-29): every feature is developed and tested with at least 2 NGO admins,
+   2 staff and 3 donors. Idempotent `scripts/seed-dataset.ps1`: Keycloak users + completed profiles + memberships via
+   the API. Asha Seva: Asha (primary admin), Ravi (secondary admin), Sunil (staff), Priya (finance staff);
+   donors Meera, Kiran, Anil (new). Phase 2 adds donor records/donations for all three. E2E scripts use this set.
+8. Mobile verification + contact privacy (owner rule 2026-10-29):
+   - A mobile number is saved only after SMS OTP verification (6 digits, hashed, 5-min expiry, 5 attempts, resend
+     after 60 s, daily caps per number and per account); changing it needs a new OTP; unverified numbers are never
+     stored on the profile.
+   - SMS adapter interface; local dev adapter delivers the code to Mailpit/log; production provider (MSG91, Gupshup,
+     Twilio...) needs TRAI DLT registration (entity, sender header, approved OTP template) - owner action.
+   - Visibility: the phone is personal - shown only to the person, to the active members of an NGO the person belongs
+     to (team directory, STAFF_VIEW), and to platform support. A donor who joins an NGO as staff becomes visible to
+     that NGO's team only; other NGOs and donors never see it. Every reveal of a contact is audited.
+
+**B. Phase 2 - donations**
+6. Run and fix donor, donation-payment, receipt, campaign services; donation checkout (mock gateway) and receipts in
+   the app; receipt e-mails through notification-service (`/internal/v1/notifications`, resourceType RECEIPT).
+
+**C. Remaining services**
+7. ngo-operations (volunteers, beneficiaries, expenses), helpdesk, reporting; push notification adapter.
+
+**D. Quality and release**
+8. Unit/integration tests towards the 1,000-case target (pricing, state machines, ledger, receipt numbering, seats).
+9. iOS project (`flutter create --platforms=ios`), iPhone-specific setup; build on a Mac or cloud macOS runner.
+10. Cloud stage 1 (single domain: `sevasetu.in`, `api.` and `auth.` subdomains; one VM, systemd services, Caddy with
+    HTTPS, nightly PostgreSQL backups), consider merging services into 2-3 deployables to cut RAM; CI; Play release.
+11. Kubernetes/OpenShift manifests, SBOM, licence inventory, release docs (when usage grows).
+
+## Known blockers / decisions
+- MinIO is AGPL → SeaweedFS (Apache-2.0) used for S3-compatible storage.
+- Real payment gateway & SaaS billing provider: not integrated (mock only); app-store billing policy review pending (spec §31).
+- iOS build/simulator requires macOS + Xcode — not available on this Windows PC.
+- Devanagari text in receipt PDFs needs Noto Sans fonts in `ngo.receipts.font-dir`; PDFBox lacks complex shaping.
+- App name "Seva Setu" is a placeholder.
+
+## Session 2026-10-28
+- Old Podman pods pod_ngo-platform / pod_ngo-v1-foundation removed (volumes kept).
+- **Mobile app builds and runs** on emulator `ngo_pixel` (language select -> welcome screens verified).
+  - Gradle 9.3.1 pre-downloaded with curl to D:\tools\_dl (wrapper uses file:// URL).
+  - gradle.properties: heap 2g, no daemon, `kotlin.incremental=false`, `kotlin.compiler.execution.strategy=in-process`
+    (project on D: + pub cache on C: crashes Kotlin incremental caches).
+  - Fixes: amountRange placeholders -> String; file_picker 13 API (`FilePicker.pickFile()` + `readAsBytes()`).
+  - run-mobile.ps1: build success judged by APK timestamp; skips build when APK is newer than sources;
+    starts the emulator only after the build (RAM); `install-app.cmd` = install without build.
+- **Backend: all 14 modules compile** (`mvn verify -DskipTests`). Fixes: `ApiException.code()`; receipt Template `@jakarta.persistence.Version`.
+- Remote-session helper: `scripts\agent.cmd` watches `D:\ngo-platform\.agent\cmd-*.ps1` and runs them (close window to stop).
+- PC limits: RAM is the bottleneck. Debug app shows "isn't responding" dialogs while the PC is loaded. Podman machine is
+  stopped after reboot (start Podman Desktop / `podman machine start`, then start-infra.cmd).
+- Next: run unit tests; start infra + gateway/identity/registry and test Keycloak login from the app;
+  decide dev topology (Eureka/no-Podman question still open with the owner); remaining services
+  (operations, helpdesk, notification, reporting); donation/receipt/campaign screens.
+
+### Afternoon: container-free local stack (owner decision: option 2, no RabbitMQ locally, Eureka yes)
+- Podman is no longer used for development (machine stopped; old `ngo-infra` pod kept but unused).
+- Native, open-source tools in D:\tools: PostgreSQL 17.11 (portable, data in `.local\pgdata`, superuser
+  password dev-only), Keycloak 26.7.2 (`start-dev`, H2 store, realm imported from infrastructure/keycloak),
+  Mailpit (SMTP 1025, UI 8025). Scripts: `setup-local.cmd` (one-time), `start-local.cmd`, `stop-local.cmd`.
+- New module `services/discovery-server` (Eureka, port 8761, loopback only). Services register by
+  spring.application.name; internal REST clients use `http://<service-name>` (Eureka load balancer when
+  `ngo.discovery.enabled`, cluster DNS in Kubernetes); the gateway routes `lb://<service-name>`.
+- Events: `ngo.events.transport=http` locally - `HttpOutboxRelay` POSTs outbox events to subscribers'
+  `/internal/v1/events` (routing table `ngo.events.routes` in commons-defaults.yml, mirrors the RabbitMQ
+  bindings); listeners implement `EventHandler`. Production keeps RabbitMQ (`EVENTS_TRANSPORT=rabbit`,
+  `AUTOCONFIG_EXCLUDE=`). Storage: `LocalObjectStorage` (`STORAGE_TYPE=local`) / S3 in production.
+- Cloud env overrides are documented at the top of commons-defaults.yml.
+- Runtime fixes: CHAR(n) columns mapped with `@JdbcTypeCode(SqlTypes.CHAR)`; gateway bean name clash
+  (`routeLocator`). Static entity-vs-migration check: 75 entities / 745 fields consistent.
+- Verified end-to-end: Keycloak password-grant token (ngo-admin-cli) -> gateway -> Eureka -> identity-service
+  `/api/v1/me` returns the provisioned user; public plans/app-config via gateway OK; app onboarding ->
+  Sign in opens the Keycloak login page in Chrome on the emulator (10.0.2.2:8180).
+- Startup on this laptop: Keycloak ~2 min, each service ~3.5 min (RAM-bound). Core set running:
+  discovery, gateway, identity, registry, subscription.
+- Next: sign in from the app (manual), NGO registration flow end-to-end, unit tests, remaining services,
+  donation/receipt/campaign screens, branded splash screen (still Flutter default).
+
+### UI test session (2026-10-28 afternoon) - findings
+Test data: `infrastructure/keycloak/test-users.json` + `scripts/seed-test-users.ps1` (Priya/Sunil/Kiran, DEV ONLY);
+sample documents pushed to the emulator's Download folder (clearly marked SAMPLE TEST DOCUMENT).
+Emulator now reaches the backend as localhost (adb reverse 8080/8180, done by run-mobile.ps1); app defaults
+API http://localhost:8080 and issuer http://localhost:8180/realms/ngo.
+Bugs found by the UI test and fixed:
+1. AndroidManifest `android:taskAffinity=""` (Flutter template) split the AppAuth redirect into another task ->
+   "AppAuth: No stored state", login silently lost. Removed.
+2. Realm users lacked `offline_access` -> Keycloak CODE_TO_TOKEN_ERROR "Offline tokens not allowed". Realm file
+   updated; `scripts/fix-offline-access.ps1` patches a running realm (also adds it to default-roles-ngo).
+3. Gateway missing route `/api/v1/public/reference` (registration wizard reference data). Added; new checker
+   `scripts/check-gateway-routes.py` (all controller paths vs gateway routes: 0 mismatches).
+4. Login page swallowed the sign-in exception (generic snackbar only) - TODO: log cause in debug builds.
+5. Launcher icon was the Flutter default (also shown on the Android 12+ splash) - replaced with a placeholder brand icon.
+Tooling: `scripts/restart-service.ps1 -Name <svc> [-Build]`; `scripts/ui.ps1` (adb helpers: TapText, WaitFor, Shot).
+Verified in the UI: onboarding -> sign in (Asha) -> NGO home -> registration step 1 saved on the server.
+Environment limit: 7.7 GB RAM laptop; debug APK on the emulator ANRs under load -> switched to `run-mobile.ps1 -Mode profile`.
+
+### UI test session (2026-10-28 evening) - phase 1 end to end (NGO onboarding, verification, trial, staff)
+Passed in the UI (profile build, emulator): Asha registers "Asha Seva" (6-step wizard, 4 documents) -> submit
+(PENDING) -> platform admin queue -> review -> Approve -> registry outbox delivers `ngo.verification.approved`
+(1 retry) -> subscription starts a 30-day PROFESSIONAL trial -> Asha's home shows the trial card -> Asha invites
+sunil.staff@ngo.test (Staff) -> Sunil signs in, sees the invitation, accepts -> lands on the NGO home ->
+More menu hides Subscription for Staff. Plans page and Marathi language switch verified.
+Bugs found and fixed (app):
+6. Admin verification console had no Settings/Sign out (Back exited the app) -> app-bar actions added.
+7. Admin could not open uploaded documents -> tap a document to download `/documents/{id}/content` and open it.
+8. Raw codes shown (`PAN_CARD`, `PUBLIC_TRUST`, `TRIAL`, role names) -> `core/util/labels.dart`, ARB `statusLabel`,
+   `roleName` selects (en/hi/mr); StatusBadge localizes UPPER_SNAKE codes; "(optional)" stripped in summaries.
+9. Quick actions gated on `verificationStatus == 'VERIFIED'` but the backend value is `APPROVED` -> always disabled.
+10. After sign-out/sign-in, `/me` reload kept the signed-out `null` value, router sent members to /ngo/start.
+    Router now waits for the real profile and sends members on /ngo/start to /ngo/home (`?stay=1` keeps them).
+11. Quick actions ignored permissions (Staff saw "Invite staff"/"New campaign") -> each tile gated by permission.
+12. Wizard step chips did not follow the current step -> auto-scroll; registered users get a quiet "Register your
+    NGO" link instead of the hero card; approved registration card opens the NGO.
+Open findings (not fixed yet):
+- Invitation card shows only the role, not the NGO name (identity has no NGO name; add `ngoName` to invitations).
+- Secondary admin entered in the wizard (Ravi) is stored as a contact only; no invitation is created for him.
+- No invitation email locally (notification-service not running).
+- Display name "Asha Seva" / description truncated by adb typing (test artefact, not an app bug).
+Emulator/PC notes: host RAM is the hard limit (0.1 GB free with 5 services + Keycloak + emulator). Chrome Custom Tab
+ANR/crashed with `-gpu auto`; emulator now starts with `-gpu swiftshader_indirect`. adb `input text` drops characters
+under load -> `scripts/login.ps1` types one character at a time. Gboard stylus prompt disabled on the emulator.
+Phase 2 (donors, donations, receipts, campaigns) needs donor/donation/receipt/campaign services, which do not fit in
+RAM next to the emulator on this PC: run phase 2 API-level without the emulator, or on a bigger machine/cloud.

@@ -1,0 +1,9 @@
+# Build the jar first: mvn -pl services/donation-payment-service -am package
+FROM docker.io/library/eclipse-temurin:21-jre-alpine
+RUN addgroup -S app && adduser -S -G app -u 10001 app
+WORKDIR /app
+COPY target/app.jar /app/app.jar
+USER 10001
+EXPOSE 8086
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError"
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

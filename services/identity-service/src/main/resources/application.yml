@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: identity-service
+  config:
+    import: classpath:commons-defaults.yml
+  mail:
+    # Used only by the development SMS adapter (codes appear in Mailpit, http://localhost:8025).
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+server:
+  port: ${PORT:8082}
+management:
+  health:
+    mail:
+      enabled: false
+ngo:
+  db-name: identity
+  keycloak:
+    # Admin REST API (service client with manage-users only). Cloud: internal Keycloak URL + secret from a vault.
+    base-url: ${KEYCLOAK_URL:http://localhost:8180}
+    realm: ${KEYCLOAK_REALM:ngo}
+    admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:ngo-identity-admin}
+    admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:dev-only-identity-admin-secret}
+  photos:
+    max-upload-bytes: ${PHOTO_MAX_BYTES:5242880}
+  sms:
+    # dev-mailbox: codes go to Mailpit. Production: a DLT-registered provider adapter (MSG91/Gupshup/Twilio).
+    provider: ${SMS_PROVIDER:dev-mailbox}
+  otp:
+    secret: ${OTP_SECRET:dev-only-otp-secret-change-me}

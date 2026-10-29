@@ -1,0 +1,30 @@
+{
+  "_comment": "DEV/TEST ONLY - fictional users for local UI testing. Created by scripts/seed-test-users.ps1.",
+  "password": "DevTest#2026",
+  "users": [
+    {
+      "email": "priya.admin@ngo.test",
+      "firstName": "Priya",
+      "lastName": "Deshmukh",
+      "note": "admin of a second NGO (Jeevan Jyoti Foundation)"
+    },
+    {
+      "email": "sunil.staff@ngo.test",
+      "firstName": "Sunil",
+      "lastName": "More",
+      "note": "staff member invited by Asha"
+    },
+    {
+      "email": "kiran.donor@ngo.test",
+      "firstName": "Kiran",
+      "lastName": "Joshi",
+      "note": "individual donor"
+    },
+    {
+      "email": "anil.donor@ngo.test",
+      "firstName": "Anil",
+      "lastName": "Shah",
+      "note": "individual donor (standard dataset)"
+    }
+  ]
+}

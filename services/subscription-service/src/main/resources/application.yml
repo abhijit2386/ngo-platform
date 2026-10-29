@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: subscription-service
+  config:
+    import: classpath:commons-defaults.yml
+server:
+  port: ${PORT:8084}
+ngo:
+  db-name: subscription
+  billing:
+    provider: ${BILLING_PROVIDER:mock}
+    mock-enabled: ${BILLING_MOCK_ENABLED:true}
+    webhook-secret: ${BILLING_WEBHOOK_SECRET:dev-billing-webhook-secret-change-me}
+    seller-name: ${BILLING_SELLER_NAME:NGO Platform (development)}
+    seller-gstin: ${BILLING_SELLER_GSTIN:GSTIN-NOT-CONFIGURED}

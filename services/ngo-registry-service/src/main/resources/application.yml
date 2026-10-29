@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: ngo-registry-service
+  config:
+    import: classpath:commons-defaults.yml
+server:
+  port: ${PORT:8083}
+ngo:
+  db-name: ngo_registry
+  storage:
+    endpoint: ${S3_ENDPOINT:http://localhost:8333}
+    bucket: ${S3_BUCKET:ngo-registry}
+    access-key: ${S3_ACCESS_KEY:dev-access}
+    secret-key: ${S3_SECRET_KEY:dev-secret-change-me}
+  verification:
+    reverify-after: P365D

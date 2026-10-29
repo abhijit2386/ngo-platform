@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: reporting-service
+  config:
+    import: classpath:commons-defaults.yml
+server:
+  port: ${PORT:8092}
+ngo:
+  db-name: reporting

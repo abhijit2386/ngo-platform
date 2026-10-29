@@ -1,0 +1,144 @@
+# Shared defaults imported by every servlet service via spring.config.import.
+# Defaults target LOCAL DEVELOPMENT without containers (Eureka discovery, HTTP event delivery, local file storage).
+# Kubernetes/cloud overrides via environment: DISCOVERY_ENABLED=false, EVENTS_TRANSPORT=rabbit,
+# AUTOCONFIG_EXCLUDE= (empty), STORAGE_TYPE=s3, OTLP_EXPORT=true and the *_URL variables (cluster DNS names).
+spring:
+  autoconfigure:
+    # No message broker locally: RabbitMQ auto-configuration (listeners, health check) is switched off.
+    exclude: ${AUTOCONFIG_EXCLUDE:org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration}
+  threads:
+    virtual:
+      enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    locations: classpath:db/commons,classpath:db/migration
+    # Resilient startup: wait for the database instead of failing (slow hosts, DB restarts, rolling deploys).
+    connect-retries: ${DB_CONNECT_RETRIES:12}
+    connect-retries-interval: 10s
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/${ngo.db-name}?connectTimeout=30&tcpKeepAlive=true}
+    username: ${DB_USER:${ngo.db-name}}
+    password: ${DB_PASSWORD:dev-only-password}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:10}
+      minimum-idle: ${DB_POOL_MIN:2}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT_MS:60000}
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:ngo}
+    password: ${RABBIT_PASSWORD:dev-only-password}
+    publisher-confirm-type: simple
+    listener:
+      simple:
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 5
+          initial-interval: 1s
+          multiplier: 3
+          max-interval: 60s
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+server:
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLE:1.0}
+  otlp:
+    tracing:
+      endpoint: ${OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
+      export:
+        enabled: ${OTLP_EXPORT:false}
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  structured:
+    format:
+      console: ${LOG_FORMAT:ecs}
+  level:
+    org.ngoplatform: INFO
+
+eureka:
+  client:
+    enabled: ${ngo.discovery.enabled}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    registry-fetch-interval-seconds: 5
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOST:localhost}
+    lease-renewal-interval-in-seconds: 10
+
+ngo:
+  discovery:
+    enabled: ${DISCOVERY_ENABLED:true}
+  events:
+    # http = broker-less local development (outbox -> POST /internal/v1/events); rabbit = production.
+    transport: ${EVENTS_TRANSPORT:http}
+    # Subscribers per event type for the HTTP transport (mirrors the RabbitMQ queue bindings).
+    routes:
+      "[ngo.registration.submitted]": [identity]
+      "[ngo.verification.approved]": [subscription, notification]
+      "[ngo.verification.rejected]": [notification]
+      "[ngo.verification.info-requested]": [notification]
+      "[ngo.account.suspended]": [notification]
+      "[identity.staff.invited]": [notification]
+      "[identity.staff.accepted]": [notification]
+      "[subscription.subscription.expiring]": [notification]
+      "[subscription.payment.failed]": [notification]
+      "[campaign.campaign.submitted]": [notification]
+      "[campaign.campaign.published]": [notification]
+      "[campaign.campaign.rejected]": [notification]
+      "[donation.donation.paid]": [receipt, donor, campaign]
+      "[donation.donation.refunded]": [receipt, donor, campaign]
+      "[donation.donation.voided]": [receipt]
+      "[notification.delivery.succeeded]": [receipt]
+      "[operations.expense.approved]": [campaign]
+  storage:
+    type: ${STORAGE_TYPE:local}
+    local-root: ${STORAGE_ROOT:.local-files}
+  internal-token: ${INTERNAL_TOKEN:dev-internal-token-change-me}
+  security:
+    jwk-set-uri: ${KEYCLOAK_JWKS:http://localhost:8180/realms/ngo/protocol/openid-connect/certs}
+    issuers: ${KEYCLOAK_ISSUERS:http://localhost:8180/realms/ngo,http://10.0.2.2:8180/realms/ngo}
+    allowed-clients: ngo-mobile,ngo-admin-cli
+  services:
+    identity: ${IDENTITY_URL:http://identity-service}
+    ngo-registry: ${NGO_REGISTRY_URL:http://ngo-registry-service}
+    subscription: ${SUBSCRIPTION_URL:http://subscription-service}
+    donor: ${DONOR_URL:http://donor-service}
+    donation: ${DONATION_URL:http://donation-payment-service}
+    receipt: ${RECEIPT_URL:http://receipt-service}
+    campaign: ${CAMPAIGN_URL:http://campaign-project-service}
+    operations: ${OPERATIONS_URL:http://ngo-operations-service}
+    helpdesk: ${HELPDESK_URL:http://helpdesk-service}
+    notification: ${NOTIFICATION_URL:http://notification-service}
+    reporting: ${REPORTING_URL:http://reporting-service}

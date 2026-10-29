@@ -1,0 +1,25 @@
+-- Database-per-service on one local PostgreSQL server (DEV ONLY passwords).
+CREATE ROLE identity LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE identity OWNER identity;
+CREATE ROLE ngo_registry LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE ngo_registry OWNER ngo_registry;
+CREATE ROLE subscription LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE subscription OWNER subscription;
+CREATE ROLE donor LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE donor OWNER donor;
+CREATE ROLE donation LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE donation OWNER donation;
+CREATE ROLE receipt LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE receipt OWNER receipt;
+CREATE ROLE campaign LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE campaign OWNER campaign;
+CREATE ROLE operations LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE operations OWNER operations;
+CREATE ROLE helpdesk LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE helpdesk OWNER helpdesk;
+CREATE ROLE notification LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE notification OWNER notification;
+CREATE ROLE reporting LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE reporting OWNER reporting;
+CREATE ROLE keycloak LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE keycloak OWNER keycloak;

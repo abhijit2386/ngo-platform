@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: api-gateway
+  threads:
+    virtual:
+      enabled: true
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLE:1.0}
+  otlp:
+    tracing:
+      endpoint: ${OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
+      export:
+        enabled: ${OTLP_EXPORT:false}
+logging:
+  structured:
+    format:
+      console: ${LOG_FORMAT:ecs}
+# Local development: routes resolve lb://<service> through Eureka. Kubernetes: DISCOVERY_ENABLED=false and
+# *_URL=http://<service> (cluster DNS).
+eureka:
+  client:
+    enabled: ${DISCOVERY_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    registry-fetch-interval-seconds: 5
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOST:localhost}
+    lease-renewal-interval-in-seconds: 10
+ngo:
+  security:
+    jwk-set-uri: ${KEYCLOAK_JWKS:http://localhost:8180/realms/ngo/protocol/openid-connect/certs}
+    issuers: ${KEYCLOAK_ISSUERS:http://localhost:8180/realms/ngo,http://10.0.2.2:8180/realms/ngo}
+  services:
+    identity: ${IDENTITY_URL:lb://identity-service}
+    ngo-registry: ${NGO_REGISTRY_URL:lb://ngo-registry-service}
+    subscription: ${SUBSCRIPTION_URL:lb://subscription-service}
+    donor: ${DONOR_URL:lb://donor-service}
+    donation: ${DONATION_URL:lb://donation-payment-service}
+    receipt: ${RECEIPT_URL:lb://receipt-service}
+    campaign: ${CAMPAIGN_URL:lb://campaign-project-service}
+    operations: ${OPERATIONS_URL:lb://ngo-operations-service}
+    helpdesk: ${HELPDESK_URL:lb://helpdesk-service}
+    notification: ${NOTIFICATION_URL:lb://notification-service}
+    reporting: ${REPORTING_URL:lb://reporting-service}

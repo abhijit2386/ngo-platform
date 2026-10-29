@@ -1,0 +1,642 @@
+{
+  "@@locale": "en",
+  "appName": "Seva Setu",
+  "tagline": "Run your NGO. Grow your impact.",
+  "continueLabel": "Continue",
+  "getStarted": "Get started",
+  "back": "Back",
+  "next": "Next",
+  "save": "Save",
+  "cancel": "Cancel",
+  "retry": "Retry",
+  "done": "Done",
+  "submit": "Submit",
+  "close": "Close",
+  "loading": "Loading…",
+  "required": "This field is required",
+  "invalidEmail": "Enter a valid email address",
+  "invalidPhone": "Enter a 10-digit Indian mobile number",
+  "invalidPin": "PIN code must be 6 digits",
+  "invalidPan": "PAN looks like ABCDE1234F",
+  "invalidDarpan": "Darpan ID looks like MH/2017/0123456",
+  "tooShort": "Must be at least {min} characters",
+  "@tooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseLanguage": "Choose your language",
+  "languageHint": "You can change this later in Settings.",
+  "howWillYouUse": "How will you use the app?",
+  "iRunNgo": "I work with an NGO",
+  "iRunNgoSub": "Manage donors, donations, receipts, campaigns and staff",
+  "iDonate": "I want to donate",
+  "iDonateSub": "Discover verified NGOs and give securely",
+  "ngoIntroTitle": "Everything your NGO needs, in one app",
+  "ngoIntro1": "Digital donor register and instant receipts",
+  "ngoIntro2": "Campaigns, projects, volunteers and expenses",
+  "ngoIntro3": "30-day free trial. 0% commission on donations.",
+  "donorIntroTitle": "Give with confidence",
+  "donorIntro1": "Every NGO is reviewed before it can accept donations",
+  "donorIntro2": "Money goes directly to the NGO's own account",
+  "donorIntro3": "All your receipts in one place",
+  "termsTitle": "Terms and privacy",
+  "termsBody": "We collect only what is needed to run your account and to issue receipts. Your data is never sold. Donation money is paid to the NGO, not to us. You can ask us to access, correct or delete your data at any time from Settings.",
+  "acceptTerms": "I have read and accept the Terms of Use and Privacy Notice",
+  "permissionsTitle": "Stay informed",
+  "permissionsBody": "We will ask for notification permission so we can tell you about donations, receipts and support replies. Camera and files are requested only when you upload a document.",
+  "signIn": "Sign in",
+  "createAccount": "Create account",
+  "signInTitle": "Welcome",
+  "signInSubtitle": "Sign in securely with your email. Your password is never shared with the app.",
+  "signInFailed": "Sign in did not complete. Please try again.",
+  "sessionExpired": "Your session expired. Please sign in again.",
+  "signOut": "Sign out",
+  "noInternet": "No internet connection",
+  "maintenance": "We're doing scheduled maintenance. Please check back soon.",
+  "updateRequired": "Please update the app to continue.",
+  "navHome": "Home",
+  "navDonors": "Donors",
+  "navCampaigns": "Campaigns",
+  "navReports": "Reports",
+  "navMore": "More",
+  "navDiscover": "Discover",
+  "navDonations": "Donations",
+  "navFollowing": "Following",
+  "navProfile": "Profile",
+  "hello": "Namaste, {name}",
+  "@hello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNgo": "Register your NGO",
+  "registerNgoSub": "Takes about 10 minutes. Keep your registration certificate, address proof and signatory ID handy.",
+  "pendingInvitations": "Invitations for you",
+  "accept": "Accept",
+  "switchToDonor": "Switch to donor app",
+  "switchToNgo": "Switch to NGO app",
+  "verificationPending": "Verification in progress",
+  "verificationPendingBody": "Our team is reviewing your documents. You'll be notified when your NGO is approved. Your 30-day trial starts then.",
+  "verificationInfoRequested": "More information needed",
+  "verificationRejected": "Registration not approved",
+  "continueRegistration": "Continue registration",
+  "subscription": "Subscription",
+  "trialDaysLeft": "{days} days left in your free trial",
+  "@trialDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "renewsOn": "Current period ends {date}",
+  "@renewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "viewPlans": "View plans",
+  "upgrade": "Upgrade",
+  "quickActions": "Quick actions",
+  "recordDonation": "Record donation",
+  "addDonor": "Add donor",
+  "inviteStaff": "Invite staff",
+  "newCampaign": "New campaign",
+  "staff": "Staff",
+  "plans": "Plans",
+  "perMonth": "/month",
+  "billedQuarterly": "Billed {amount} every 3 months",
+  "@billedQuarterly": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "billedAnnually": "Billed {amount} per year",
+  "@billedAnnually": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "includesStaff": "{count} staff included",
+  "@includesStaff": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pricesIncludeGst": "Prices include GST · 0% commission on donations",
+  "quarterly": "Quarterly",
+  "annual": "Annual",
+  "choosePlan": "Choose plan",
+  "currentPlan": "Current plan",
+  "payNow": "Pay {amount}",
+  "@payNow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentSuccess": "Payment successful",
+  "paymentFailed": "Payment failed",
+  "paymentPending": "Payment pending",
+  "settings": "Settings",
+  "language": "Language",
+  "helpdesk": "Help & support",
+  "about": "About",
+  "discoverTitle": "Find a cause you care about",
+  "searchNgos": "Search NGOs",
+  "verified": "Verified",
+  "donate": "Donate",
+  "noResults": "No NGOs found",
+  "noResultsHint": "Try another city or cause",
+  "invalidAmount": "Enter an amount like 500 or 500.50",
+  "amountRange": "Amount must be between ₹{min} and ₹{max}",
+  "@amountRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeTitle": "Digital tools for every NGO in India",
+  "welcomeBody": "Replace paper registers, receipt books and spreadsheets with one simple, secure app.",
+  "alreadyHaveAccount": "Already have an account? Sign in",
+  "notificationsAllow": "Allow notifications",
+  "notNow": "Not now",
+  "orgDetails": "Organization",
+  "registrationDetails": "Registration",
+  "address": "Address",
+  "people": "People",
+  "documents": "Documents",
+  "review": "Review",
+  "legalName": "Legal name (as on certificate)",
+  "displayName": "Display name",
+  "registrationType": "Registration type",
+  "typePublicTrust": "Public charitable trust",
+  "typeSociety": "Registered society",
+  "typeSection8": "Section 8 company",
+  "typeOther": "Other",
+  "description": "What does your NGO do?",
+  "areasOfActivity": "Areas of work",
+  "officialEmail": "Official email",
+  "officialPhone": "Official mobile",
+  "website": "Website (optional)",
+  "registrationNumber": "Registration number",
+  "registrationDate": "Registration date",
+  "registrationState": "Registered in state",
+  "darpanId": "NGO Darpan ID (optional)",
+  "darpanNote": "A Darpan ID helps review but is not proof of legitimacy on its own.",
+  "pan": "PAN of the NGO (optional)",
+  "tax80g": "80G registration number (optional)",
+  "line1": "Address line 1",
+  "line2": "Address line 2 (optional)",
+  "city": "City / Taluka",
+  "district": "District",
+  "state": "State",
+  "pinCode": "PIN code",
+  "secondaryAdmin": "Secondary administrator",
+  "secondaryAdminHint": "A second person who can manage the NGO if you are unavailable. They will receive an invitation.",
+  "signatory": "Authorized signatory",
+  "signatoryHint": "The person whose name appears on receipts.",
+  "fullName": "Full name",
+  "email": "Email",
+  "mobile": "Mobile",
+  "designation": "Designation",
+  "upload": "Upload",
+  "replace": "Replace",
+  "uploaded": "Uploaded",
+  "docRegistrationCertificate": "Registration certificate",
+  "docAddressProof": "Address proof",
+  "docSignatoryId": "Signatory ID",
+  "docPanCard": "PAN card",
+  "docTrustDeed": "Trust deed / MoA",
+  "doc12a": "12A certificate",
+  "doc80g": "80G certificate",
+  "docLogo": "Logo",
+  "docRequired": "Required",
+  "docOptional": "Optional",
+  "fileRules": "PDF, JPG or PNG up to 10 MB",
+  "missingItems": "Still needed before you can submit",
+  "readyToSubmit": "Everything looks complete. Submit for verification.",
+  "submitForVerification": "Submit for verification",
+  "submitted": "Submitted for verification",
+  "saved": "Saved",
+  "myRegistrations": "Your registrations",
+  "settingUpWorkspace": "Setting up your workspace…",
+  "selectState": "Select state",
+  "status": "Status",
+  "billingCycle": "Billing cycle",
+  "trial": "Free trial",
+  "staffLimit": "Staff seats",
+  "unlimited": "Unlimited",
+  "activeCampaigns": "Active campaigns",
+  "activeProjects": "Active projects",
+  "receiptDesigner": "Custom receipt designer",
+  "basic": "Basic",
+  "advanced": "Advanced",
+  "standard": "Standard",
+  "no": "No",
+  "yes": "Yes",
+  "prioritySupport": "Priority support",
+  "billingHistory": "Billing history",
+  "invoices": "Invoices",
+  "payments": "Payments",
+  "noInvoices": "No invoices yet",
+  "download": "Download",
+  "orderSummary": "Order summary",
+  "total": "Total",
+  "gstIncluded": "includes GST of {amount}",
+  "@gstIncluded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "mockPaymentTitle": "Test payment (development)",
+  "mockPaymentBody": "No real money moves. Choose how the payment provider should respond.",
+  "mockSucceed": "Simulate success",
+  "mockFail": "Simulate failure",
+  "mockPending": "Simulate pending",
+  "upgradeTo": "Upgrade to {plan}",
+  "@upgradeTo": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "renew": "Renew",
+  "subscribe": "Subscribe",
+  "selectOnTrial": "Use during trial",
+  "downgradeAtRenewal": "Switch at renewal",
+  "cancelSubscription": "Cancel at end of period",
+  "cancellationScheduled": "Cancels at period end",
+  "undoCancel": "Keep subscription",
+  "scheduledChange": "Scheduled: {plan} from next renewal",
+  "@scheduledChange": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "readOnlyNotice": "Your subscription is {status}. Your records stay available; renew to continue adding new records.",
+  "@readOnlyNotice": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "notAvailableYet": "Your subscription starts after verification",
+  "addStaffBlocks": "Additional staff (blocks of 10)",
+  "blocks": "{n} blocks",
+  "@blocks": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmDowngradeTitle": "Switch plan at renewal?",
+  "confirmDowngradeBody": "You'll keep your current plan until {date}. Features not in the new plan will stop then; your data is kept.",
+  "@confirmDowngradeBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "staffDirectory": "Team",
+  "seatsUsed": "{used} of {max} staff seats used",
+  "@seatsUsed": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "pending": "Pending",
+  "role": "Role",
+  "invite": "Send invitation",
+  "invitationSent": "Invitation sent",
+  "resend": "Resend",
+  "deactivate": "Deactivate",
+  "activate": "Activate",
+  "ngoProfile": "NGO profile",
+  "platformAdmin": "Platform administration",
+  "verificationQueue": "Verification queue",
+  "approve": "Approve",
+  "reject": "Reject",
+  "requestInfo": "Request information",
+  "messageToNgo": "Message to the NGO",
+  "internalNote": "Internal note (not shown to NGO)",
+  "riskFlags": "Review signals",
+  "nothingToReview": "Nothing waiting for review",
+  "highContrast": "High contrast",
+  "account": "Account",
+  "deleteAccount": "Request account deletion",
+  "deleteAccountBody": "We will review your request. Receipts and financial records that the law requires NGOs to keep are retained.",
+  "requested": "Requested",
+  "version": "Version",
+  "comingSoonTitle": "Available in the next build",
+  "serviceUnavailable": "This section's service is not running yet. Pull to refresh once it's deployed.",
+  "availableAfterVerification": "Available after verification",
+  "statusLabel": "{status, select, ACTIVE{Active} APPROVED{Approved} PAID{Paid} ELIGIBLE{Eligible} PUBLISHED{Published} GENERATED{Generated} DELIVERED{Delivered} RESOLVED{Resolved} CLOSED{Closed} TRIAL{Trial} PENDING{Pending} GRACE{Grace period} INFO_REQUESTED{Info requested} PENDING_ACCEPTANCE{Awaiting acceptance} OPEN{Open} IN_PROGRESS{In progress} DRAFT{Draft} SUSPENDED{Suspended} REJECTED{Rejected} FAILED{Failed} EXPIRED{Expired} CANCELLED{Cancelled} ESCALATED{Escalated} GENERATION_FAILED{Generation failed} UPLOADED{Uploaded} VERIFIED{Verified} REMOVED{Removed} INVITED{Invited} SENT{Sent} SUPPRESSED{Not sent (opted out)} DEAD{Could not be delivered} other{{status}}}",
+  "@statusLabel": {
+    "description": "Human-readable name of a backend status code shown in badges",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "roleName": "{role, select, PRIMARY_ADMIN{Primary admin} SECONDARY_ADMIN{Secondary admin} STAFF{Staff} FINANCE{Finance} CAMPAIGN_MANAGER{Campaign manager} VOLUNTEER_COORDINATOR{Volunteer coordinator} VOLUNTEER{Volunteer} other{{role}}}",
+  "inviteExpires": "Expires {date}",
+  "@roleName": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "@inviteExpires": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "notifications": "Notifications",
+  "markAllRead": "Mark all as read",
+  "noNotifications": "You're all caught up",
+  "noNotificationsBody": "Updates about verification, your team and your plan will appear here.",
+  "notificationPreferences": "Notification preferences",
+  "communicationHistory": "Messages sent to you",
+  "channelEmail": "E-mail",
+  "channelInApp": "In the app",
+  "channelPush": "Push",
+  "mandatoryNotifications": "Always on: needed for your account and security.",
+  "pushComingSoon": "Push notifications will be available in a later update.",
+  "catAccount": "Account and verification",
+  "catTeam": "Team and invitations",
+  "catBilling": "Plan and billing",
+  "catDonations": "Donations and receipts",
+  "catCampaigns": "Campaigns",
+  "catHelpdesk": "Help desk",
+  "noMessagesYet": "No messages yet",
+  "unreadCount": "{count} unread",
+  "@unreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "completeProfileTitle": "Tell us about yourself",
+  "completeProfileIntro": "This takes a minute. Seva Setu is for people aged 18 and over.",
+  "myProfile": "My profile",
+  "dateOfBirth": "Date of birth",
+  "dateOfBirthHelp": "Used only to confirm you are 18 or older. Not shown to NGOs. Cannot be changed later.",
+  "dateOfBirthLocked": "To correct your date of birth, contact support.",
+  "chooseDate": "Choose date",
+  "gender": "Gender (optional)",
+  "genderHelp": "Helps NGOs understand who they serve. Only totals are shared, never your answer.",
+  "genderFemale": "Female",
+  "genderMale": "Male",
+  "genderTransgender": "Transgender",
+  "genderUndisclosed": "Prefer not to say",
+  "mobileOptional": "Mobile (optional)",
+  "confirmAdult": "I confirm I am 18 or older and these details are correct.",
+  "confirmAdultRequired": "Please confirm to continue",
+  "profilePicture": "Profile picture (optional)",
+  "profilePictureHelp": "Shown with your name to your NGO team. Use a photo, pick an avatar, or skip.",
+  "changePicture": "Change picture",
+  "takePhoto": "Take a photo",
+  "chooseFromGallery": "Choose from gallery",
+  "chooseAvatar": "Choose an avatar",
+  "removePicture": "Remove picture",
+  "underageTitle": "Seva Setu is for adults",
+  "underageConfirm": "You entered a date of birth under 18. Seva Setu is only for people aged 18 and over, so your sign-up will be cancelled and your details removed. Continue?",
+  "checkDate": "Check the date",
+  "ok": "OK",
+  "mobileNumber": "Mobile number",
+  "addMobile": "Add and verify mobile",
+  "changeMobile": "Change",
+  "mobileRequiredForTeam": "NGO team members need a verified mobile number.",
+  "mobilePrivacy": "Private: only you and your NGO team can see it.",
+  "sendCode": "Send code",
+  "enterCode": "Enter the 6-digit code",
+  "codeSentTo": "Code sent to +91 {number}",
+  "@codeSentTo": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "verify": "Verify",
+  "resendIn": "Resend in {seconds}s",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "resendCode": "Resend code",
+  "phoneVerifiedDone": "Mobile number verified",
+  "call": "Call",
+  "aTeamMember": "A team member",
+  "you": "You",
+  "aboutCampaign": "About this campaign",
+  "addCoverPhoto": "Add a cover photo",
+  "changeCoverPhoto": "Change",
+  "campaignCoverHelp": "Optional. A wide photo works best; location details are removed from the photo.",
+  "addTestDonation": "Add test donation",
+  "testDonationNote": "For testing only. Real online donations will replace this.",
+  "testDonationAdded": "Test donation added",
+  "testLabel": "TEST",
+  "amountRupees": "Amount",
+  "donorNameOptional": "Donor name (optional)",
+  "anonymousDonor": "Anonymous donor",
+  "approvePublish": "Approve and publish",
+  "publishNow": "Publish now",
+  "approveConfirm": "Donors will be able to see and support this campaign right away.",
+  "campaignPublished": "Campaign is live",
+  "approvedByLabel": "Approved by",
+  "createdByLabel": "Created by",
+  "sentForApprovalLabel": "Sent for approval",
+  "archiveCampaign": "Archive campaign",
+  "discardDraft": "Discard draft",
+  "archiveConfirm": "It will be moved to the archive and hidden from the list.",
+  "campaignArchived": "Moved to archive",
+  "awaitingApprovalAdmin": "Check the details below, then approve it or ask the team for changes.",
+  "awaitingApprovalTeam": "An administrator will review it. It goes live for donors only after approval. You can still edit it.",
+  "liveEditAdminOnly": "Only an administrator can change a live campaign.",
+  "byNgo": "by {name}",
+  "@byNgo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "campaignCause": "Cause",
+  "campaignStart": "Start date",
+  "campaignEnd": "End date",
+  "campaignDatesHelp": "A campaign can run for up to one year.",
+  "campaignTooLong": "A campaign can run for at most one year",
+  "endBeforeStart": "End date is before the start date",
+  "endInPast": "End date has already passed",
+  "campaignClosed": "Campaign closed",
+  "closeCampaign": "Close campaign",
+  "closeConfirm": "Donors will no longer be able to give to this campaign. This cannot be undone.",
+  "campaignDetails": "Campaign",
+  "campaignDonations": "Donations",
+  "noDonationsYet": "No donations yet",
+  "campaignEnded": "This campaign has ended",
+  "campaignEndedHint": "Thank you to everyone who supported it. Explore other live campaigns.",
+  "campaignGoal": "Goal amount",
+  "campaignGoalHelp": "Between ₹1,000 and ₹10 crore",
+  "campaignStatusLabel": "{status, select, DRAFT{Draft} PENDING_APPROVAL{Awaiting approval} PUBLISHED{Live} CLOSED{Closed} ARCHIVED{Archived} other{{status}}}",
+  "@campaignStatusLabel": {
+    "description": "Campaign workflow status shown in badges",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "campaignStory": "Full story (optional)",
+  "campaignStoryHint": "Who will benefit, how the money will be used, and why it matters",
+  "campaignSummary": "Short summary",
+  "campaignSummaryHint": "One or two lines donors see in the list",
+  "campaignTitle": "Campaign title",
+  "campaignTitleHint": "e.g. School books for 200 children",
+  "campaignsAwaitingYou": "{count, plural, =1{1 campaign is waiting for your approval} other{{count} campaigns are waiting for your approval}}",
+  "@campaignsAwaitingYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "campaignsEmpty": "No campaigns here yet",
+  "campaignsEmptyHint": "Create a campaign to raise funds for a specific need. An administrator approves it before donors can see it.",
+  "changesRequested": "Changes requested",
+  "changesSent": "Sent back to the team",
+  "requestChanges": "Request changes",
+  "requestChangesHint": "What should the team change?",
+  "coverNotSaved": "Cover photo was not saved",
+  "daysLeft": "{days, plural, =1{1 day left} other{{days} days left}}",
+  "@daysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "endsToday": "Ends today",
+  "endedOn": "Ended {date}",
+  "@endedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "startsOn": "Starts {date}",
+  "@startsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "donateComingSoon": "Online donations open very soon. Thank you for your support!",
+  "donationsCount": "{count, plural, =0{No donations yet} =1{1 donation} other{{count} donations}}",
+  "@donationsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "draftSaved": "Draft saved",
+  "editCampaign": "Edit campaign",
+  "filterAll": "All",
+  "filterDrafts": "Drafts",
+  "liveCampaigns": "Live campaigns",
+  "liveCampaignsCount": "{count, plural, =1{1 live campaign} other{{count} live campaigns}}",
+  "@liveCampaignsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveCampaignsOfLimit": "{count} of {limit} live campaigns on your plan",
+  "@liveCampaignsOfLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "movedToDrafts": "Moved back to drafts",
+  "newCampaignAdminNote": "It is saved as a draft. As an administrator you can publish it when ready.",
+  "newCampaignTeamNote": "It is saved as a draft. Send it for approval when ready; an administrator publishes it.",
+  "noLiveCampaigns": "No live campaigns right now",
+  "ofGoal": "of {goal}",
+  "@ofGoal": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "raisedOfGoal": "{raised} raised of {goal}",
+  "@raisedOfGoal": {
+    "placeholders": {
+      "raised": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "saveDraft": "Save draft",
+  "searchCampaigns": "Search campaigns",
+  "seeAll": "See all",
+  "send": "Send",
+  "sendForApproval": "Send for approval",
+  "sendForApprovalConfirm": "An administrator will review this campaign. Donors see it only after approval.",
+  "sentForApproval": "Sent for approval",
+  "withdrawRequest": "Withdraw approval request",
+  "verifiedNgos": "Verified NGOs"
+}

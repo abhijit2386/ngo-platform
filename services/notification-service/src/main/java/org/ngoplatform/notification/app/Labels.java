@@ -1,0 +1,32 @@
+package org.ngoplatform.notification.app;
+
+import java.util.Map;
+
+/** Display names for codes that appear inside messages, per language (fallback: English). */
+final class Labels {
+    private Labels() {}
+
+    private static final Map<String, Map<String, String>> ROLES = Map.of(
+            "en", Map.of("PRIMARY_ADMIN", "Primary admin", "SECONDARY_ADMIN", "Secondary admin", "STAFF", "Staff",
+                    "FINANCE", "Finance", "CAMPAIGN_MANAGER", "Campaign manager",
+                    "VOLUNTEER_COORDINATOR", "Volunteer coordinator", "VOLUNTEER", "Volunteer"),
+            "hi", Map.of("PRIMARY_ADMIN", "मुख्य प्रशासक", "SECONDARY_ADMIN", "सह-प्रशासक", "STAFF", "कर्मचारी",
+                    "FINANCE", "वित्त", "CAMPAIGN_MANAGER", "अभियान प्रबंधक",
+                    "VOLUNTEER_COORDINATOR", "स्वयंसेवक समन्वयक", "VOLUNTEER", "स्वयंसेवक"),
+            "mr", Map.of("PRIMARY_ADMIN", "मुख्य प्रशासक", "SECONDARY_ADMIN", "सह-प्रशासक", "STAFF", "कर्मचारी",
+                    "FINANCE", "वित्त", "CAMPAIGN_MANAGER", "मोहीम व्यवस्थापक",
+                    "VOLUNTEER_COORDINATOR", "स्वयंसेवक समन्वयक", "VOLUNTEER", "स्वयंसेवक"));
+
+    private static final Map<String, String> PLANS = Map.of("COMMUNITY", "Community", "GROWTH", "Growth",
+            "PROFESSIONAL", "Professional", "ENTERPRISE", "Enterprise");
+
+    static String role(String code, String language) {
+        if (code == null) return "";
+        Map<String, String> m = ROLES.getOrDefault(language, ROLES.get("en"));
+        return m.getOrDefault(code, ROLES.get("en").getOrDefault(code, code));
+    }
+
+    static String plan(String code) { return code == null ? "" : PLANS.getOrDefault(code, code); }
+
+    static String language(String lang) { return lang != null && (lang.equals("hi") || lang.equals("mr")) ? lang : "en"; }
+}

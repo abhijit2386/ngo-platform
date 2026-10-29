@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: helpdesk-service
+  config:
+    import: classpath:commons-defaults.yml
+server:
+  port: ${PORT:8090}
+ngo:
+  db-name: helpdesk

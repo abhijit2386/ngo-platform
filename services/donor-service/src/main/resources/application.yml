@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: donor-service
+  config:
+    import: classpath:commons-defaults.yml
+server:
+  port: ${PORT:8085}
+ngo:
+  db-name: donor

@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: notification-service
+  config:
+    import: classpath:commons-defaults.yml
+  mail:
+    # Local development: Mailpit (web UI http://localhost:8025). Production: provider SMTP relay + credentials.
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USER:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:false}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+server:
+  port: ${PORT:8091}
+ngo:
+  db-name: notification
+  notifications:
+    mail-from: ${MAIL_FROM:no-reply@sevasetu.local}
+    mail-from-name: ${MAIL_FROM_NAME:Seva Setu}
+    dispatch-ms: ${NOTIFICATION_DISPATCH_MS:5000}
+    batch-size: ${NOTIFICATION_BATCH:20}
+management:
+  health:
+    mail:
+      # A slow or down SMTP relay must not mark the service unhealthy: deliveries retry on their own.
+      enabled: false

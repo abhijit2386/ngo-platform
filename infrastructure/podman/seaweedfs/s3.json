@@ -1,0 +1,9 @@
+{
+  "identities": [
+    {
+      "name": "ngo-services-dev",
+      "credentials": [{ "accessKey": "dev-access", "secretKey": "dev-secret-change-me" }],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+{
+  "realm": "ngo",
+  "enabled": true,
+  "displayName": "NGO Platform",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "verifyEmail": true,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "bruteForceProtected": true,
+  "failureFactor": 5,
+  "maxFailureWaitSeconds": 900,
+  "passwordPolicy": "length(8) and digits(1) and upperCase(1) and notUsername and notEmail",
+  "accessTokenLifespan": 600,
+  "ssoSessionIdleTimeout": 2592000,
+  "ssoSessionMaxLifespan": 7776000,
+  "offlineSessionIdleTimeout": 2592000,
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "en",
+    "hi",
+    "mr"
+  ],
+  "defaultLocale": "en",
+  "loginTheme": "keycloak",
+  "smtpServer": {
+    "host": "localhost",
+    "port": "1025",
+    "from": "no-reply@ngo-platform.local",
+    "fromDisplayName": "NGO Platform (dev)"
+  },
+  "roles": {
+    "realm": [
+      {
+        "name": "PLATFORM_ADMIN",
+        "description": "Platform administrator"
+      },
+      {
+        "name": "PLATFORM_SUPPORT",
+        "description": "Platform support executive"
+      },
+      {
+        "name": "DONOR",
+        "description": "Default role"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "ngo-mobile",
+      "name": "NGO Platform mobile app",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "org.ngoplatform.app:/oauthredirect",
+        "org.ngoplatform.app:/logout"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "org.ngoplatform.app:/logout"
+      },
+      "protocolMappers": [
+        {
+          "name": "auth_time",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "config": {
+            "user.session.note": "AUTH_TIME",
+            "claim.name": "auth_time",
+            "jsonType.label": "long",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email",
+        "basic"
+      ],
+      "optionalClientScopes": [
+        "offline_access"
+      ]
+    },
+    {
+      "clientId": "ngo-admin-cli",
+      "name": "Test automation (dev only)",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email",
+        "basic"
+      ]
+    },
+    {
+      "clientId": "ngo-identity-admin",
+      "name": "identity-service admin access (manage-users only)",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-only-identity-admin-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "attributes": {
+        "access.token.lifespan": "300"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "platform.admin@ngo.test",
+      "email": "platform.admin@ngo.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Platform",
+      "lastName": "Admin",
+      "realmRoles": [
+        "PLATFORM_ADMIN",
+        "DONOR",
+        "offline_access"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DevAdmin#2026",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "support@ngo.test",
+      "email": "support@ngo.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Support",
+      "lastName": "Executive",
+      "realmRoles": [
+        "PLATFORM_SUPPORT",
+        "DONOR",
+        "offline_access"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DevSupport#2026",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "asha.admin@ngo.test",
+      "email": "asha.admin@ngo.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Asha",
+      "lastName": "Patil",
+      "realmRoles": [
+        "DONOR",
+        "offline_access"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DevNgo#2026",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "ravi.staff@ngo.test",
+      "email": "ravi.staff@ngo.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Ravi",
+      "lastName": "Kulkarni",
+      "realmRoles": [
+        "DONOR",
+        "offline_access"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DevStaff#2026",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "meera.donor@ngo.test",
+      "email": "meera.donor@ngo.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Meera",
+      "lastName": "Shah",
+      "realmRoles": [
+        "DONOR",
+        "offline_access"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DevDonor#2026",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "service-account-ngo-identity-admin",
+      "enabled": true,
+      "serviceAccountClientId": "ngo-identity-admin",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users"
+        ]
+      }
+    }
+  ]
+}
