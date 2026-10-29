@@ -20,6 +20,7 @@ public final class Dtos {
             @Email @Size(max = 254) String donorEmail,
             @Pattern(regexp = "^$|^[6-9]\\d{9}$", message = "Enter a 10-digit Indian mobile number") String donorPhone,
             @Pattern(regexp = "^$|^[A-Za-z]{5}\\d{4}[A-Za-z]$", message = "PAN looks like ABCDE1234F") String donorPan,
+            @Size(max = 300) String donorAddress,
             boolean wants80g,
             @Pattern(regexp = "^$|^[A-Z_]{4,30}$") String scenario) {}
 
@@ -55,13 +56,14 @@ public final class Dtos {
 
     public record ExceptionResolution(boolean ignore, @NotBlank @Size(max = 500) String note) {}
 
-    public record DonationView(UUID id, UUID ngoId, UUID donorId, String donorName, String donorEmail, UUID campaignId,
-                               UUID projectId, BigDecimal amount, BigDecimal refundedAmount, String purpose, String channel,
-                               String status, boolean wants80g, String offlineReference, boolean hasEvidence, Instant paidAt,
-                               String failureReason, boolean voided, UUID correctionOf, Instant createdAt) {
+    public record DonationView(UUID id, UUID ngoId, String ngoName, UUID donorId, String donorName, String donorEmail,
+                               UUID campaignId, String campaignTitle, UUID projectId, BigDecimal amount, BigDecimal refundedAmount,
+                               String purpose, String channel, String status, boolean wants80g, String offlineReference,
+                               boolean hasEvidence, Instant paidAt, String failureReason, boolean voided, UUID correctionOf,
+                               Instant createdAt) {
         public static DonationView of(Donation d) {
-            return new DonationView(d.getId(), d.getNgoId(), d.getDonorId(), d.getDonorName(), d.getDonorEmail(),
-                    d.getCampaignId(), d.getProjectId(), d.getAmount(), d.getRefundedAmount(), d.getPurpose(),
+            return new DonationView(d.getId(), d.getNgoId(), d.getNgoName(), d.getDonorId(), d.getDonorName(), d.getDonorEmail(),
+                    d.getCampaignId(), d.getCampaignTitle(), d.getProjectId(), d.getAmount(), d.getRefundedAmount(), d.getPurpose(),
                     d.getChannel().name(), d.getStatus().name(), d.isWants80g(), d.getOfflineReference(),
                     d.getEvidenceKey() != null, d.getPaidAt(), d.getFailureReason(), d.isVoided(), d.getCorrectionOf(),
                     d.getCreatedAt());

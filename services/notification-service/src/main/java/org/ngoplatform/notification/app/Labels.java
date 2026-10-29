@@ -28,5 +28,15 @@ final class Labels {
 
     static String plan(String code) { return code == null ? "" : PLANS.getOrDefault(code, code); }
 
+    /** "1500.00" -> "₹1,500"; "1500.50" -> "₹1,500.50" (Indian grouping). */
+    static String inr(String amount) {
+        if (amount == null) return "";
+        java.math.BigDecimal v = new java.math.BigDecimal(amount);
+        java.text.NumberFormat f = java.text.NumberFormat.getCurrencyInstance(java.util.Locale.forLanguageTag("en-IN"));
+        f.setMaximumFractionDigits(v.stripTrailingZeros().scale() > 0 ? 2 : 0);
+        f.setMinimumFractionDigits(v.stripTrailingZeros().scale() > 0 ? 2 : 0);
+        return f.format(v);
+    }
+
     static String language(String lang) { return lang != null && (lang.equals("hi") || lang.equals("mr")) ? lang : "en"; }
 }

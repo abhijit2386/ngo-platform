@@ -117,9 +117,11 @@ ngo:
       "[campaign.campaign.submitted]": [notification]
       "[campaign.campaign.published]": [notification]
       "[campaign.campaign.rejected]": [notification]
-      "[donation.donation.paid]": [receipt, donor, campaign]
-      "[donation.donation.refunded]": [receipt, donor, campaign]
-      "[donation.donation.voided]": [receipt]
+      # The HTTP relay stops at the first unreachable subscriber, so only services that run today are listed.
+      # Add receipt and donor here when receipt-service / donor-service ship (rabbit transport binds them anyway).
+      "[donation.donation.paid]": [campaign, notification]
+      "[donation.donation.refunded]": [campaign]
+      "[donation.donation.voided]": []
       "[notification.delivery.succeeded]": [receipt]
       "[operations.expense.approved]": [campaign]
   storage:

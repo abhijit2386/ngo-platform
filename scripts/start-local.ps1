@@ -1,7 +1,7 @@
 # Starts the container-free development stack: PostgreSQL, Keycloak, Mailpit, Eureka and the selected services.
 #   -Services identity-service,ngo-registry-service,...  (default: the core set below)
 param([string[]]$Services = @('identity-service', 'ngo-registry-service', 'subscription-service', 'notification-service',
-  'campaign-project-service', 'api-gateway'))
+  'campaign-project-service', 'donation-payment-service', 'api-gateway'))
 $ErrorActionPreference = 'Continue'
 $Repo = 'D:\ngo-platform'; $Tools = 'D:\tools'; $KcVer = '26.7.2'
 $jdk = (Get-ChildItem $Tools -Directory -Filter 'jdk-21*' | Select-Object -First 1).FullName

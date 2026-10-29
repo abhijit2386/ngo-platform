@@ -12,6 +12,7 @@ import '../../design_system/tokens.dart';
 import '../../localization/app_localizations.dart';
 import '../campaigns/campaign_api.dart' show isTeamMemberOf;
 import '../campaigns/campaign_pages.dart';
+import '../donations/donation_pages.dart';
 import '../profile/avatar.dart';
 import '../registration/registration_pages.dart' show causeLabel;
 import '../settings/settings_pages.dart';
@@ -204,7 +205,9 @@ class PublicNgoPage extends ConsumerWidget {
           if (!isTeamMemberOf(ref.watch(meProvider).value, ngoId))
             FilledButton.icon(
               // Donation checkout lands with donation-payment-service (next build).
-              onPressed: n['acceptingDonations'] == true ? () => showSnack(context, t.comingSoonTitle) : null,
+              onPressed: n['acceptingDonations'] == true
+                  ? () => startDonation(context, ngoId: ngoId, title: '${n['displayName']}')
+                  : null,
               icon: const Icon(Icons.volunteer_activism),
               label: Text(t.donate),
             ),
@@ -216,45 +219,6 @@ class PublicNgoPage extends ConsumerWidget {
 
 final _publicNgoProvider = FutureProvider.family<Map<String, dynamic>, String>(
     (ref, id) => ref.read(apiProvider).getJson('/api/v1/public/ngos/$id'));
-
-/// DAPP-017: donor's donation history (donation-payment-service).
-class MyDonationsPage extends ConsumerWidget {
-  const MyDonationsPage({super.key});
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = L10n.of(context);
-    final data = ref.watch(_myDonationsProvider);
-    return Scaffold(
-      appBar: AppBar(title: Text(t.navDonations)),
-      body: data.when(
-        loading: () => const LoadingView(),
-        error: (e, _) => ErrorState(message: t.serviceUnavailable, onRetry: () => ref.invalidate(_myDonationsProvider)),
-        data: (list) => list.isEmpty
-            ? EmptyState(icon: Icons.volunteer_activism_outlined, title: t.navDonations, message: t.discoverTitle)
-            : ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                itemCount: list.length,
-                separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                itemBuilder: (_, i) => AppCard(
-                  child: Row(children: [
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('${list[i]['ngoName']}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                      Text(formatDate(list[i]['createdAt']), style: const TextStyle(color: AppColors.textMuted)),
-                    ])),
-                    Text(formatInr(list[i]['amount']), style: const TextStyle(fontWeight: FontWeight.w700)),
-                  ]),
-                ),
-              ),
-      ),
-    );
-  }
-}
-
-final _myDonationsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  ref.watch(sessionKeyProvider);
-  final r = await ref.read(apiProvider).getJson('/api/v1/donations/mine');
-  return (r['items'] as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
-});
 
 /// DAPP-022: followed NGOs (donor-service).
 class FollowingPage extends ConsumerWidget {

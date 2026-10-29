@@ -17,11 +17,28 @@ import org.springframework.web.client.RestClientException;
 public class Clients {
     private final RestClient registry;
     private final RestClient donor;
+    private final RestClient campaign;
+    private final boolean donorResolveEnabled;
 
     public Clients(InternalClients clients, @Value("${ngo.services.ngo-registry}") String registry,
-                   @Value("${ngo.services.donor}") String donor) {
+                   @Value("${ngo.services.donor}") String donor, @Value("${ngo.services.campaign}") String campaign,
+                   @Value("${ngo.donors.resolve-enabled:false}") boolean donorResolveEnabled) {
         this.registry = clients.forBaseUrl(registry);
         this.donor = clients.forBaseUrl(donor);
+        this.campaign = clients.forBaseUrl(campaign);
+        this.donorResolveEnabled = donorResolveEnabled;
+    }
+
+    /** Campaign facts at checkout: ngoId, title, status, startDate, endDate. */
+    public Map<String, Object> campaign(UUID campaignId) {
+        try {
+            return campaign.get().uri("/internal/v1/campaigns/{id}", campaignId).retrieve()
+                    .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+        } catch (HttpClientErrorException.NotFound e) {
+            throw ApiException.notFound("Campaign");
+        } catch (RestClientException e) {
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "CAMPAIGN_UNAVAILABLE", "Please retry in a moment");
+        }
     }
 
     public Map<String, Object> ngo(UUID ngoId) {
@@ -35,7 +52,9 @@ public class Clients {
         }
     }
 
+    /** NGO-scoped donor record from donor-service; null while that service is not deployed (resolve-enabled=false). */
     public UUID resolveDonor(UUID ngoId, UUID userId, String name, String email, String phone, String pan, boolean guest) {
+        if (!donorResolveEnabled) return null;
         try {
             Map<String, Object> body = new java.util.HashMap<>();
             if (userId != null) body.put("userId", userId);

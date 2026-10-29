@@ -78,7 +78,7 @@ $aInbox = WaitFor { $r = Api GET '/api/v1/notifications' $asha; $x = $r.items | 
 Check 'Asha gets "New team member" in-app' ($null -ne $aInbox)
 if ($aInbox) { "      in-app: $(@($aInbox)[0].title) / $(@($aInbox)[0].body)" }
 $joinMail = WaitFor { MailTo 'asha.admin@ngo.test' | Where-Object { $_.Subject -like '*joined*' } } 60
-Check 'Asha gets "joined" e-mail' ($null -ne $joinMail)
+Check 'Asha gets "joined" e-mail' ($null -ne $joinMail) ((@(MailTo 'asha.admin@ngo.test') | ForEach-Object { $_.Subject }) -join ' | ')
 
 # --- read state ---
 $n = @($aInbox)[0]
@@ -104,7 +104,8 @@ Check 'communication history lists the sent e-mail' (@($hist.items | Where-Objec
 
 # --- admin templates ---
 $tpl = Api GET '/api/v1/admin/notification-templates' $admin
-Check '60 seeded templates (10 codes x 2 channels x 3 languages)' ($tpl.Count -eq 60) "count=$($tpl.Count)"
+$codes = @($tpl | ForEach-Object { $_.code } | Sort-Object -Unique)
+Check 'every template code has e-mail + in-app in en/hi/mr' ($tpl.Count -eq $codes.Count * 6 -and $codes.Count -ge 15) "count=$($tpl.Count) codes=$($codes.Count)"
 $denied = Api GET '/api/v1/admin/notification-templates' $asha
 Check 'NGO admin cannot manage platform templates (403)' ($denied.__status -eq 403)
 $t1 = $tpl | Where-Object { $_.code -eq 'STAFF_INVITED' -and $_.channel -eq 'EMAIL' -and $_.language -eq 'hi' }
@@ -123,8 +124,10 @@ Check 'Asha invites an outsider while e-mail is down' ($null -ne $inv2.id) ($inv
 $failed = WaitFor { $r = Api GET '/api/v1/notifications/admin/deliveries?status=FAILED' $admin; $x = $r.items | Where-Object { $_.recipient -eq 'outsider.test@ngo.test' }; if ($x) { $x } } 90
 Check 'delivery is FAILED with a scheduled retry' ($null -ne $failed -and $failed.nextAttemptAt) ($failed | ConvertTo-Json -Compress)
 if ($failed) { "      error: $($failed.lastError)  next attempt: $($failed.nextAttemptAt)" }
-Start-Process -FilePath 'D:\tools\mailpit\mailpit.exe' -ArgumentList '--listen', '127.0.0.1:8025', '--smtp', '127.0.0.1:1025' `
-  -RedirectStandardOutput 'D:\ngo-platform\logs\mailpit.log' -RedirectStandardError 'D:\ngo-platform\logs\mailpit.err.log' -WindowStyle Hidden
+# Fully detached (WMI): a child started with Start-Process inherits our redirected output handles and keeps the
+# remote command runner waiting after this script ends.
+Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{
+  CommandLine = 'D:\tools\mailpit\mailpit.exe --listen 127.0.0.1:8025 --smtp 127.0.0.1:1025' } | Out-Null
 $retried = WaitFor { try { MailTo 'outsider.test@ngo.test' | Where-Object { $_.Subject -like '*invited*' } } catch { $null } } 150
 Check 'automatic retry delivers once e-mail is back' ($null -ne $retried)
 

@@ -39,7 +39,7 @@ public class DonorDonationController {
 
     private DonationService.CheckoutRequest map(Dtos.CheckoutRequest r) {
         return new DonationService.CheckoutRequest(r.ngoId(), r.campaignId(), r.projectId(), r.amount(), r.purpose(),
-                r.donorName(), r.donorEmail(), r.donorPhone(), r.donorPan(), r.wants80g(),
+                r.donorName(), r.donorEmail(), r.donorPhone(), r.donorPan(), r.donorAddress(), r.wants80g(),
                 r.scenario() == null || r.scenario().isBlank() ? "SUCCESS" : r.scenario());
     }
 
@@ -87,7 +87,17 @@ public class DonorDonationController {
     @GetMapping("/api/v1/donations/mine")
     public PageResponse<Dtos.DonationView> mine(@RequestParam(defaultValue = "0") int page) {
         CurrentUser u = guard.user();
-        return PageResponse.of(donations.findByDonorUserIdOrderByCreatedAtDesc(u.userId(), PageRequest.of(page, 20)), Dtos.DonationView::of);
+        return PageResponse.of(donations.findByDonorUserIdAndStatusNotInOrderByCreatedAtDesc(u.userId(),
+                List.of(Donation.Status.CREATED, Donation.Status.CANCELLED), PageRequest.of(Math.max(0, page), 20)), Dtos.DonationView::of);
+    }
+
+    /** The donor's last 80G details (their own data) to prefill the next donation; empty when none. */
+    @GetMapping("/api/v1/donations/tax-profile")
+    public Map<String, String> taxProfile() {
+        CurrentUser u = guard.user();
+        return donations.findFirstByDonorUserIdAndWants80gTrueOrderByCreatedAtDesc(u.userId())
+                .<Map<String, String>>map(d -> Map.of("pan", d.getDonorPan(), "address", d.getDonorAddress() == null ? "" : d.getDonorAddress()))
+                .orElse(Map.of());
     }
 
     @PostMapping("/api/v1/webhooks/payments/{provider}")

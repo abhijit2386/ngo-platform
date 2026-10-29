@@ -27,6 +27,7 @@ class MorePage extends ConsumerWidget {
       body: ListView(children: [
         item(Icons.apartment, t.ngoProfile, () => context.push('/ngo/profile')),
         if (m?.can('SUBSCRIPTION_VIEW') ?? true) item(Icons.workspace_premium, t.subscription, () => context.push('/ngo/subscription')),
+        if (m?.can('DONATION_VIEW') ?? false) item(Icons.payments_outlined, t.onlinePayments, () => context.push('/ngo/payments')),
         if (m?.can('STAFF_VIEW') ?? false) item(Icons.groups, t.staffDirectory, () => context.push('/ngo/staff')),
         item(Icons.settings, t.settings, () => context.push('/settings')),
         if (me?.isPlatformSupport ?? false) ...[

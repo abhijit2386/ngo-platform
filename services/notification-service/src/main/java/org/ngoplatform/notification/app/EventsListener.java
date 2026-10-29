@@ -24,7 +24,8 @@ public class EventsListener implements EventHandler {
     static final Set<String> TYPES = Set.of(EventTypes.NGO_VERIFIED, EventTypes.NGO_REJECTED, EventTypes.NGO_INFO_REQUESTED,
             EventTypes.NGO_SUSPENDED, EventTypes.STAFF_INVITED, EventTypes.STAFF_ACCEPTED,
             EventTypes.SUBSCRIPTION_EXPIRING, EventTypes.SUBSCRIPTION_PAYMENT_FAILED,
-            EventTypes.CAMPAIGN_SUBMITTED, EventTypes.CAMPAIGN_PUBLISHED, EventTypes.CAMPAIGN_REJECTED);
+            EventTypes.CAMPAIGN_SUBMITTED, EventTypes.CAMPAIGN_PUBLISHED, EventTypes.CAMPAIGN_REJECTED,
+            EventTypes.DONATION_PAID);
 
     private final IdempotentConsumer inbox;
     private final NotificationPlanner planner;
@@ -136,8 +137,30 @@ public class EventsListener implements EventHandler {
                 vars.put("reason", nz(e.str("reason")));
                 yield toUser("CAMPAIGN_REJECTED", ngoId, e.uuid("requestedBy"), vars, e);
             }
+            case EventTypes.DONATION_PAID -> donationPaid(e, ngoId, vars);
             default -> null;
         };
+    }
+
+    /**
+     * Thank-you to a signed-in donor (e-mail + in-app) and a "new donation" note to the NGO's administrators (in-app
+     * only, no donor name). Offline donations recorded by staff thank nobody here (receipts cover them).
+     */
+    Request donationPaid(EventEnvelope e, UUID ngoId, Map<String, Object> vars) {
+        String ngoName = e.str("ngoName") != null ? e.str("ngoName") : directory.ngoName(ngoId);
+        String campaign = e.str("campaignTitle");
+        vars.put("amount", Labels.inr(e.str("amount")));
+        vars.put("ngoName", ngoName);
+        vars.put("campaignTitle", campaign == null ? ngoName : campaign);
+        UUID donor = e.uuid("donorUserId");
+        if ("ONLINE".equals(e.str("channel")) && donor != null) {
+            List<Recipient> to = directory.user(donor).map(Recipient::of).stream().toList();
+            planner.plan(new Request("DONATION_THANKS", ngoId, to, new HashMap<>(vars), "/donor/donations", "DONATION",
+                    e.resourceId(), e.eventId(), true, true));
+        }
+        List<Recipient> admins = directory.admins(ngoId).stream().map(Recipient::of).toList();
+        String link = e.str("campaignId") == null ? "/ngo/home" : "/ngo/campaigns/" + e.str("campaignId");
+        return new Request("DONATION_RECEIVED", ngoId, admins, vars, link, "DONATION", e.resourceId(), e.eventId(), true, false);
     }
 
     private Request toUser(String template, UUID ngoId, UUID userId, Map<String, Object> vars, EventEnvelope e) {

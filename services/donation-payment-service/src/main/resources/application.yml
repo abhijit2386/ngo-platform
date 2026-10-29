@@ -18,3 +18,6 @@ ngo:
     min-amount: 10.00
     max-amount: 1000000.00
     order-expiry: PT30M
+  donors:
+    # donor-service (NGO donor CRM) is not deployed yet; enable when it is.
+    resolve-enabled: ${DONOR_RESOLVE_ENABLED:false}

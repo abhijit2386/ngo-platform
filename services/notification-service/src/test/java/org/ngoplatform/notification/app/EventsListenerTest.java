@@ -16,7 +16,8 @@ import org.ngoplatform.commons.events.IdempotentConsumer;
 
 class EventsListenerTest {
     private final Directory directory = mock(Directory.class);
-    private final EventsListener listener = new EventsListener(mock(IdempotentConsumer.class), mock(NotificationPlanner.class), directory);
+    private final NotificationPlanner planner = mock(NotificationPlanner.class);
+    private final EventsListener listener = new EventsListener(mock(IdempotentConsumer.class), planner, directory);
     private final UUID ngo = UUID.randomUUID();
     private final UUID asha = UUID.randomUUID();
 
@@ -146,13 +147,14 @@ class EventsListenerTest {
 
     @Test
     void unrelatedEventsAreIgnored() {
-        assertThat(listener.toRequest(event(EventTypes.DONATION_PAID, Map.of()))).isNull();
+        assertThat(listener.toRequest(event(EventTypes.RECEIPT_GENERATED, Map.of()))).isNull();
     }
 
     @Test
     void subscribesToExactlyTheHandledTypes() {
         assertThat(listener.eventTypes()).contains(EventTypes.STAFF_INVITED, EventTypes.NGO_VERIFIED,
-                EventTypes.SUBSCRIPTION_EXPIRING).doesNotContain(EventTypes.DONATION_PAID);
+                EventTypes.SUBSCRIPTION_EXPIRING, EventTypes.DONATION_PAID, EventTypes.CAMPAIGN_SUBMITTED)
+                .doesNotContain(EventTypes.RECEIPT_GENERATED);
         assertThat(listener.consumerName()).isEqualTo("notification.events");
     }
 
@@ -194,5 +196,34 @@ class EventsListenerTest {
         assertThat(r.templateCode()).isEqualTo("CAMPAIGN_REJECTED");
         assertThat(r.vars()).containsEntry("reason", "Add a cover photo");
         assertThat(r.recipients()).extracting(NotificationPlanner.Recipient::userId).containsExactly(sunil);
+    }
+
+    @Test
+    void onlineDonationThanksDonorAndTellsAdminsWithoutDonorName() {
+        UUID meera = UUID.randomUUID();
+        admins();
+        when(directory.user(meera)).thenReturn(Optional.of(new Directory.Person(meera, "meera@ngo.test", "Meera Iyer", "en")));
+        var r = listener.toRequest(event(EventTypes.DONATION_PAID, Map.of("amount", "1500.00", "channel", "ONLINE",
+                "donorUserId", meera.toString(), "ngoName", "Asha Seva", "campaignTitle", "School books", "campaignId", "c-1")));
+        var thanks = org.mockito.ArgumentCaptor.forClass(NotificationPlanner.Request.class);
+        verify(planner).plan(thanks.capture());
+        assertThat(thanks.getValue().templateCode()).isEqualTo("DONATION_THANKS");
+        assertThat(thanks.getValue().recipients()).extracting(NotificationPlanner.Recipient::userId).containsExactly(meera);
+        assertThat(thanks.getValue().vars()).containsEntry("amount", "₹1,500").containsEntry("campaignTitle", "School books");
+        assertThat(r.templateCode()).isEqualTo("DONATION_RECEIVED");
+        assertThat(r.recipients()).extracting(NotificationPlanner.Recipient::userId).containsExactly(asha);
+        assertThat(r.email()).isFalse();
+        assertThat(r.vars().values()).doesNotContain("Meera Iyer");
+        assertThat(r.link()).isEqualTo("/ngo/campaigns/c-1");
+    }
+
+    @Test
+    void offlineDonationOnlyTellsAdmins() {
+        admins();
+        var r = listener.toRequest(event(EventTypes.DONATION_PAID, Map.of("amount", "250.50", "channel", "CASH", "ngoName", "Asha Seva")));
+        verify(planner, never()).plan(any());
+        assertThat(r.templateCode()).isEqualTo("DONATION_RECEIVED");
+        assertThat(r.vars()).containsEntry("amount", "₹250.50").containsEntry("campaignTitle", "Asha Seva");
+        assertThat(r.link()).isEqualTo("/ngo/home");
     }
 }

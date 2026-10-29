@@ -41,8 +41,8 @@ public class DonationService {
     private static final Logger log = LoggerFactory.getLogger(DonationService.class);
 
     public record CheckoutRequest(UUID ngoId, UUID campaignId, UUID projectId, BigDecimal amount, String purpose,
-                                  String donorName, String donorEmail, String donorPhone, String donorPan, boolean wants80g,
-                                  String scenario) {}
+                                  String donorName, String donorEmail, String donorPhone, String donorPan, String donorAddress,
+                                  boolean wants80g, String scenario) {}
 
     public record CheckoutResult(UUID donationId, String status, String provider, String orderId, BigDecimal amount,
                                  Instant expiresAt, boolean mockCheckout) {}
@@ -67,23 +67,29 @@ public class DonationService {
     private final Clock clock;
     private final boolean mockEnabled;
     private final Duration orderExpiry;
+    private final org.ngoplatform.commons.security.MembershipResolver memberships;
 
     public DonationService(Repos.Donations donations, Repos.Payments payments, Repos.Events events, Repos.Settings settings,
                            Repos.Refunds refunds, Providers providers, Clients clients, Ledger ledger, EventPublisher publisher,
                            AuditLog audit, EntitlementResolver entitlements, ObjectStorage storage, ObjectMapper mapper,
                            Clock clock, @Value("${ngo.payments.mock-enabled:false}") boolean mockEnabled,
-                           @Value("${ngo.payments.order-expiry:PT30M}") Duration orderExpiry) {
+                           @Value("${ngo.payments.order-expiry:PT30M}") Duration orderExpiry,
+                           org.ngoplatform.commons.security.MembershipResolver memberships) {
         this.donations = donations; this.payments = payments; this.events = events; this.settings = settings;
         this.refunds = refunds; this.providers = providers; this.clients = clients; this.ledger = ledger;
         this.publisher = publisher; this.audit = audit; this.entitlements = entitlements; this.storage = storage;
         this.mapper = mapper; this.clock = clock; this.mockEnabled = mockEnabled; this.orderExpiry = orderExpiry;
+        this.memberships = memberships;
     }
 
     // ------------------------------------------------------------------ eligibility
 
     /** Donations are accepted only if the NGO is verified & not on compliance hold, subscription live, payments ACTIVE. */
     Records.PaymentSettings ensureAcceptingDonations(UUID ngoId) {
-        Map<String, Object> ngo = clients.ngo(ngoId);
+        return ensureAcceptingDonations(ngoId, clients.ngo(ngoId));
+    }
+
+    Records.PaymentSettings ensureAcceptingDonations(UUID ngoId, Map<String, Object> ngo) {
         if (!Boolean.TRUE.equals(ngo.get("donationEligible"))) {
             throw ApiException.rule("NGO_NOT_ACCEPTING_DONATIONS", "This organization is not accepting donations right now");
         }
@@ -106,7 +112,13 @@ public class DonationService {
 
     @Transactional
     public CheckoutResult checkout(CheckoutRequest r, UUID userId, boolean guest) {
-        Records.PaymentSettings ps = ensureAcceptingDonations(r.ngoId());
+        // Owner rule (2026-10-29): an NGO's own administrators and staff do not donate to it through the app.
+        if (userId != null && memberships.find(userId, r.ngoId()).filter(org.ngoplatform.commons.security.Membership::isActive).isPresent()) {
+            throw ApiException.forbidden("TEAM_MEMBER_DONATION", "Members of this organization's team cannot donate to it in the app");
+        }
+        Map<String, Object> ngo = clients.ngo(r.ngoId());
+        Records.PaymentSettings ps = ensureAcceptingDonations(r.ngoId(), ngo);
+        String campaignTitle = r.campaignId() == null ? null : checkCampaignLive(r.ngoId(), r.campaignId());
         if (guest && !ps.isGuestCheckoutAllowed()) throw ApiException.rule("GUEST_NOT_ALLOWED", "Please sign in to donate to this organization");
         if (!Money.isValidAmount(r.amount(), ps.getMinAmount(), ps.getMaxAmount())) {
             throw ApiException.badRequest("INVALID_AMOUNT", "Amount must be between ₹" + ps.getMinAmount().toPlainString()
@@ -115,6 +127,12 @@ public class DonationService {
         if (r.wants80g() && (r.donorPan() == null || r.donorPan().isBlank())) {
             throw ApiException.badRequest("PAN_REQUIRED_FOR_80G", "PAN is required to request an 80G receipt");
         }
+        if (r.wants80g() && (r.donorAddress() == null || r.donorAddress().strip().length() < 10)) {
+            throw ApiException.badRequest("ADDRESS_REQUIRED_FOR_80G", "Your address is required on an 80G receipt");
+        }
+        if (r.wants80g() && !eligible80g(ngo)) {
+            throw ApiException.rule("NGO_NOT_80G", "This organization cannot issue 80G receipts");
+        }
         if (guest && (r.donorEmail() == null || r.donorEmail().isBlank())) {
             throw ApiException.badRequest("EMAIL_REQUIRED", "Email is required so we can send your receipt");
         }
@@ -122,6 +140,8 @@ public class DonationService {
         Donation d = new Donation(r.ngoId(), donorId, userId, r.donorName().trim(), lower(r.donorEmail()),
                 r.wants80g() ? r.donorPan().trim().toUpperCase() : null, r.campaignId(), r.projectId(), Money.round(r.amount()),
                 r.purpose(), Donation.Channel.ONLINE, r.wants80g());
+        d.details(r.wants80g() ? r.donorAddress().strip() : null, ngo.get("displayName") == null ? null : ngo.get("displayName").toString(),
+                campaignTitle);
         d.setExpiresAt(clock.instant().plus(orderExpiry));
         donations.save(d);
         PaymentProvider provider = providers.get(ps.getProvider());
@@ -133,6 +153,28 @@ public class DonationService {
                 Map.of("amount", d.getAmount().toPlainString(), "guest", guest));
         return new CheckoutResult(d.getId(), d.getStatus().name(), provider.name(), order.orderId(), d.getAmount(),
                 d.getExpiresAt(), "MOCK".equals(provider.name()));
+    }
+
+    /** 80G receipts only while the NGO's 80G registration is verified and still valid. */
+    boolean eligible80g(Map<String, Object> ngo) {
+        Object until = ngo.get("tax80gValidUntil");
+        return Boolean.TRUE.equals(ngo.get("tax80gVerified")) && until != null
+                && !LocalDate.parse(until.toString()).isBefore(LocalDate.now(clock.withZone(java.time.ZoneId.of("Asia/Kolkata"))));
+    }
+
+    /** Donations to a campaign are accepted only while it is live and within its dates (India calendar). */
+    String checkCampaignLive(UUID ngoId, UUID campaignId) {
+        Map<String, Object> c = clients.campaign(campaignId);
+        if (!ngoId.toString().equals(String.valueOf(c.get("ngoId")))) throw ApiException.notFound("Campaign");
+        LocalDate today = LocalDate.now(clock.withZone(java.time.ZoneId.of("Asia/Kolkata")));
+        if (!"PUBLISHED".equals(c.get("status"))) throw ApiException.rule("CAMPAIGN_NOT_LIVE", "This campaign is not accepting donations");
+        if (c.get("startDate") != null && today.isBefore(LocalDate.parse(c.get("startDate").toString()))) {
+            throw ApiException.rule("CAMPAIGN_NOT_STARTED", "This campaign has not started yet");
+        }
+        if (c.get("endDate") != null && today.isAfter(LocalDate.parse(c.get("endDate").toString()))) {
+            throw ApiException.rule("CAMPAIGN_ENDED", "This campaign has ended");
+        }
+        return c.get("title") == null ? null : c.get("title").toString();
     }
 
     // ------------------------------------------------------------------ provider results
@@ -197,13 +239,17 @@ public class DonationService {
     private void publishPaid(Donation d) {
         Map<String, Object> m = new HashMap<>();
         m.put("donationId", d.getId().toString());
-        m.put("donorId", d.getDonorId().toString());
+        if (d.getDonorId() != null) m.put("donorId", d.getDonorId().toString());
         m.put("amount", d.getAmount().toPlainString());
         m.put("paidAt", d.getPaidAt().toString());
         m.put("channel", d.getChannel().name());
         if (d.getCampaignId() != null) m.put("campaignId", d.getCampaignId().toString());
         if (d.getProjectId() != null) m.put("projectId", d.getProjectId().toString());
         if (d.getDonorUserId() != null) m.put("donorUserId", d.getDonorUserId().toString());
+        // Display names only (no personal data): used for thank-you / new-donation messages.
+        if (d.getNgoName() != null) m.put("ngoName", d.getNgoName());
+        if (d.getCampaignTitle() != null) m.put("campaignTitle", d.getCampaignTitle());
+        m.put("wants80g", d.isWants80g());
         publisher.publish(EventTypes.DONATION_PAID, d.getNgoId(), d.getId(), m);
     }
 

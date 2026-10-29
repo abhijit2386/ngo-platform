@@ -30,11 +30,14 @@ public class Donation {
 
     @Id private UUID id;
     @Column(name = "ngo_id", nullable = false) private UUID ngoId;
-    @Column(name = "donor_id", nullable = false) private UUID donorId;
+    @Column(name = "donor_id") private UUID donorId;
     @Column(name = "donor_user_id") private UUID donorUserId;
     @Column(name = "donor_name", nullable = false) private String donorName;
     @Column(name = "donor_email") private String donorEmail;
     @Column(name = "donor_pan") private String donorPan;
+    @Column(name = "donor_address") private String donorAddress;
+    @Column(name = "ngo_name") private String ngoName;
+    @Column(name = "campaign_title") private String campaignTitle;
     @Column(name = "campaign_id") private UUID campaignId;
     @Column(name = "project_id") private UUID projectId;
     @Column(nullable = false) private BigDecimal amount;
@@ -86,6 +89,11 @@ public class Donation {
         this.offlineReference = reference; this.recordedBy = by; markPaid(receivedAt);
     }
 
+    /** 80G address and display snapshots taken at checkout. */
+    public void details(String donorAddress, String ngoName, String campaignTitle) {
+        this.donorAddress = donorAddress; this.ngoName = ngoName; this.campaignTitle = campaignTitle;
+    }
+
     public void setEvidenceKey(String key) { this.evidenceKey = key; touch(); }
     public void setExpiresAt(Instant at) { this.expiresAt = at; }
     public void voidFor(UUID correctionId) { this.voided = true; touch(); }
@@ -102,6 +110,9 @@ public class Donation {
     public String getDonorEmail() { return donorEmail; }
     public String getDonorPan() { return donorPan; }
     public UUID getCampaignId() { return campaignId; }
+    public String getDonorAddress() { return donorAddress; }
+    public String getNgoName() { return ngoName; }
+    public String getCampaignTitle() { return campaignTitle; }
     public UUID getProjectId() { return projectId; }
     public BigDecimal getAmount() { return amount; }
     public BigDecimal getRefundedAmount() { return refundedAmount; }

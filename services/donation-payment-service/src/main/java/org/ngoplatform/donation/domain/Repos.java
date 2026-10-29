@@ -25,6 +25,11 @@ public final class Repos {
 
         Page<Donation> findByDonorUserIdOrderByCreatedAtDesc(UUID userId, Pageable p);
 
+        /** History shows attempts that reached the provider; abandoned checkouts (CREATED/CANCELLED) are hidden. */
+        Page<Donation> findByDonorUserIdAndStatusNotInOrderByCreatedAtDesc(UUID userId, List<Donation.Status> hidden, Pageable p);
+
+        Optional<Donation> findFirstByDonorUserIdAndWants80gTrueOrderByCreatedAtDesc(UUID userId);
+
         List<Donation> findByStatusInAndCreatedAtBefore(List<Donation.Status> statuses, Instant before);
 
         @Query(value = "select coalesce(sum(amount - refunded_amount), 0) from donations where ngo_id = :ngoId and voided = false "

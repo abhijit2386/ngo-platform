@@ -465,9 +465,17 @@ public class CampaignController {
                 "activeProjects", projects.countByNgoIdAndStatusIn(ngoId, Set.of(Project.Status.PLANNED, Project.Status.ACTIVE, Project.Status.ON_HOLD)));
     }
 
+    /** Checkout facts for donation-payment-service (live check + display title). */
     @GetMapping("/internal/v1/campaigns/{id}")
     public Map<String, Object> internalCampaign(@PathVariable UUID id) {
         Campaign c = campaigns.findById(id).orElseThrow(() -> ApiException.notFound("Campaign"));
-        return Map.of("id", c.getId(), "ngoId", c.getNgoId(), "title", c.getTitle(), "status", c.getStatus().name());
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", c.getId());
+        m.put("ngoId", c.getNgoId());
+        m.put("title", c.getTitle());
+        m.put("status", c.getStatus().name());
+        m.put("startDate", c.getStartDate().toString());
+        if (c.getEndDate() != null) m.put("endDate", c.getEndDate().toString());
+        return m;
     }
 }

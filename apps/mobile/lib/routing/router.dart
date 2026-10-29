@@ -8,6 +8,7 @@ import '../core/session/session.dart';
 import '../features/admin/admin_pages.dart';
 import '../features/campaigns/campaign_pages.dart';
 import '../features/auth/login_page.dart';
+import '../features/donations/donation_pages.dart';
 import '../features/donor/donor_pages.dart';
 import '../features/ngo/home_page.dart';
 import '../features/notifications/notification_pages.dart';
@@ -112,6 +113,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/ngo/subscription', builder: (_, __) => const SubscriptionPage()),
       GoRoute(path: '/ngo/subscription/plans', builder: (_, __) => const PlansPage()),
       GoRoute(path: '/ngo/subscription/billing', builder: (_, __) => const BillingHistoryPage()),
+      GoRoute(path: '/ngo/payments', builder: (_, __) => const PaymentSettingsPage()),
       GoRoute(path: '/ngo/staff', builder: (_, __) => const StaffPage()),
       GoRoute(path: '/ngo/profile', builder: (_, __) => const NgoProfilePage()),
       StatefulShellRoute.indexedStack(

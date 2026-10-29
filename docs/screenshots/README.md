@@ -51,3 +51,14 @@ Android emulator (Pixel 7, API 35) running against the local stack with the fict
 ## Subscription
 
 <img src="subscription-01-plans.png" alt="subscription-01-plans" width="270">
+
+## Donations (test payments)
+
+Donor Meera gives ₹1,000 to a live campaign; with 80G on she adds PAN and address. Test mode stands in for the payment provider.
+
+<img src="donations-01-campaign-page.png" alt="donations-01-campaign-page" width="270">
+<img src="donations-02-donate-sheet.png" alt="donations-02-donate-sheet" width="270">
+<img src="donations-03-80g-details.png" alt="donations-03-80g-details" width="270">
+<img src="donations-04-test-payment.png" alt="donations-04-test-payment" width="270">
+<img src="donations-05-thank-you.png" alt="donations-05-thank-you" width="270">
+<img src="donations-06-my-donations.png" alt="donations-06-my-donations" width="270">

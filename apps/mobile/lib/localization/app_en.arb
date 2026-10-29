@@ -690,5 +690,91 @@
         "type": "String"
       }
     }
-  }
+  },
+  "donateTo": "Donate to",
+  "want80g": "I want an 80G tax receipt",
+  "want80gHint": "Saves income tax under section 80G. Needs your PAN and address.",
+  "panNumber": "PAN",
+  "addressFor80g": "Address (printed on the receipt)",
+  "receiptTo": "Receipt to {name} · {email}",
+  "@receiptTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "donateAmount": "Donate {amount}",
+  "@donateAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paysNgoDirectly": "Your money goes directly to the NGO's own account.",
+  "testPaymentTitle": "Test payment",
+  "testPaymentNote": "Test mode: no real money moves. In the live app, the payment provider's secure screen (UPI, card, net banking) appears here.",
+  "testPaySuccess": "Pay {amount}",
+  "@testPaySuccess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "testPayFailure": "Simulate a failed payment",
+  "testPayCancel": "Cancel payment",
+  "thankYouTitle": "Thank you!",
+  "thankYouBody": "Your donation of {amount} to \"{title}\" was received. Your receipt will follow by e-mail.",
+  "@thankYouBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentFailedTitle": "Payment didn't go through",
+  "paymentFailedBody": "No money was taken. You can try again.",
+  "paymentPendingTitle": "Waiting for confirmation",
+  "paymentPendingBody": "Your bank has not confirmed the payment yet. We'll update it automatically; you can also check again.",
+  "checkAgain": "Check again",
+  "tryAgain": "Try again",
+  "myDonations": "My donations",
+  "noDonationsYetDonor": "You haven't donated yet",
+  "noDonationsYetDonorHint": "Find a verified NGO or a live campaign you care about.",
+  "totalGiven": "{amount} given in {count, plural, =1{1 donation} other{{count} donations}}",
+  "@totalGiven": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "donationStatusLabel": "{status, select, PAID{Paid} FAILED{Failed} PENDING{Pending} AUTHORIZED{Processing} REFUNDED{Refunded} PARTIALLY_REFUNDED{Partly refunded} CANCELLED{Cancelled} other{{status}}}",
+  "@donationStatusLabel": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "onlinePayments": "Online donations",
+  "paymentsOn": "Online donations are on",
+  "paymentsOff": "Online donations are off",
+  "paymentsTestMode": "Test mode: no real money moves",
+  "paymentsHowItWorks": "Donations go straight from the donor to your organization's own payment account. Seva Setu never holds the money. To go live, connect your organization's Razorpay account (KYC is done by Razorpay in your organization's name).",
+  "connectRazorpay": "Connect Razorpay account",
+  "razorpayComingSoon": "Razorpay connection arrives once the platform's Razorpay partner account is approved.",
+  "turnOnTestPayments": "Turn on test payments",
+  "paymentsAdminOnly": "Only an administrator can change payment settings."
 }

@@ -36,3 +36,8 @@ End-to-end scripts (run after the seed): `test-profile.ps1`, `test-phone.ps1`, `
 Campaign rule (owner, 2026-10-29): any team member drafts and sends for approval; only admins approve/publish,
 request changes, edit a live campaign, close or archive it. Test donations (`CAMPAIGN_TEST_DONATIONS=true`, set by
 start-local) stand in for online payments until donation-payment-service exists.
+
+## Online donations (`seed-donations.ps1`, idempotent)
+Asha Seva gets a fictional 80G registration (valid to 31 Mar 2031) and online payments with the TEST provider
+(no money moves; the app shows a "Test payment" screen). Donors Meera, Kiran and Anil can donate; the NGO's own team
+(Asha, Ravi, Sunil, Priya) cannot (owner rule). `test-donations.ps1` uses its own "E2E" campaign and cleans up.

@@ -14,6 +14,7 @@ import '../../design_system/components.dart';
 import '../../design_system/tokens.dart';
 import '../../localization/app_localizations.dart';
 import '../registration/registration_pages.dart' show causeLabel;
+import '../donations/donation_pages.dart' show startDonation;
 import 'campaign_api.dart';
 
 String _day(Object? iso) {
@@ -1229,7 +1230,9 @@ class PublicCampaignPage extends ConsumerWidget {
             else
               FilledButton.icon(
                 // Online checkout arrives with donation-payment-service.
-                onPressed: phase == 'LIVE' ? () => showSnack(context, t.donateComingSoon) : null,
+                onPressed: phase == 'LIVE'
+                    ? () => startDonation(context, ngoId: '${c['ngoId']}', campaignId: '${c['id']}', title: '${c['title']}')
+                    : null,
                 icon: const Icon(Icons.volunteer_activism),
                 label: Text(phase == 'UPCOMING' ? t.startsOn(_day(c['startDate'])) : t.donate),
               ),

@@ -19,7 +19,7 @@ _Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (ses
 | ngo-registry-service | wizard, documents (S3), verification workflow, suspension, change requests, public search | yes (before refactor) | none | |
 | subscription-service | catalog, entitlements, trial, quotes/checkout, proration, blocks, downgrade impact, lifecycle, reminders, invoices PDF, mock billing | NOT YET | none | |
 | donor-service | donors, dedupe/merge, import/export, segments, follows, privacy | NOT YET | none | |
-| donation-payment-service | checkout, mock provider (12 scenarios), webhooks, state machine, ledger, refunds (maker-checker), reconciliation, offline/corrections | NOT YET | none | controllers done |
+| donation-payment-service | online checkout with test provider, webhooks, ledger, team/80G/campaign rules (2026-10-29); refunds, reconciliation, offline/corrections drafted only | yes (2026-10-29) | 5 unit; e2e test-donations 34/34 | Razorpay adapter not built |
 | receipt-service | numbering per FY, PDF standard/custom, designers basic/advanced, approvals, versions, retries, signed guest links | NOT YET | none | |
 | campaign-project-service | campaigns: approval workflow, covers, public discovery, test donations (2026-10-29); projects/milestones/budgets drafted only | yes (2026-10-29) | 15 unit; e2e test-campaigns 58/58 | projects not reviewed/tested yet |
 | ngo-operations-service | **not started** (volunteers, beneficiaries, expenses/finance) | | | |
@@ -155,6 +155,29 @@ dataset unchanged (2 admins / 2 staff / 3 donors).
 - Tests: campaign unit 19 (SharePageControllerTest 4 new), e2e test-campaigns 76/76 (photos, share page, XSS).
 - Later: app links so /c/{id} opens the app (needs the domain + assetlinks/apple-app-site-association), referral tag
   on shared links, Hindi/Marathi share page.
+
+### Session 2026-10-29 (night): online donations, part 1 (owner decision: money goes straight to each NGO's account)
+- donation-payment-service draft aligned and compiled for the first time: V2 (donor_id optional until donor-service,
+  80G address, NGO/campaign display snapshots, 80G checks); donor-service call behind `ngo.donors.resolve-enabled`.
+- Checkout rules: NGO verified + subscription operational + payments ACTIVE; campaign must be live and within dates
+  (campaign internal API now returns dates); NGO's own team members refused (TEAM_MEMBER_DONATION, owner rule);
+  amount Rs 10..10 lakh; idempotency key per checkout; 80G needs PAN + address and a verified, unexpired 80G
+  registration. Paid -> ledger entry + donation.donation.paid -> campaign raised amount + notifications.
+- Test payment provider (MOCK) stands in for Razorpay: app shows a clearly-labelled "Test payment" screen
+  (pay / fail / cancel); signed webhooks, duplicate-webhook dedupe, late events cannot undo PAID.
+- NGO side: More > Online donations (status, "Turn on test payments"; "Connect Razorpay" placeholder until the
+  platform's Razorpay partner account exists). Seed: `scripts/seed-donations.ps1` (80G test number + test payments).
+- Notifications (notification V4): DONATION_THANKS to the donor (e-mail + in-app), DONATION_RECEIVED to NGO admins
+  (in-app, no donor name). Event routes: donation.paid -> campaign, notification only (HTTP relay stops at the first
+  unreachable subscriber; add receipt/donor when those services ship).
+- App: Donate sheet (amount chips, 80G switch with PAN/address prefilled from the donor's last 80G gift), test payment
+  screen, result (thank you / failed, try again / pending, check again), My donations with total given.
+- Tests: donation unit 5, notification unit 64; e2e `test-donations.ps1` 34/34, test-campaigns 77/77,
+  test-notifications 26/26 (template count check now derived).
+- Found: Asha's saved language had become Marathi (cause not identified; seed-dataset restores it). The PC
+  command runner hung when a test restarted Mailpit with Start-Process; the test now starts it detached (WMI).
+- Next: 80G/standard receipts (receipt-service), offline donations (cash/cheque) in the NGO app, NGO donations list,
+  Razorpay adapter (needs the platform's Razorpay partner account), guest donations from the share page.
 
 ## Next steps (in order) - agreed with the owner 2026-10-29
 Done since the original plan: first emulator runs, core services built and UI-tested (phase 1), notification-service.

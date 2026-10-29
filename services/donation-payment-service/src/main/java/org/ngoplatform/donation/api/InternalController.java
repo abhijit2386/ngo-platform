@@ -25,7 +25,7 @@ public class InternalController {
         Map<String, Object> m = new HashMap<>();
         m.put("donationId", d.getId().toString());
         m.put("ngoId", d.getNgoId().toString());
-        m.put("donorId", d.getDonorId().toString());
+        if (d.getDonorId() != null) m.put("donorId", d.getDonorId().toString());
         m.put("donorName", d.getDonorName());
         if (d.getDonorEmail() != null) m.put("donorEmail", d.getDonorEmail());
         if (d.getDonorPan() != null) m.put("donorPan", d.getDonorPan());
