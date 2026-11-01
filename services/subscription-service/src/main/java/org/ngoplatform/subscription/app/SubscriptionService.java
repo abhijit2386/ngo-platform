@@ -400,7 +400,8 @@ public class SubscriptionService {
         Long templates = usage.customTemplates(ngoId);
         List<String> lost = new ArrayList<>();
         for (String k : List.of(Entitlements.RECEIPT_BASIC_DESIGNER, Entitlements.RECEIPT_ADVANCED_DESIGNER,
-                Entitlements.PRIORITY_SUPPORT)) {
+                Entitlements.PRIORITY_SUPPORT, Entitlements.CSR_COMPLIANCE_PACK, Entitlements.CSR_UTILISATION_CERT,
+                Entitlements.CSR_PROPOSALS)) {
             if ("true".equals(now.get(k)) && !"true".equals(next.get(k))) lost.add(k);
         }
         for (String k : List.of(Entitlements.REPORTING_LEVEL, Entitlements.VOLUNTEER_FEATURE_LEVEL,

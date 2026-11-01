@@ -25,11 +25,11 @@ public final class DocumentRules {
     private DocumentRules() {}
 
     public static final List<String> CATEGORIES = List.of("LEGAL_REGISTRATION", "TAX_COMPLIANCE", "FINANCE", "CAMPAIGN",
-            "PROJECT", "AGREEMENT", "MEETING", "HR", "PHOTOS_REPORTS", "RECEIPT", "OTHER");
+            "PROJECT", "AGREEMENT", "MEETING", "HR", "PHOTOS_REPORTS", "RECEIPT", "CSR", "OTHER");
     /** Confidential by default: shared only with administrators unless the uploader chooses the team. */
     public static final Set<String> CONFIDENTIAL = Set.of("LEGAL_REGISTRATION", "HR", "MEETING", "AGREEMENT");
     /** Statutory records: kept at least {@link #RETENTION_YEARS} years from the document date, even when deleted. */
-    public static final Set<String> RETAINED = Set.of("FINANCE", "TAX_COMPLIANCE", "RECEIPT");
+    public static final Set<String> RETAINED = Set.of("FINANCE", "TAX_COMPLIANCE", "RECEIPT", "CSR");
     public static final int RETENTION_YEARS = 8;
     public static final int BIN_DAYS = 30;
     public static final Set<String> VISIBILITIES = Set.of("TEAM", "RESTRICTED");

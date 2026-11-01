@@ -20,7 +20,7 @@ import '../../localization/app_localizations.dart';
 /// Administrators see everything; team members see their own uploads and documents shared with the team.
 const documentCategories = [
   'LEGAL_REGISTRATION', 'TAX_COMPLIANCE', 'FINANCE', 'CAMPAIGN', 'PROJECT', 'AGREEMENT', 'MEETING', 'HR',
-  'PHOTOS_REPORTS', 'RECEIPT', 'OTHER',
+  'PHOTOS_REPORTS', 'RECEIPT', 'CSR', 'OTHER',
 ];
 
 /// Categories that are only for the uploader and administrators unless shared on purpose.
@@ -39,6 +39,7 @@ String categoryLabel(L10n t, String? c) => switch (c) {
       'HR' => t.docCatHr,
       'PHOTOS_REPORTS' => t.docCatPhotos,
       'RECEIPT' => t.docCatReceipt,
+      'CSR' => t.docCatCsr,
       _ => t.docCatOther,
     };
 
@@ -53,6 +54,7 @@ IconData categoryIcon(String? c) => switch (c) {
       'HR' => Icons.badge_outlined,
       'PHOTOS_REPORTS' => Icons.photo_library_outlined,
       'RECEIPT' => Icons.receipt_long_outlined,
+      'CSR' => Icons.handshake_outlined,
       _ => Icons.folder_outlined,
     };
 
@@ -67,6 +69,7 @@ Color categoryColor(String? c) => switch (c) {
       'HR' => const Color(0xFFBE185D),
       'PHOTOS_REPORTS' => const Color(0xFF15803D),
       'RECEIPT' => const Color(0xFF0369A1),
+      'CSR' => const Color(0xFF0F766E),
       _ => const Color(0xFF5B6478),
     };
 

@@ -1838,5 +1838,224 @@
       }
     }
   },
-  "rcdFooterMark": "Yogdaan credit line"
+  "rcdFooterMark": "Yogdaan credit line",
+  "csrTitle": "CSR documents",
+  "csrIntroTitle": "Share your papers with CSR teams",
+  "csrIntro": "Pick documents from your vault and send the company one secure link. Nothing is copied: the link shows exactly the files you shared, you see when they are opened, and you can stop the link at any time.",
+  "csrEnterpriseOnly": "Part of the Enterprise plan",
+  "csrEnterpriseHint": "Upgrade to Enterprise to create and share CSR packs. Packs you already shared stay visible here.",
+  "csrSeePlans": "See plans",
+  "csrPacks": "Packs",
+  "csrNoPacks": "No packs yet. Tap \"New CSR pack\" to prepare one for a company.",
+  "csrNewPack": "New CSR pack",
+  "csrNewPackHint": "We fill it from your vault: registration, PAN, 12A, 80G, CSR-1, audited accounts and more. You can change it before sharing.",
+  "csrEditPack": "Edit details",
+  "csrCompany": "Company",
+  "csrCompanyHint": "e.g. Tata Trusts CSR",
+  "csrCompanyRequired": "Enter the company's name",
+  "csrCompanyEmail": "Company e-mail",
+  "csrOptional": "Optional, for your records",
+  "csrPackName": "Pack name (the company sees it)",
+  "csrPackNameRequired": "Give the pack a name",
+  "csrNote": "Note to the company",
+  "csrNoteHint": "Shown at the top of their page, in the language you type",
+  "csrLinkOpenFor": "Link stays open for",
+  "csrDays": "{days, plural, =1{1 day} other{{days} days}}",
+  "@csrDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "csrCreateFromVault": "Create from my vault",
+  "csrPack": "CSR pack",
+  "csrDocCount": "{count, plural, =1{1 document} other{{count} documents}}",
+  "@csrDocCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "csrOpenedTimes": "{count, plural, =0{not opened yet} =1{opened once} other{opened {count} times}}",
+  "@csrOpenedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "csrOpenUntil": "Link open until {date}",
+  "@csrOpenUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "csrExpiredOn": "Link expired on {date}",
+  "@csrExpiredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "csrStoppedOn": "Link stopped on {date}",
+  "@csrStoppedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "csrLinkWillBeOpen": "After sharing, the link stays open for {period}",
+  "@csrLinkWillBeOpen": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "csrStatusDraft": "Draft",
+  "csrStatusShared": "Shared",
+  "csrStatusExpired": "Expired",
+  "csrStatusRevoked": "Stopped",
+  "csrReady": "Ready to share",
+  "csrAlmostReady": "Almost ready: please check",
+  "csrNotReady": "Not ready yet",
+  "csrIssueMissing": "{kind} is missing",
+  "@csrIssueMissing": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "csrIssueExpiresSoon": "Expires soon: {what}",
+  "@csrIssueExpiresSoon": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "csrIssueExpired": "Expired, replace it: {what}",
+  "@csrIssueExpired": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "csrIssueRemoved": "Deleted from the vault: {what}",
+  "@csrIssueRemoved": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "csrIssueEmpty": "Add at least one document",
+  "csrDocuments": "Documents",
+  "csrAddDocument": "Add document",
+  "csrNoDocuments": "No documents in this pack yet.",
+  "csrValidTill": "valid till {date}",
+  "@csrValidTill": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "csrDocRemoved": "Deleted from the vault",
+  "csrDocExpired": "Expired",
+  "csrDocExpiresSoon": "Expires within 30 days",
+  "csrFingerprint": "Fingerprint {code}",
+  "@csrFingerprint": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "csrRemove": "Remove from pack",
+  "csrLinkForCompany": "Link for the company",
+  "csrLinkClosed": "This link no longer opens",
+  "csrOpened": "times opened",
+  "csrDownloads": "downloads",
+  "csrLastVisit": "Last visit: {date}",
+  "@csrLastVisit": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "csrShareLink": "Share link",
+  "csrCopy": "Copy",
+  "csrLinkCopied": "Link copied",
+  "csrShareText": "Dear {company} team, our compliance documents are here: {url}",
+  "@csrShareText": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "csrVisits": "Visits",
+  "csrNoVisits": "The company has not opened the link yet.",
+  "csrVisitOpened": "Opened the page",
+  "csrVisitZip": "Downloaded everything (ZIP)",
+  "csrVisitDownloaded": "Downloaded {title}",
+  "@csrVisitDownloaded": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "csrShareWithCompany": "Share with the company",
+  "csrShare": "Share",
+  "csrShareConfirmTitle": "Share this pack?",
+  "csrShareConfirm": "{company} will get a link to these documents for {period}. The files are frozen as they are now.",
+  "@csrShareConfirm": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "csrShareWarnings": "Please note:",
+  "csrFixFirst": "Fix the items in red first",
+  "csrStopLink": "Stop link",
+  "csrStopConfirm": "The company will no longer be able to open or download these documents.",
+  "csrMakeCopy": "Make a copy to share again",
+  "csrWhatIsIt": "What is this document?",
+  "csrSuggested": "Suggested from your vault",
+  "csrNoSuggestion": "Nothing matching in the vault. Search below, or upload it in Documents first.",
+  "csrSearchVault": "Search the vault",
+  "csrSearchHint": "Title or tag",
+  "csrNothingFound": "No document found",
+  "csrUploadHint": "Missing a paper? Upload it in Documents (category CSR), then add it here.",
+  "csrKindRegistration": "Registration certificate / trust deed",
+  "csrKindPan": "PAN of the organisation",
+  "csrKind12a": "12A registration",
+  "csrKind80g": "80G registration",
+  "csrKindCsr1": "CSR-1 registration",
+  "csrKindAudited": "Audited accounts",
+  "csrKindAnnual": "Annual report",
+  "csrKindBoard": "Board / trustee list",
+  "csrKindFcra": "FCRA registration",
+  "csrKindUtilisation": "Utilisation certificate",
+  "csrKindProposal": "Project proposal",
+  "csrKindOther": "Other document",
+  "docCatCsr": "CSR"
 }

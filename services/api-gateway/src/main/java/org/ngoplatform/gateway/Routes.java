@@ -50,7 +50,7 @@ public class Routes {
                         .uri(campaign))
                 .route("document", r -> r.order(1).path("/api/v1/ngos/*/library", "/api/v1/ngos/*/library/**",
                         "/api/v1/ngos/*/meetings", "/api/v1/ngos/*/meetings/**", "/api/v1/ngos/*/action-items", "/api/v1/ngos/*/action-items/**",
-                        "/api/v1/public/files/**").uri(document))
+                        "/api/v1/ngos/*/csr", "/api/v1/ngos/*/csr/**", "/api/v1/public/files/**", "/api/v1/public/csr/**").uri(document))
                 .route("operations", r -> r.order(1).path("/api/v1/ngos/*/volunteers/**", "/api/v1/ngos/*/volunteers",
                         "/api/v1/ngos/*/beneficiaries/**", "/api/v1/ngos/*/beneficiaries", "/api/v1/ngos/*/finance/**",
                         "/api/v1/ngos/*/activities/**", "/api/v1/me/volunteering/**").uri(operations))

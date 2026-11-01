@@ -14,6 +14,10 @@ public record Entitlements(UUID ngoId, String plan, String subscriptionStatus, M
     public static final String PROJECT_ACTIVE_MAX = "PROJECT_ACTIVE_MAX";
     public static final String RECEIPT_BASIC_DESIGNER = "RECEIPT_BASIC_DESIGNER";
     public static final String RECEIPT_ADVANCED_DESIGNER = "RECEIPT_ADVANCED_DESIGNER";
+    /** CSR features (owner decision 2026-11-02: Enterprise for now; each one can move to another plan by data alone). */
+    public static final String CSR_COMPLIANCE_PACK = "CSR_COMPLIANCE_PACK";
+    public static final String CSR_UTILISATION_CERT = "CSR_UTILISATION_CERT";
+    public static final String CSR_PROPOSALS = "CSR_PROPOSALS";
     public static final String REPORTING_LEVEL = "REPORTING_LEVEL";
     public static final String VOLUNTEER_FEATURE_LEVEL = "VOLUNTEER_FEATURE_LEVEL";
     public static final String DONOR_SEGMENTATION_LEVEL = "DONOR_SEGMENTATION_LEVEL";

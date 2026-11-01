@@ -58,7 +58,14 @@ public class PdfRenderer {
     static final float IMAGE_SCALE = 4f; // pixels per point for shaped text (288 dpi)
 
     private static final Font SHAPING_FONT = loadAwtFont("/fonts/FreeSans.ttf");
-    private static final Object SHAPING_LOCK = new Object();
+    /**
+     * All native imaging work of this service (PDF rendering, Java2D fonts and drawing, ImageIO codecs, colour
+     * management) runs one job at a time. The receipt worker and web requests used to render together, and the JVM
+     * twice died in native code with an access violation and no crash report (2026-11-01/02). A receipt takes a
+     * fraction of a second, so serialising costs nothing at our volumes. Reentrant (synchronized).
+     */
+    public static final Object NATIVE_LOCK = new Object();
+    private static final Object SHAPING_LOCK = NATIVE_LOCK;
 
     private static Font loadAwtFont(String path) {
         try (InputStream in = PdfRenderer.class.getResourceAsStream(path)) {
@@ -216,6 +223,10 @@ public class PdfRenderer {
 
     /** A5 landscape: two receipts fit on one A4 sheet. */
     public byte[] standard(Data d) {
+        synchronized (NATIVE_LOCK) { return renderStandard(d); }
+    }
+
+    private byte[] renderStandard(Data d) {
         try (PDDocument doc = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PDPage page = new PDPage(new PDRectangle(PDRectangle.A5.getHeight(), PDRectangle.A5.getWidth()));
             doc.addPage(page);
@@ -348,6 +359,10 @@ public class PdfRenderer {
      * simply not printed.
      */
     public byte[] custom(TemplateDefinition t, byte[] background, Data d, Map<String, String> facts) {
+        synchronized (NATIVE_LOCK) { return renderCustom(t, background, d, facts); }
+    }
+
+    private byte[] renderCustom(TemplateDefinition t, byte[] background, Data d, Map<String, String> facts) {
         try (PDDocument doc = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             float pw = t.page().width(), ph = t.page().height();
             PDPage page = new PDPage(new PDRectangle(pw, ph));

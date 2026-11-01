@@ -73,3 +73,12 @@ Priya (finance) can record but not approve. `test-expenses.ps1` uses its own "E2
 | Signatories | Asha Patil (Chairman), Ravi Kulkarni (Secretary), both with signature images |
 | Receipts | issued automatically for every paid donation (earlier seed donations by backfill) |
 | Designer | Asha Seva is on the Professional trial: Basic designer available (test-receipts creates and archives an E2E design) |
+
+## CSR papers (`seed-csr.ps1`, idempotent, after `seed-documents.ps1`)
+
+| What | Value |
+|---|---|
+| Vault papers | PAN card - Asha Seva Foundation; 80G approval order and 12A registration order (valid till 31 Mar 2031); Trust registration certificate (admins only); CSR-1 registration (MCA); Board of trustees 2026; Annual report 2025-26. From seed-documents: Audit report FY 2025-26, FCRA renewal acknowledgement (expiring) |
+| Plan | CSR packs are Enterprise. test-csr switches the Professional trial to Enterprise and back (entitlement cache: 30 s) |
+| Demo pack | "Compliance documents FY 2026-27" for Sahyadri Industries CSR Foundation (fictional), shared from the app on 2 Nov 2026 |
+| E2E | test-csr creates "E2E ..." packs and "E2E CSR ..." vault files and removes them at the start and end |

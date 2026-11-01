@@ -25,7 +25,7 @@ _Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (ses
 | ngo-operations-service | **not started** (volunteers, beneficiaries, expenses/finance) | | | |
 | helpdesk-service | **not started** | | | |
 | notification-service | done: templates en/hi/mr (10 events x e-mail + in-app), event consumer, in-app inbox, e-mail via SMTP (Mailpit), retries with backoff + dead letter + replay, preferences/opt-outs, history, admin template edit/preview | yes (2026-10-29) | 58 unit tests pass; API e2e `scripts/test-notifications.ps1` | push/SMS/WhatsApp adapters not built (interface ready); receipt e-mails wait for receipt-service |
-| document-service | document vault (one shared private bucket, `ngos/<id>/` prefixes, per-NGO quota, signed 5-minute links, recycle bin, activity log, files of other modules registered by events + backfill) and meetings (AGM/EGM/board/committee/staff, attendance, minutes, numbered resolutions, action items, minutes PDF) (2026-11-01) | yes (2026-11-01) | 16 unit; e2e test-documents 57/57 | expiry reminders, versions, CA read-only access = phase 3 |
+| document-service | CSR compliance pack (Enterprise, 2026-11-02: vault papers shared through one expiring link, frozen files, view log); document vault (one shared private bucket, `ngos/<id>/` prefixes, per-NGO quota, signed 5-minute links, recycle bin, activity log, files of other modules registered by events + backfill) and meetings (AGM/EGM/board/committee/staff, attendance, minutes, numbered resolutions, action items, minutes PDF) (2026-11-01) | yes (2026-11-01) | 16 unit; e2e test-documents 57/57 | expiry reminders, versions, CA read-only access = phase 3 |
 | reporting-service | **not started** (dashboard projections) | | | |
 
 ## Mobile app
@@ -260,6 +260,28 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
 - Next (agreed phases): phase 2 donor receipts (PDF + QR) in the vault for donors; phase 3 expiry reminders,
   document versions, CA read-only access.
 
+### Session 2026-11-02: CSR 1 - compliance pack (document-service, Enterprise)
+Owner decisions: CSR is an Enterprise feature for now; each CSR component has its own entitlement
+(CSR_COMPLIANCE_PACK, CSR_UTILISATION_CERT, CSR_PROPOSALS; subscription V3) so it can later move to another plan or
+become an add-on by data alone. Documents live once in the NGO's vault (object storage) and are linked, never copied.
+- document-service V4: vault category CSR (retained like finance records); csr_packs, csr_pack_items (frozen after
+  sharing: storage key + SHA-256, DB trigger), csr_pack_views (append-only, no IP stored).
+- Pack: company, note, link validity 1-90 days; created as a draft filled automatically from the vault (CsrRules
+  recognises registration / PAN / 12A / 80G / CSR-1 / audited accounts / annual report / board / FCRA / UC /
+  proposal from titles and tags); add/remove documents; readiness: errors block (deleted or expired paper, empty
+  pack), warnings need confirmation (required paper missing, expiring within 30 days).
+- Share: freezes each file, opens /api/v1/public/csr/<22-char random code> (no login, noindex, own CSP): NGO name,
+  note, documents with type/size/validity/fingerprint, download per file and "Download all" ZIP built on the fly
+  (nothing stored); 410 Gone after expiry or "Stop link". Every open/download is logged for the NGO. Vault edits
+  after sharing do not change what was sent; the purge job keeps files a live link points to. Copy = new draft.
+- Admins only; writing needs the Enterprise flag; reading and stopping links still work after a downgrade.
+  Gateway routes /api/v1/ngos/*/csr/** and /api/v1/public/csr/** (sensitive rate limit).
+- App: More > CSR documents (admins): packs list with Enterprise card, new pack sheet, pack page (readiness chips,
+  issues, documents with kind/validity/fingerprint, vault picker with suggestions + search, share confirmation with
+  warnings, link card with share/copy and open/download counts, visits, stop link, copy). ~95 strings en/hi/mr.
+- Tests: CsrRulesTest (5); test-csr.ps1 (39 checks); seed-csr.ps1. Regressions: documents 57, receipts 68 (x3).
+- Next: CSR 2 utilisation certificate (campaign accounts -> PDF in the vault, NGO + CA sign-off), CSR 3 proposals.
+
 ### Session 2026-11-01 (evening): donation receipts R1 + Basic receipt designer R2 (receipt-service live)
 Owner decisions: receipts always in English; the donor's name printed exactly as in the donor's profile (Google,
 Facebook or e-mail sign-up; donors can edit their name in Profile and the app reminds them before an 80G donation);
@@ -301,6 +323,10 @@ any admin publishes; Enterprise adds approval); background pictures PNG/JPEG onl
 - Stability: one run crashed the receipt-service JVM (native access violation, no report) while rendering; local
   start now gives receipt-service the JDK default 1 MB thread stack (others keep 512k), 320 MB heap, and every service
   writes `logs/hs_err_<service>_<pid>.log` if a JVM ever crashes; non-Latin name shaping is serialised.
+  A second identical crash (2026-11-02 02:00, again during test-receipts, again no hs_err) showed the stack size was
+  not the cause: all native imaging work of receipt-service (PDF rendering, Java2D fonts/drawing, ImageIO codecs,
+  colour management) now runs one job at a time (PdfRenderer.NATIVE_LOCK; the worker and requests used to render
+  together). Watch for a third occurrence: if it happens, try without -XX:TieredStopAtLevel=1 and a newer JDK 21.
   Results: test-receipts 68/68 (repeated), test-donations 34/34, test-documents 57/57, test-notifications 26/26.
 - Design names: archived designs no longer block reusing a name (V3 partial unique index, NAME_TAKEN check).
 - App credit (owner request 2026-11-02): every receipt prints a small line "Generated with Yogdaan - donations and

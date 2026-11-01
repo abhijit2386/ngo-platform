@@ -65,6 +65,10 @@ public final class Images {
      * print cleanly over a background), PNG.
      */
     public static byte[] signature(byte[] input) {
+        synchronized (PdfRenderer.NATIVE_LOCK) { return signature0(input); }
+    }
+
+    private static byte[] signature0(byte[] input) {
         BufferedImage src = decode(input, SIGNATURE_MAX_BYTES, "The signature picture must be at most 1 MB");
         if (src.getWidth() < 100 || src.getHeight() < 40) {
             throw ApiException.badRequest("IMAGE_TOO_SMALL", "The signature picture is too small (at least 100 x 40 pixels)");
@@ -86,6 +90,10 @@ public final class Images {
 
     /** Receipt background (R2): sharp enough to print, never larger than 4000 px on the long side. */
     public static Background background(byte[] input) {
+        synchronized (PdfRenderer.NATIVE_LOCK) { return background0(input); }
+    }
+
+    private static Background background0(byte[] input) {
         BufferedImage src = decode(input, BACKGROUND_MAX_BYTES, "The background picture must be at most 5 MB");
         int w = src.getWidth(), h = src.getHeight();
         if (Math.min(w, h) < BACKGROUND_MIN_SHORT_SIDE) {

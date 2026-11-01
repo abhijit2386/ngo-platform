@@ -110,3 +110,17 @@ signed by up to 3 signatories and verifiable by QR code. Professional plans can 
 <img src="receipts-04-signatories.png" alt="receipts-04-signatories" width="270">
 <img src="receipts-05-designs.png" alt="receipts-05-designs" width="270">
 <img src="receipts-06-designer.png" alt="receipts-06-designer" width="270">
+
+## CSR compliance pack (2026-11-02, Asha / admin, Enterprise)
+
+Vault papers (registration, PAN, 12A, 80G, CSR-1, audited accounts ...) shared with a company through one expiring
+link; files frozen with their SHA-256 fingerprint, every visit logged, link can be stopped at any time.
+
+<img src="csr-01-packs.png" alt="csr-01-packs" width="270">
+<img src="csr-02-readiness.png" alt="csr-02-readiness" width="270">
+<img src="csr-03-documents.png" alt="csr-03-documents" width="270">
+<img src="csr-04-share.png" alt="csr-04-share" width="270">
+<img src="csr-05-link.png" alt="csr-05-link" width="270">
+<img src="csr-06-visits.png" alt="csr-06-visits" width="270">
+<img src="csr-07-company-page.png" alt="csr-07-company-page" width="270">
+<img src="csr-08-company-page-end.png" alt="csr-08-company-page-end" width="270">

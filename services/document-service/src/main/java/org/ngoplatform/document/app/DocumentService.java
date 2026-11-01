@@ -311,8 +311,10 @@ public class DocumentService {
     /** Removes the bytes of deleted uploads whose bin period (or statutory retention) is over. */
     @Scheduled(cron = "${ngo.documents.purge-cron:0 30 1 * * *}", zone = "Asia/Kolkata")
     public void purge() {
-        for (Doc d : jdbc.query("select " + COLS + " from documents where status = 'DELETED' and purge_after < ? and source = 'UPLOAD' limit 500",
-                ROW, today())) {
+        // Files a live CSR link still points to are kept until the link ends (CsrService: frozen as sent).
+        for (Doc d : jdbc.query("select " + COLS + " from documents d where status = 'DELETED' and purge_after < ? and source = 'UPLOAD' "
+                + "and not exists (select 1 from csr_pack_items i join csr_packs p on p.id = i.pack_id where i.storage_key = d.storage_key "
+                + "and p.status = 'SHARED' and p.expires_at > now()) limit 500", ROW, today())) {
             try {
                 storage.delete(d.storageKey());
                 jdbc.update("update documents set status = 'PURGED', updated_at = now() where id = ? and status = 'DELETED'", d.id());
