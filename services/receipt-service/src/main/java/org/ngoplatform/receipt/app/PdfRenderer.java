@@ -50,8 +50,8 @@ public class PdfRenderer {
      * App credit printed small at the foot of every receipt (owner request 2026-11-02: every receipt advertises the app).
      * Text from ngo.receipts.branding; blank turns it off. Kept out of the way of the NGO's own content.
      */
-    @Value("${ngo.receipts.branding:Generated with Seva Setu - donations and accounts app for NGOs}")
-    String branding = "Generated with Seva Setu - donations and accounts app for NGOs";
+    @Value("${ngo.receipts.branding:Generated with Yogdaan (yogdaan.co.in) - donations and accounts app for NGOs}")
+    String branding = "Generated with Yogdaan (yogdaan.co.in) - donations and accounts app for NGOs";
 
     static final Color INK = new Color(20, 33, 61), MUTED = new Color(91, 100, 120), BRAND = new Color(8, 122, 75),
             BRAND_LIGHT = new Color(230, 243, 236), RULE = new Color(210, 214, 222);

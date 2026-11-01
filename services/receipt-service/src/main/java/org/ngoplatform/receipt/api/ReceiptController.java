@@ -281,12 +281,12 @@ public class ReceiptController {
             rows.append("<p>Check the code printed under the QR code, or contact the organisation that issued the receipt.</p>");
         }
         return "<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
-                + "<title>" + title + " - Seva Setu</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;"
+                + "<title>" + title + " - Yogdaan</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;"
                 + "background:#F7F8F6;color:#14213D;margin:0;padding:24px}main{max-width:480px;margin:0 auto;background:#fff;"
                 + "border:1px solid #E3E6EA;border-radius:16px;padding:24px}h1{font-size:22px;color:" + color + ";margin:0 0 16px}"
                 + "dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0}dt{color:#5B6478}dd{margin:0;font-weight:600}"
                 + "footer{margin-top:20px;font-size:12px;color:#5B6478}</style></head><body><main><h1>" + title + "</h1><dl>" + rows
-                + "</dl><footer>Verified by Seva Setu. Only the donor's initials are shown to protect their privacy.</footer></main></body></html>";
+                + "</dl><footer>Verified by Yogdaan. Only the donor's initials are shown to protect their privacy.</footer></main></body></html>";
     }
 
     private static void row(StringBuilder b, String k, Object v) {

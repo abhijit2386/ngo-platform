@@ -1,6 +1,6 @@
 # CLAUDE.md — ngo-platform
 
-India NGO management & donation SaaS. Authoritative spec: `docs/business/MASTER_SPEC.md` (copy of the original contract).
+Yogdaan (yogdaan.co.in; renamed from Seva Setu 2026-11-02): India NGO management & donation SaaS. Authoritative spec: `docs/business/MASTER_SPEC.md` (copy of the original contract).
 Status & next steps: `IMPLEMENTATION_STATUS.md` (always read first, update after every work session).
 
 ## Layout
@@ -31,6 +31,11 @@ Every feature is built and tested with the standard dataset (>= 2 admins, 2 staf
 E2E: test-profile, test-phone, test-notifications, test-campaigns, test-admin-limit, test-donations, test-expenses, test-documents, test-receipts.
 Never pipe or redirect the output of start-local.ps1 in helper commands (started services inherit the handle and the command never ends).
 PC scripts that call psql must set `$env:PGPASSWORD = 'dev-only-password'` and pass `-w` (a password prompt hangs the runner).
+
+## Configuration
+All keys and passwords (e-mail SMTP, Google/Facebook sign-in, secrets, storage, payments) go in ONE file:
+`config/yogdaan.env` (gitignored; template `config/yogdaan.env.example`). start-local.ps1 loads it; after changing
+e-mail or Google/Facebook values run `scripts/configure-login.ps1` (applies them to Keycloak). Never commit real keys.
 
 ## Dev accounts (Keycloak realm `ngo`, DEV ONLY)
 platform.admin@ngo.test / DevAdmin#2026 · support@ngo.test / DevSupport#2026 · asha.admin@ngo.test / DevNgo#2026 ·

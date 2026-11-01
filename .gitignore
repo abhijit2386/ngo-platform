@@ -20,3 +20,6 @@ infrastructure/podman/secrets/
 .local/
 .local-files/
 .agent/
+
+# Master configuration with real keys (template: config/yogdaan.env.example)
+config/yogdaan.env

@@ -238,7 +238,7 @@ public final class AccountSheetPdf {
             try (PDPageContentStream f = new PDPageContentStream(doc, pages.get(i), PDPageContentStream.AppendMode.APPEND, true)) {
                 cs = f;
                 text(regular, 8, MUTED, M, 18, footer);
-                String p = "Page " + (i + 1) + " of " + n + "  ·  Seva Setu";
+                String p = "Page " + (i + 1) + " of " + n + "  ·  Yogdaan";
                 text(regular, 8, MUTED, W - M - width(regular, 8, p), 18, p);
             }
         }

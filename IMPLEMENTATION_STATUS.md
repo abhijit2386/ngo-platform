@@ -303,10 +303,20 @@ any admin publishes; Enterprise adds approval); background pictures PNG/JPEG onl
   writes `logs/hs_err_<service>_<pid>.log` if a JVM ever crashes; non-Latin name shaping is serialised.
   Results: test-receipts 68/68 (repeated), test-donations 34/34, test-documents 57/57, test-notifications 26/26.
 - Design names: archived designs no longer block reusing a name (V3 partial unique index, NAME_TAKEN check).
-- App credit (owner request 2026-11-02): every receipt prints a small line "Generated with Seva Setu - donations and
+- App credit (owner request 2026-11-02): every receipt prints a small line "Generated with Yogdaan - donations and
   accounts app for NGOs" at the foot (standard: after "computer-generated receipt"; custom designs: centred on a white
   strip in the bottom 11 pt). Setting ngo.receipts.branding / RECEIPT_BRANDING (blank = off). The designer marks the
   strip and warns FOOTER_OVERLAP when a field is placed in it. Not yet tied to plans (could be removable on Enterprise).
+- Rename (owner decision 2026-11-02): the app is now **Yogdaan** (domain yogdaan.co.in). "Seva Setu" is used by several
+  state-government portals and an existing donor app. Changed: app name/label, en/hi/mr strings (hi/mr: योगदान),
+  receipts (credit "Generated with Yogdaan (yogdaan.co.in) ..."), verification and campaign share pages, account
+  sheet, minutes PDF, OTP SMS text (must be DLT-registered under the new name before real SMS), e-mail sender name,
+  login page title (realm displayName). Stored e-mail templates renamed by notification V8 (V2-V7 left unchanged
+  for Flyway checksums); tools/gen_templates.py updated. No logo image exists yet (default Flutter icon).
+- Master configuration: config/yogdaan.env.example (committed template) -> config/yogdaan.env (gitignored, real
+  values): addresses, e-mail SMTP, Google/Facebook sign-in keys, Keycloak admin, DB password, secrets, storage,
+  payments, billing, SMS. start-local.ps1 loads it (only lines with a value); scripts/configure-login.ps1 applies
+  title, SMTP and Google/Facebook identity providers to Keycloak. Server: /etc/yogdaan/yogdaan.env (systemd).
 - Fix (found 2026-11-02 00:15 IST): "today" was the UTC date in donation-service (offline donation date, reconciliation)
   and ngo-registry-service (registration/expiry dates, 80G validity), so a cash donation entered between midnight and
   05:30 IST was refused as "in the future". These now use India time, like campaign-service already did.
@@ -321,7 +331,7 @@ Done since the original plan: first emulator runs, core services built and UI-te
    guideline 4.8 when Google/Facebook are offered). App buttons "Continue with Google/Facebook/Apple" use
    `kc_idp_hint` so donors go straight to the provider; first-broker-login creates the account automatically and
    links to an existing account with the same verified e-mail. Keycloak page kept only as a branded fallback
-   (Seva Setu theme en/hi/mr). Owner action: create Google Cloud OAuth client, Meta developer app, Apple service ID,
+   (Yogdaan theme en/hi/mr). Owner action: create Google Cloud OAuth client, Meta developer app, Apple service ID,
    and publish a privacy policy page. Local testing with test apps/accounts. (~1 day)
 2. [DONE 2026-10-29] "Complete your profile" after first sign-in (profile picture, name, +91 mobile, preferred language saved to the server - also used
    for e-mail language, date of birth) and "My profile" under Settings; Facebook accounts without e-mail are asked
@@ -360,7 +370,7 @@ Done since the original plan: first emulator runs, core services built and UI-te
      policy not applicable).
 3. Donor tax details captured only when needed: PAN + address at the first donation that wants an 80G receipt,
    stored in donor-service (DPDP data minimisation). (~0.5 day)
-4. Referral and ad attribution: links `sevasetu.in/r/<code>` and `sevasetu.in/c/<campaign>?utm_*`, Android App
+4. Referral and ad attribution: links `yogdaan.co.in/r/<code>` and `yogdaan.co.in/c/<campaign>?utm_*`, Android App
    Links / iOS Universal Links, Google Play Install Referrer for new installs (Firebase Dynamic Links shut down
    25 Aug 2025), attribution saved on the donor profile at first sign-in, "where donors came from" report. (~1.5 days)
 5. Account deletion completed end to end (today only a request flag is stored): sign-in blocked on request, 7-30 day
@@ -400,7 +410,7 @@ Done since the original plan: first emulator runs, core services built and UI-te
 **D. Quality and release**
 8. Unit/integration tests towards the 1,000-case target (pricing, state machines, ledger, receipt numbering, seats).
 9. iOS project (`flutter create --platforms=ios`), iPhone-specific setup; build on a Mac or cloud macOS runner.
-10. Cloud stage 1 (single domain: `sevasetu.in`, `api.` and `auth.` subdomains; one VM, systemd services, Caddy with
+10. Cloud stage 1 (single domain: `yogdaan.co.in`, `api.` and `auth.` subdomains; one VM, systemd services, Caddy with
     HTTPS, nightly PostgreSQL backups), consider merging services into 2-3 deployables to cut RAM; CI; Play release.
 11. Kubernetes/OpenShift manifests, SBOM, licence inventory, release docs (when usage grows).
 
@@ -409,7 +419,7 @@ Done since the original plan: first emulator runs, core services built and UI-te
 - Real payment gateway & SaaS billing provider: not integrated (mock only); app-store billing policy review pending (spec §31).
 - iOS build/simulator requires macOS + Xcode — not available on this Windows PC.
 - Devanagari text in receipt PDFs needs Noto Sans fonts in `ngo.receipts.font-dir`; PDFBox lacks complex shaping.
-- App name "Seva Setu" is a placeholder.
+- App name: Yogdaan (renamed from "Seva Setu" on 2026-11-02; domain yogdaan.co.in bought by the owner).
 
 ## Session 2026-10-28
 - Old Podman pods pod_ngo-platform / pod_ngo-v1-foundation removed (volumes kept).

@@ -16,7 +16,7 @@ class SharePageControllerTest {
     static final LocalDate TODAY = LocalDate.of(2026, 10, 29);
 
     private final CampaignService svc = mock(CampaignService.class);
-    private final SharePageController page = new SharePageController(mock(Repos.Campaigns.class), svc, "https://sevasetu.example/");
+    private final SharePageController page = new SharePageController(mock(Repos.Campaigns.class), svc, "https://yogdaan.co.in/");
 
     private Campaign live(String title, String story) {
         Campaign c = new Campaign(UUID.randomUUID(), UUID.randomUUID());
@@ -34,8 +34,8 @@ class SharePageControllerTest {
         c.setImageKey("ngos/x/campaigns/y/photo-1");
         String html = page.render(c);
         assertThat(html).contains("<meta property=\"og:title\" content=\"School books\">")
-                .contains("<meta property=\"og:url\" content=\"https://sevasetu.example/c/" + c.getId() + "\">")
-                .contains("og:image\" content=\"https://sevasetu.example/api/v1/public/campaigns/" + c.getId() + "/image?size=large")
+                .contains("<meta property=\"og:url\" content=\"https://yogdaan.co.in/c/" + c.getId() + "\">")
+                .contains("og:image\" content=\"https://yogdaan.co.in/api/v1/public/campaigns/" + c.getId() + "/image?size=large")
                 .contains("summary_large_image")
                 .contains("by Asha Seva")
                 .contains("25%")

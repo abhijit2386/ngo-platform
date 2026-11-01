@@ -1,7 +1,7 @@
 {
   "realm": "ngo",
   "enabled": true,
-  "displayName": "NGO Platform",
+  "displayName": "Yogdaan",
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,
   "loginWithEmailAllowed": true,
@@ -28,8 +28,8 @@
   "smtpServer": {
     "host": "localhost",
     "port": "1025",
-    "from": "no-reply@ngo-platform.local",
-    "fromDisplayName": "NGO Platform (dev)"
+    "from": "no-reply@yogdaan.co.in",
+    "fromDisplayName": "Yogdaan (dev)"
   },
   "roles": {
     "realm": [

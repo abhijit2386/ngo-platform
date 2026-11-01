@@ -61,8 +61,8 @@ public class ProfileController {
         if (!profiles.validate(cu, in)) {
             ProfileService.Refusal r = profiles.refuseUnderage(cu);
             throw ApiException.forbidden("UNDERAGE", r == ProfileService.Refusal.DELETED
-                    ? "Seva Setu is for people aged 18 and over. Your sign-up has been cancelled and your details removed."
-                    : "Seva Setu is for people aged 18 and over. Your account has been paused; our support team will contact your organisation.");
+                    ? "Yogdaan is for people aged 18 and over. Your sign-up has been cancelled and your details removed."
+                    : "Yogdaan is for people aged 18 and over. Your account has been paused; our support team will contact your organisation.");
         }
         UserAccount u = profiles.complete(cu, in);
         return Dtos.MeView.of(u, cu.platformRoles(), me.memberships(cu));

@@ -9,6 +9,18 @@ $env:JAVA_HOME = $jdk
 $log = "$Repo\logs\start-local.log"
 Set-Content "$Repo\logs\start-local.status" 'RUNNING'
 Set-Content $log "[$(Get-Date -Format s)] start-local"
+# Master configuration (config\yogdaan.env, never committed; template: config\yogdaan.env.example). Only lines with a
+# value are applied, so empty lines keep each service's development default. Values are not logged.
+$cfg = "$Repo\config\yogdaan.env"
+if (Test-Path $cfg) {
+  $n = 0
+  foreach ($line in Get-Content $cfg) {
+    if ($line -match '^\s*([A-Z][A-Z0-9_]*)\s*=\s*(.*?)\s*$' -and $Matches[2] -ne '') {
+      Set-Item -Path "env:$($Matches[1])" -Value $Matches[2]; $n++
+    }
+  }
+  Add-Content $log "master configuration: $n settings from config\yogdaan.env"
+}
 function Log($s) { "$s" | Tee-Object -FilePath $log -Append | Write-Host }
 function Port-Open($p) { try { $c = New-Object Net.Sockets.TcpClient; $c.Connect('127.0.0.1', $p); $c.Close(); $true } catch { $false } }
 

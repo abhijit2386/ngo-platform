@@ -142,7 +142,7 @@ public final class MinutesPdf {
         }
         y -= 10;
         para(regular, 9, MUTED, "Minutes recorded by " + (recordedBy == null ? "-" : recordedBy) + "; approved by "
-                + (approvedBy == null ? "-" : approvedBy) + " on " + DAY.format(approvedAt) + " in Seva Setu.");
+                + (approvedBy == null ? "-" : approvedBy) + " on " + DAY.format(approvedAt) + " in Yogdaan.");
         need(90);
         y -= 60;
         float sw = (W - 2 * M - 60) / 2;

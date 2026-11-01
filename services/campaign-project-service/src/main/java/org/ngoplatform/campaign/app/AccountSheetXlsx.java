@@ -19,7 +19,7 @@ public final class AccountSheetXlsx {
     public static byte[] render(AccountSheet.Sheet s) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
-            Workbook wb = new Workbook(out, "Seva Setu", "1.0");
+            Workbook wb = new Workbook(out, "Yogdaan", "1.0");
             summary(wb.newWorksheet("Summary"), s);
             expenses(wb.newWorksheet("Expenses"), s);
             others(wb.newWorksheet("Pending and void"), s);

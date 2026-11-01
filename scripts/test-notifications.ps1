@@ -64,7 +64,7 @@ if ($mail) {
   $full = MailMessage (@($mail)[0].ID)
   "      subject: $($full.Subject)"
   Check 'e-mail is in Priya''s language (Marathi) with NGO and role' ($full.Text -match 'Asha Seva' -and $full.Text -match 'वित्त' -and $full.Text -match 'आमंत्रित') $full.Text
-  Check 'e-mail sender is Seva Setu' ($full.From.Name -eq 'Seva Setu')
+  Check 'e-mail sender is Yogdaan' ($full.From.Name -eq 'Yogdaan')
 }
 $pInbox = WaitFor { $r = Api GET '/api/v1/notifications' $priya; if ($r.items.Count -gt 0) { $r } } 30
 Check "Priya's in-app inbox has the invitation" ($pInbox.items[0].templateCode -eq 'STAFF_INVITED') ($pInbox | ConvertTo-Json -Compress -Depth 4)

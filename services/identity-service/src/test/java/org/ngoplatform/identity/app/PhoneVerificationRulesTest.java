@@ -71,7 +71,7 @@ class PhoneVerificationRulesTest {
     @Test
     void otpTextMatchesTheDltTemplate() {
         assertThat(SmsSender.otpText("042137"))
-                .isEqualTo("042137 is your Seva Setu verification code. It expires in 5 minutes. Do not share it with anyone.");
+                .isEqualTo("042137 is your Yogdaan verification code. It expires in 5 minutes. Do not share it with anyone.");
     }
 
     @Test

@@ -20,8 +20,8 @@ server:
 ngo:
   db-name: notification
   notifications:
-    mail-from: ${MAIL_FROM:no-reply@sevasetu.local}
-    mail-from-name: ${MAIL_FROM_NAME:Seva Setu}
+    mail-from: ${MAIL_FROM:no-reply@yogdaan.co.in}
+    mail-from-name: ${MAIL_FROM_NAME:Yogdaan}
     dispatch-ms: ${NOTIFICATION_DISPATCH_MS:5000}
     batch-size: ${NOTIFICATION_BATCH:20}
 management:

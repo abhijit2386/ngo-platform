@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appName": "Seva Setu",
+  "appName": "Yogdaan",
   "tagline": "Run your NGO. Grow your impact.",
   "continueLabel": "Continue",
   "getStarted": "Get started",
@@ -414,7 +414,7 @@
     }
   },
   "completeProfileTitle": "Tell us about yourself",
-  "completeProfileIntro": "This takes a minute. Seva Setu is for people aged 18 and over.",
+  "completeProfileIntro": "This takes a minute. Yogdaan is for people aged 18 and over.",
   "myProfile": "My profile",
   "dateOfBirth": "Date of birth",
   "dateOfBirthHelp": "Used only to confirm you are 18 or older. Not shown to NGOs. Cannot be changed later.",
@@ -436,8 +436,8 @@
   "chooseFromGallery": "Choose from gallery",
   "chooseAvatar": "Choose an avatar",
   "removePicture": "Remove picture",
-  "underageTitle": "Seva Setu is for adults",
-  "underageConfirm": "You entered a date of birth under 18. Seva Setu is only for people aged 18 and over, so your sign-up will be cancelled and your details removed. Continue?",
+  "underageTitle": "Yogdaan is for adults",
+  "underageConfirm": "You entered a date of birth under 18. Yogdaan is only for people aged 18 and over, so your sign-up will be cancelled and your details removed. Continue?",
   "checkDate": "Check the date",
   "ok": "OK",
   "mobileNumber": "Mobile number",
@@ -671,7 +671,7 @@
   "shareCampaign": "Share campaign",
   "copyLink": "Copy link",
   "linkCopied": "Link copied",
-  "shareCampaignText": "Please support \"{title}\" on Seva Setu: {url}",
+  "shareCampaignText": "Please support \"{title}\" on Yogdaan: {url}",
   "@shareCampaignText": {
     "placeholders": {
       "title": {
@@ -772,7 +772,7 @@
   "paymentsOn": "Online donations are on",
   "paymentsOff": "Online donations are off",
   "paymentsTestMode": "Test mode: no real money moves",
-  "paymentsHowItWorks": "Donations go straight from the donor to your organization's own payment account. Seva Setu never holds the money. To go live, connect your organization's Razorpay account (KYC is done by Razorpay in your organization's name).",
+  "paymentsHowItWorks": "Donations go straight from the donor to your organization's own payment account. Yogdaan never holds the money. To go live, connect your organization's Razorpay account (KYC is done by Razorpay in your organization's name).",
   "connectRazorpay": "Connect Razorpay account",
   "razorpayComingSoon": "Razorpay connection arrives once the platform's Razorpay partner account is approved.",
   "turnOnTestPayments": "Turn on test payments",
@@ -1830,7 +1830,7 @@
   "rcdUseStandard": "Use standard receipt",
   "rcdUseThis": "Use this design",
   "rcdWidth": "Width",
-  "rcdChkFooter": "{field} is in the bottom strip, where the small Seva Setu line is printed. Move it up a little.",
+  "rcdChkFooter": "{field} is in the bottom strip, where the small Yogdaan line is printed. Move it up a little.",
   "@rcdChkFooter": {
     "placeholders": {
       "field": {
@@ -1838,5 +1838,5 @@
       }
     }
   },
-  "rcdFooterMark": "Seva Setu credit line"
+  "rcdFooterMark": "Yogdaan credit line"
 }

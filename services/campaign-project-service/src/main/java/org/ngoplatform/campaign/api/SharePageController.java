@@ -73,11 +73,11 @@ public class SharePageController {
                 <!doctype html>
                 <html lang="en"><head>
                 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>%1$s | Seva Setu</title>
+                <title>%1$s | Yogdaan</title>
                 <meta name="description" content="%3$s">
                 <link rel="canonical" href="%4$s">
                 <meta property="og:type" content="website">
-                <meta property="og:site_name" content="Seva Setu">
+                <meta property="og:site_name" content="Yogdaan">
                 <meta property="og:title" content="%1$s">
                 <meta property="og:description" content="%3$s · by %2$s">
                 <meta property="og:url" content="%4$s">
@@ -106,14 +106,14 @@ public class SharePageController {
                 %12$s
                 <p class="muted">%13$s</p>
                 <p class="cta">%14$s</p>
-                <footer class="muted">Seva Setu connects donors with verified NGOs in India.</footer>
+                <footer class="muted">Yogdaan connects donors with verified NGOs in India.</footer>
                 </main></body></html>
                 """.formatted(title, ngo, summary, e(url),
                 image == null ? "" : "<meta property=\"og:image\" content=\"" + e(image) + "\">\n<meta property=\"og:image:width\" content=\"1200\">\n<meta property=\"og:image:height\" content=\"675\">\n<meta name=\"twitter:image\" content=\"" + e(image) + "\">",
                 image == null ? "summary" : "summary_large_image",
                 image == null ? "" : "<img src=\"" + e(image) + "\" alt=\"" + title + "\">",
                 pct, inr(c.getRaisedAmount()), inr(c.getGoalAmount()), c.getDonationCount(), story, e(status),
-                ended ? "Find more causes on the Seva Setu app" : "Support this campaign on the Seva Setu app");
+                ended ? "Find more causes on the Yogdaan app" : "Support this campaign on the Yogdaan app");
     }
 
     private static String inr(BigDecimal v) {
@@ -127,7 +127,7 @@ public class SharePageController {
     private static ResponseEntity<String> notFound() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(new MediaType(MediaType.TEXT_HTML, java.nio.charset.StandardCharsets.UTF_8))
                 .body("<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\">"
-                        + "<title>Seva Setu</title></head><body style=\"font-family:sans-serif;padding:24px\">"
+                        + "<title>Yogdaan</title></head><body style=\"font-family:sans-serif;padding:24px\">"
                         + "<h1>Campaign not available</h1><p>This campaign is not public or no longer exists.</p></body></html>");
     }
 }

@@ -16,4 +16,4 @@ ngo:
     link-ttl: P30D
     public-base-url: ${PUBLIC_API_BASE:http://localhost:8080}
     # App credit at the foot of every receipt (advertises the app); blank = off.
-    branding: ${RECEIPT_BRANDING:Generated with Seva Setu - donations and accounts app for NGOs}
+    branding: ${RECEIPT_BRANDING:Generated with Yogdaan (yogdaan.co.in) - donations and accounts app for NGOs}
