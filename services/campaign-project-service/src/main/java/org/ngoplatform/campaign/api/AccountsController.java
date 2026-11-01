@@ -363,6 +363,10 @@ public class AccountsController {
         return download(out, MediaType.parseMediaType("text/csv"), "vendors.csv");
     }
 
+    /** Bills for the document vault's one-time backfill (document-service). */
+    @GetMapping("/internal/v1/document-files")
+    public List<Map<String, Object>> documentFiles() { return svc.vaultFiles(); }
+
     // ---------------- helpers
 
     private ExpenseView view(Expense e) {

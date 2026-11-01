@@ -21,6 +21,8 @@ public record Entitlements(UUID ngoId, String plan, String subscriptionStatus, M
     public static final String CUSTOM_INTEGRATION_ALLOWED = "CUSTOM_INTEGRATION_ALLOWED";
     public static final String PRIORITY_SUPPORT = "PRIORITY_SUPPORT";
     public static final String ADMIN_MAX = "ADMIN_MAX";
+    /** Document storage per NGO in MB (owner 2026-11-01: 2 / 10 / 50 / 100 GB by plan). */
+    public static final String STORAGE_MB_MAX = "STORAGE_MB_MAX";
 
     private static final Set<String> WRITABLE = Set.of("TRIAL", "ACTIVE", "GRACE");
 
@@ -29,6 +31,13 @@ public record Entitlements(UUID ngoId, String plan, String subscriptionStatus, M
     /** -1 means unlimited. Missing limit is treated as 0 (deny by default). */
     public int limit(String key) {
         try { return Integer.parseInt(values.getOrDefault(key, "0")); } catch (NumberFormatException e) { return 0; }
+    }
+
+    /** Like {@link #limit} but with a default when the plan does not define the key yet. */
+    public int limitOr(String key, int fallback) {
+        String v = values == null ? null : values.get(key);
+        if (v == null) return fallback;
+        try { return Integer.parseInt(v); } catch (NumberFormatException e) { return fallback; }
     }
 
     public boolean withinLimit(String key, long currentCount) {

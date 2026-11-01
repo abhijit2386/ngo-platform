@@ -27,8 +27,8 @@ Status & next steps: `IMPLEMENTATION_STATUS.md` (always read first, update after
 
 ## Test data rule
 Every feature is built and tested with the standard dataset (>= 2 admins, 2 staff, 3 donors):
-`scripts/seed-dataset.ps1` (+ `seed-campaigns.ps1`, `seed-donations.ps1`, `seed-expenses.ps1`), described in `docs/testing/TEST_DATASET.md`.
-E2E: test-profile, test-phone, test-notifications, test-campaigns, test-admin-limit, test-donations, test-expenses.
+`scripts/seed-dataset.ps1` (+ `seed-campaigns.ps1`, `seed-donations.ps1`, `seed-expenses.ps1`, `seed-documents.ps1`), described in `docs/testing/TEST_DATASET.md`.
+E2E: test-profile, test-phone, test-notifications, test-campaigns, test-admin-limit, test-donations, test-expenses, test-documents.
 PC scripts that call psql must set `$env:PGPASSWORD = 'dev-only-password'` and pass `-w` (a password prompt hangs the runner).
 
 ## Dev accounts (Keycloak realm `ngo`, DEV ONLY)

@@ -17,8 +17,17 @@ public class InternalController {
     private final Repos.Addresses addresses;
     private final Repos.Contacts contacts;
 
-    public InternalController(Repos.Ngos ngos, Repos.Addresses addresses, Repos.Contacts contacts) {
-        this.ngos = ngos; this.addresses = addresses; this.contacts = contacts;
+    private final Repos.Documents documents;
+
+    public InternalController(Repos.Ngos ngos, Repos.Addresses addresses, Repos.Contacts contacts, Repos.Documents documents) {
+        this.ngos = ngos; this.addresses = addresses; this.contacts = contacts; this.documents = documents;
+    }
+
+    /** All current registration documents, for the document vault's one-time backfill. */
+    @GetMapping("/document-files")
+    public java.util.List<Map<String, Object>> documentFiles() {
+        return documents.findByStatusNot("SUPERSEDED").stream().filter(d -> !"LOGO".equals(d.getType()))
+                .map(org.ngoplatform.registry.app.VaultFiles::registered).toList();
     }
 
     @GetMapping("/{ngoId}")

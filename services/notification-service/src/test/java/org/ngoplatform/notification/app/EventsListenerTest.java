@@ -269,4 +269,27 @@ class EventsListenerTest {
         assertThat(r.vars()).containsEntry("reason", "Bill is blurred");
         assertThat(r.email()).isTrue();
     }
+
+    @Test
+    void meetingInvitationGoesToInvitedMembers() {
+        UUID sunil = UUID.randomUUID();
+        when(directory.user(sunil)).thenReturn(Optional.of(new Directory.Person(sunil, "sunil@ngo.test", "Sunil More", "en")));
+        var r = listener.toRequest(event(EventTypes.MEETING_SCHEDULED, Map.of("title", "Board meeting", "type", "BOARD",
+                "startsAt", "2026-11-15T05:30:00Z", "userIds", sunil.toString())));
+        assertThat(r.templateCode()).isEqualTo("MEETING_SCHEDULED");
+        assertThat(r.vars()).containsEntry("when", "Sun, 15 Nov 2026, 11:00 AM");
+        assertThat(r.recipients()).extracting(NotificationPlanner.Recipient::userId).containsExactly(sunil);
+        assertThat(r.link()).isEqualTo("/ngo/meetings/r-1");
+    }
+
+    @Test
+    void actionItemGoesToItsOwner() {
+        UUID sunil = UUID.randomUUID();
+        when(directory.user(sunil)).thenReturn(Optional.of(new Directory.Person(sunil, "sunil@ngo.test", "Sunil More", "en")));
+        var r = listener.toRequest(event(EventTypes.MEETING_ACTION_ASSIGNED, Map.of("meetingId", "m-1", "meetingTitle", "AGM",
+                "text", "Book the hall", "ownerUserId", sunil.toString(), "dueDate", "2026-11-20")));
+        assertThat(r.templateCode()).isEqualTo("MEETING_ACTION_ASSIGNED");
+        assertThat(r.vars()).containsEntry("dueDate", "20 Nov 2026");
+        assertThat(r.link()).isEqualTo("/ngo/meetings/m-1");
+    }
 }

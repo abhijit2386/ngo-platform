@@ -23,6 +23,8 @@ import '../features/subscription/subscription_pages.dart';
 import '../features/accounts/expense_pages.dart';
 import '../features/accounts/sheet_pages.dart';
 import '../features/accounts/team_money_pages.dart';
+import '../features/documents/document_pages.dart';
+import '../features/meetings/meeting_pages.dart';
 import 'shells.dart';
 
 /// Bridges Riverpod state changes to GoRouter re-evaluation of redirects.
@@ -125,6 +127,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/ngo/expenses/pending', builder: (_, __) => const PendingExpensesPage()),
       GoRoute(path: '/ngo/vendors', builder: (_, __) => const VendorsPage()),
       GoRoute(path: '/ngo/staff-money', builder: (_, __) => const StaffMoneyPage()),
+      // Document vault: fixed paths before ':id'.
+      GoRoute(path: '/ngo/documents', builder: (_, s) => DocumentsPage(initialCategory: s.uri.queryParameters['category'])),
+      GoRoute(path: '/ngo/documents/upload', builder: (_, s) => DocumentUploadPage(category: s.uri.queryParameters['category'])),
+      GoRoute(path: '/ngo/documents/bin', builder: (_, __) => const DocumentBinPage()),
+      GoRoute(path: '/ngo/documents/:id', builder: (_, s) => DocumentDetailPage(documentId: s.pathParameters['id']!)),
+      // Meetings and minutes.
+      GoRoute(path: '/ngo/meetings', builder: (_, __) => const MeetingsPage()),
+      GoRoute(path: '/ngo/meetings/new', builder: (_, __) => const MeetingFormPage()),
+      GoRoute(path: '/ngo/meetings/:id', builder: (_, s) => MeetingDetailPage(meetingId: s.pathParameters['id']!)),
+      GoRoute(path: '/ngo/meetings/:id/edit', builder: (_, s) => MeetingFormPage(meetingId: s.pathParameters['id']!)),
+      GoRoute(path: '/ngo/action-items', builder: (_, __) => const ActionItemsPage()),
       GoRoute(path: '/ngo/staff-money/:uid', builder: (_, s) => StaffLedgerPage(userId: s.pathParameters['uid']!)),
       GoRoute(path: '/ngo/subscription', builder: (_, __) => const SubscriptionPage()),
       GoRoute(path: '/ngo/subscription/plans', builder: (_, __) => const PlansPage()),

@@ -1,7 +1,7 @@
 # Starts the container-free development stack: PostgreSQL, Keycloak, Mailpit, Eureka and the selected services.
 #   -Services identity-service,ngo-registry-service,...  (default: the core set below)
 param([string[]]$Services = @('identity-service', 'ngo-registry-service', 'subscription-service', 'notification-service',
-  'campaign-project-service', 'donation-payment-service', 'api-gateway'))
+  'campaign-project-service', 'donation-payment-service', 'document-service', 'api-gateway'))
 $ErrorActionPreference = 'Continue'
 $Repo = 'D:\ngo-platform'; $Tools = 'D:\tools'; $KcVer = '26.7.2'
 $jdk = (Get-ChildItem $Tools -Directory -Filter 'jdk-21*' | Select-Object -First 1).FullName
@@ -15,7 +15,7 @@ function Port-Open($p) { try { $c = New-Object Net.Sockets.TcpClient; $c.Connect
 $ports = [ordered]@{ 'discovery-server' = 8761; 'identity-service' = 8082; 'ngo-registry-service' = 8083;
   'subscription-service' = 8084; 'donor-service' = 8085; 'donation-payment-service' = 8086; 'receipt-service' = 8087;
   'campaign-project-service' = 8088; 'ngo-operations-service' = 8089; 'helpdesk-service' = 8090;
-  'notification-service' = 8091; 'reporting-service' = 8092; 'api-gateway' = 8080 }
+  'notification-service' = 8091; 'reporting-service' = 8092; 'document-service' = 8093; 'api-gateway' = 8080 }
 
 # 1. PostgreSQL
 if (-not (Port-Open 5432)) {

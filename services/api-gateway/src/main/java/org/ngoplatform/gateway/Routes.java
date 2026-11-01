@@ -25,7 +25,8 @@ public class Routes {
                         @Value("${ngo.services.operations}") String operations,
                         @Value("${ngo.services.helpdesk}") String helpdesk,
                         @Value("${ngo.services.notification}") String notification,
-                        @Value("${ngo.services.reporting}") String reporting) {
+                        @Value("${ngo.services.reporting}") String reporting,
+                        @Value("${ngo.services.document}") String document) {
         return b.routes()
                 .route("identity", r -> r.order(1).path("/api/v1/me", "/api/v1/me/**", "/api/v1/users/*/photo", "/api/v1/ngos/*/staff/**",
                         "/api/v1/ngos/*/staff").uri(identity))
@@ -47,6 +48,9 @@ public class Routes {
                         "/c/*", "/api/v1/ngos/*/expenses/**", "/api/v1/ngos/*/vendors", "/api/v1/ngos/*/vendors/**",
                         "/api/v1/ngos/*/staff-money", "/api/v1/ngos/*/staff-money/**")
                         .uri(campaign))
+                .route("document", r -> r.order(1).path("/api/v1/ngos/*/library", "/api/v1/ngos/*/library/**",
+                        "/api/v1/ngos/*/meetings", "/api/v1/ngos/*/meetings/**", "/api/v1/ngos/*/action-items", "/api/v1/ngos/*/action-items/**",
+                        "/api/v1/public/files/**").uri(document))
                 .route("operations", r -> r.order(1).path("/api/v1/ngos/*/volunteers/**", "/api/v1/ngos/*/volunteers",
                         "/api/v1/ngos/*/beneficiaries/**", "/api/v1/ngos/*/beneficiaries", "/api/v1/ngos/*/finance/**",
                         "/api/v1/ngos/*/activities/**", "/api/v1/me/volunteering/**").uri(operations))

@@ -25,6 +25,7 @@ _Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (ses
 | ngo-operations-service | **not started** (volunteers, beneficiaries, expenses/finance) | | | |
 | helpdesk-service | **not started** | | | |
 | notification-service | done: templates en/hi/mr (10 events x e-mail + in-app), event consumer, in-app inbox, e-mail via SMTP (Mailpit), retries with backoff + dead letter + replay, preferences/opt-outs, history, admin template edit/preview | yes (2026-10-29) | 58 unit tests pass; API e2e `scripts/test-notifications.ps1` | push/SMS/WhatsApp adapters not built (interface ready); receipt e-mails wait for receipt-service |
+| document-service | document vault (one shared private bucket, `ngos/<id>/` prefixes, per-NGO quota, signed 5-minute links, recycle bin, activity log, files of other modules registered by events + backfill) and meetings (AGM/EGM/board/committee/staff, attendance, minutes, numbered resolutions, action items, minutes PDF) (2026-11-01) | yes (2026-11-01) | 16 unit; e2e test-documents 57/57 | expiry reminders, versions, CA read-only access = phase 3 |
 | reporting-service | **not started** (dashboard projections) | | | |
 
 ## Mobile app
@@ -215,6 +216,49 @@ donors.
   account sheet, budget, add expense, vendors, staff advances) - screenshots docs/screenshots/accounts-*.
 - Next for accounts: projects get the same expense module; NGO-wide (non-campaign) expenses and income register for the
   annual accounts; Form 10B / utilisation certificate export for the CA; expense receipts by e-mail to vendors.
+
+### Session 2026-11-01 (afternoon): document vault and meetings (phase 1 of the agreed document plan)
+Owner request: "keep every document on object storage, isolated per NGO, retrieved only after login; admins see
+everything staff upload, receipts, legal documents; staff can upload; searchable" + "how will AGM and other minutes
+of meeting be tracked". Owner decisions: staff see their own uploads + documents shared with the team, admins see all;
+no search inside files (category, name, type, dates, tags, uploader only); quota 2 / 10 / 50 / 100 GB for
+Community / Growth / Professional / Enterprise; ONE object store for all NGOs (built for 2 lakh NGOs).
+- Storage: one private bucket `ngo-files` for every service (S3_BUCKET in commons-defaults; local files moved from the
+  old per-service folders). Keys `ngos/<ngoId>/<module>/...`; isolation is enforced by the services (membership +
+  permission on every request), never by public URLs. Downloads only through the API or a signed 5-minute link
+  (HMAC, re-checks membership on use, `Content-Disposition: attachment`, CSP sandbox, nosniff).
+- New document-service (port 8093, DB `document`): documents (categories Legal & registration, Tax & compliance,
+  Finance & bills, Campaigns, Projects, Agreements, Meetings, HR, Photos & reports, Receipts, Other), tags, document
+  date, expiry date, visibility TEAM or RESTRICTED (uploader + admins; default for Legal, HR, Meetings, Agreements),
+  module files carry a required permission (bills need EXPENSE_VIEW). Upload checks file content (PDF, JPEG/PNG
+  re-encoded without EXIF/GPS, Word/Excel/PowerPoint), 25 MB max, quota from entitlement STORAGE_MB_MAX
+  (subscription V2). Recycle bin 30 days then purge job; Finance / Tax / Receipts kept 8 years even when deleted.
+  Append-only activity log (uploaded, viewed, link, downloaded, updated, deleted, restored), admins only.
+- Other modules: registry documents and expense bills are registered in the vault by events
+  (`document.file.registered/removed`) and a one-time backfill (internal endpoints in registry + campaign). The file
+  stays in its module and is managed there (MANAGED_ELSEWHERE); the vault lists, searches and opens it.
+- Meetings: AGM, EGM, board, committee, staff, other; date/time, in person / online / hybrid, agenda, quorum,
+  invitees (team + guests with designation); board/AGM/EGM visible to invitees + admins by default. Minutes after the
+  meeting started: attendance, chairperson, proceedings, resolutions (proposer, seconder, votes, result), action
+  items with owner and due date. Approval locks everything (DB trigger), numbers resolutions RES/<FY>/nnn and files a
+  minutes PDF (attendance, quorum, agenda, proceedings, resolutions, actions, signature lines) in the vault (Meetings).
+  Action items can be ticked off by the owner or an admin, also after approval. AGM tracker per financial year
+  (due by 30 September). Notifications: invitees on scheduling, owner on a new action item (in-app, en/hi/mr).
+- Permissions: DOCUMENT_VIEW / DOCUMENT_UPLOAD / GOVERNANCE_VIEW for staff roles; GOVERNANCE_MANAGE admins only.
+  Gateway routes /library, /meetings, /action-items, /api/v1/public/files.
+- App: Documents (search, storage bar, category chips with counts, type / date / mine / tag / sort filters, upload
+  from camera, gallery or files, detail with preview / open / share / edit / delete, expiry warnings, link to the
+  expense or meeting, admin activity log, recycle bin); Meetings & minutes (AGM card, my action items, minutes to
+  approve, upcoming / past, schedule / edit, minutes editor with attendance, resolutions, action items, attach
+  documents, approve, minutes PDF, cancel); My action items; home card + Documents quick action; ~193 strings.
+- Seeds/tests: `seed-documents.ps1` (5 documents incl. one expiring soon, approved AGM 2026, approved October board
+  meeting with action items, November board meeting with draft minutes, upcoming staff + committee meetings);
+  `test-documents.ps1` e2e 57/57; unit DocumentRulesTest, DocFilesTest, LinkSignerTest, MeetingRulesTest (16).
+  Found: E2E campaign cleanup left bills in the vault (rows deleted without events) - document cleanup now removes
+  bills of E2E campaigns; download filename header was Q-encoded - now ASCII + RFC 5987 filename*.
+- Regression: test-expenses 66/66, test-campaigns 77/77, test-donations 34/34, test-notifications 26/26.
+- Next (agreed phases): phase 2 donor receipts (PDF + QR) in the vault for donors; phase 3 expiry reminders,
+  document versions, CA read-only access.
 
 ## Next steps (in order) - agreed with the owner 2026-10-29
 Done since the original plan: first emulator runs, core services built and UI-tested (phase 1), notification-service.

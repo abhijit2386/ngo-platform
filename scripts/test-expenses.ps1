@@ -88,6 +88,7 @@ function Inbox($tok, $template, $link) {
 function Day($n) { (Get-Date).AddDays($n).ToString('yyyy-MM-dd') }
 
 & $psql -w -h localhost -U postgres -d campaign -q -f "$PSScriptRoot\sql\cleanup-e2e-campaigns.sql" | Out-Null
+& $psql -w -h localhost -U postgres -d document -q -f "$PSScriptRoot\sql\cleanup-e2e-documents.sql" 2>$null | Out-Null
 
 $asha = Token 'asha.admin@ngo.test' 'DevNgo#2026'
 $ravi = Token 'ravi.staff@ngo.test' 'DevStaff#2026'
@@ -261,6 +262,7 @@ Check 'no expenses after archive' ($x.__code -eq 'CAMPAIGN_ARCHIVED') (J $x)
 
 # --- cleanup ---
 & $psql -w -h localhost -U postgres -d campaign -q -f "$PSScriptRoot\sql\cleanup-e2e-campaigns.sql" | Out-Null
+& $psql -w -h localhost -U postgres -d document -q -f "$PSScriptRoot\sql\cleanup-e2e-documents.sql" 2>$null | Out-Null
 $left = & $psql -w -h localhost -U postgres -d campaign -t -A -c "select count(*) from campaigns where title like 'E2E %'"
 Check 'E2E data cleaned up' ("$left".Trim() -eq '0') "$left"
 ""

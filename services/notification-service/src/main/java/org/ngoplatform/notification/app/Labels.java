@@ -38,5 +38,20 @@ final class Labels {
         return f.format(v);
     }
 
+    private static final java.time.ZoneId INDIA = java.time.ZoneId.of("Asia/Kolkata");
+
+    /** ISO instant -> "Sat, 15 Nov 2026, 11:00 AM" (India time). */
+    static String dateTime(String iso) {
+        if (iso == null || iso.isBlank()) return "";
+        return java.time.format.DateTimeFormatter.ofPattern("EEE, d MMM yyyy, h:mm a", java.util.Locale.ENGLISH)
+                .format(java.time.Instant.parse(iso).atZone(INDIA));
+    }
+
+    /** ISO date -> "15 Nov 2026". */
+    static String date(String iso) {
+        if (iso == null || iso.isBlank()) return "";
+        return java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", java.util.Locale.ENGLISH).format(java.time.LocalDate.parse(iso));
+    }
+
     static String language(String lang) { return lang != null && (lang.equals("hi") || lang.equals("mr")) ? lang : "en"; }
 }

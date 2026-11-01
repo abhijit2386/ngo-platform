@@ -10,6 +10,8 @@ import '../../localization/app_localizations.dart';
 import '../notifications/notification_pages.dart';
 import 'ngo_api.dart';
 import '../accounts/accounts_api.dart' show pendingExpensesProvider;
+import '../meetings/meetings_api.dart' show meetingSummaryProvider;
+import 'package:intl/intl.dart';
 
 /// DASH-001: home dashboard. Shows verification state first, then subscription and quick actions.
 class NgoHomePage extends ConsumerWidget {
@@ -53,6 +55,7 @@ class NgoHomePage extends ConsumerWidget {
             if (n != null) _VerificationBanner(ngo: n),
             sub.maybeWhen(data: (s) => s == null ? const SizedBox.shrink() : _SubscriptionCard(sub: s), orElse: () => const SizedBox.shrink()),
             if ((membership?.isAdmin ?? false) && n != null) const _ExpensesToApproveCard(),
+            if (membership?.can('GOVERNANCE_VIEW') ?? false) const _MeetingsCard(),
             SectionHeader(t.quickActions),
             GridView.count(
               crossAxisCount: 2,
@@ -72,6 +75,9 @@ class NgoHomePage extends ConsumerWidget {
                 if (membership?.can('STAFF_MANAGE') ?? false)
                   ActionTile(label: t.inviteStaff, icon: Icons.group_add, color: AppColors.professional,
                       onTap: () => context.push('/ngo/staff')),
+                if (membership?.can('DOCUMENT_VIEW') ?? false)
+                  ActionTile(label: t.docTitle, icon: Icons.folder_copy_outlined, color: const Color(0xFF0E7490),
+                      onTap: () => context.push('/ngo/documents')),
                 if (membership?.can('CAMPAIGN_MANAGE') ?? false)
                   ActionTile(label: t.newCampaign, icon: Icons.campaign, color: AppColors.enterprise,
                       disabledHint: t.availableAfterVerification, onTap: operational(n) ? () => context.push('/ngo/campaigns/new') : null),
@@ -172,6 +178,42 @@ class _ExpensesToApproveCard extends ConsumerWidget {
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(t.accToApprove, style: const TextStyle(fontWeight: FontWeight.w700)),
             Text(t.accPendingLine(count, formatInr(p?['total'], whole: true)), style: const TextStyle(color: AppColors.textMuted)),
+          ])),
+          const Icon(Icons.chevron_right),
+        ]),
+      ),
+    );
+  }
+}
+
+/// Next meeting, this year's AGM and the member's open action items.
+class _MeetingsCard extends ConsumerWidget {
+  const _MeetingsCard();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = L10n.of(context);
+    final ngoId = ref.watch(currentNgoIdProvider);
+    if (ngoId == null) return const SizedBox.shrink();
+    final s = ref.watch(meetingSummaryProvider(ngoId)).value;
+    if (s == null) return const SizedBox.shrink();
+    final upcoming = (s['upcoming'] as num? ?? 0).toInt();
+    final actions = (s['myOpenActions'] as num? ?? 0).toInt();
+    final agmMissing = s['agmThisYear'] == null;
+    if (upcoming == 0 && actions == 0 && !agmMissing) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: AppCard(
+        onTap: () => context.push(actions > 0 ? '/ngo/action-items' : '/ngo/meetings'),
+        child: Row(children: [
+          const Icon(Icons.event_note_outlined, color: AppColors.primary),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(t.meetTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
+            Text([
+              if (actions > 0) t.meetMyActions(actions),
+              if (upcoming > 0) t.meetUpcomingCount(upcoming),
+              if (agmMissing) t.meetAgmNotYet('${s['agmDueBy']}'.isEmpty ? '' : DateFormat('d MMM yyyy').format(DateTime.parse('${s['agmDueBy']}'))),
+            ].join(' · '), style: const TextStyle(color: AppColors.textMuted)),
           ])),
           const Icon(Icons.chevron_right),
         ]),

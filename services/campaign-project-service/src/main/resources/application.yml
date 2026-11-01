@@ -9,7 +9,6 @@ ngo:
   db-name: campaign
   storage:
     endpoint: ${S3_ENDPOINT:http://localhost:8333}
-    bucket: ${S3_BUCKET:ngo-campaigns}
     access-key: ${S3_ACCESS_KEY:dev-access}
     secret-key: ${S3_SECRET_KEY:dev-secret-change-me}
   # Base of public share links (https://<product domain> in production). Locally the gateway serves /c/{id}.

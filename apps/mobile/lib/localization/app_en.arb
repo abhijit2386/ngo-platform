@@ -1093,5 +1093,416 @@
   "accWhatForHint": "e.g. 200 notebooks for Class 5",
   "accWhichStaff": "Who paid?",
   "accWhoPaid": "Who paid",
-  "accChooseCategory": "Choose a category"
+  "accChooseCategory": "Choose a category",
+  "docActDeleted": "Moved to recycle bin",
+  "docActDownloaded": "Downloaded",
+  "docActLink": "Shared a link",
+  "docActRestored": "Restored",
+  "docActUpdated": "Details updated",
+  "docActUploaded": "Uploaded",
+  "docActViewed": "Viewed",
+  "docActivity": "Activity",
+  "docAnyDate": "Any date",
+  "docAnyType": "Any type",
+  "docBinEmpty": "Recycle bin is empty",
+  "docBinHint": "Deleted documents stay here for 30 days. Finance and tax records are kept for 8 years.",
+  "docCatAgreement": "Agreements",
+  "docCatCampaign": "Campaigns",
+  "docCatFinance": "Finance & bills",
+  "docCatHr": "HR",
+  "docCatLegal": "Legal & registration",
+  "docCatMeeting": "Meetings",
+  "docCatOther": "Other",
+  "docCatPhotos": "Photos & reports",
+  "docCatProject": "Projects",
+  "docCatReceipt": "Receipts",
+  "docCatTax": "Tax & compliance",
+  "docChange": "Change",
+  "docChooseFile": "Choose a file",
+  "docChooseFileFirst": "Choose a file first",
+  "docChooseFileHint": "PDF, photo, Word, Excel or PowerPoint, up to 25 MB",
+  "docCount": "{count} documents",
+  "@docCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docDate": "Document date",
+  "docDelete": "Delete",
+  "docDeleteConfirm": "Move this document to the recycle bin?",
+  "docDescription": "Description",
+  "docDocument": "Document",
+  "docEditDetails": "Edit details",
+  "docEmpty": "No documents yet",
+  "docEmptyHint": "Upload certificates, bills, agreements and reports so the whole team finds them in one place.",
+  "docExpired": "Expired on {date}",
+  "@docExpired": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "docExpiresOn": "Valid until",
+  "docExpiresSoon": "Expires on {date}",
+  "@docExpiresSoon": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "docFromFiles": "Files",
+  "docInBin": "In recycle bin, deleted for good after {date}",
+  "@docInBin": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "docLinked": "Linked to",
+  "docLinkedTo": "Linked to {name}",
+  "@docLinkedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "docManagedElsewhere": "This file is managed in its own module. Open it there to change it.",
+  "docMine": "Uploaded by me",
+  "docMovedToBin": "Moved to recycle bin",
+  "docName": "Name",
+  "docNameHint": "e.g. 80G certificate 2026",
+  "docNoMatch": "No documents match these filters",
+  "docOpenLinked": "Open",
+  "docOriginalName": "Original file",
+  "docRecycleBin": "Recycle bin",
+  "docRestore": "Restore",
+  "docRestored": "Document restored",
+  "docRestricted": "Confidential",
+  "docSaved": "Document saved",
+  "docSearchHint": "Search by name or tag",
+  "docShare": "Share",
+  "docSort": "Sort",
+  "docSortDocDate": "Document date",
+  "docSortName": "Name",
+  "docSortNewest": "Newest first",
+  "docSortSize": "Largest first",
+  "docStorageUsed": "{used} of {limit} used",
+  "@docStorageUsed": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "docStorageUsedUnlimited": "{used} used",
+  "@docStorageUsedUnlimited": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      }
+    }
+  },
+  "docTagHint": "Add a tag and press enter, e.g. fcra, 2026",
+  "docTags": "Tags",
+  "docTitle": "Documents",
+  "docTypeOther": "Other files",
+  "docTypePhoto": "Photo",
+  "docUpdatedBy": "Last changed by",
+  "docUpload": "Upload document",
+  "docUploaded": "Document uploaded",
+  "docUploadedBy": "Uploaded by",
+  "docVisRestricted": "Confidential",
+  "docVisRestrictedHint": "Only you and administrators",
+  "docVisTeam": "Whole team",
+  "docVisTeamHint": "Everyone in the NGO team can see it",
+  "docWhoCanSee": "Who can see it",
+  "meetActionAdded": "Action item added",
+  "meetActionHint": "What needs to be done",
+  "meetActionText": "Action",
+  "meetActions": "Action items",
+  "meetAdd": "Add",
+  "meetAddAction": "Add action item",
+  "meetAddGuest": "Add guest",
+  "meetAddResolution": "Add resolution",
+  "meetAddTeam": "Add team members",
+  "meetAgenda": "Agenda",
+  "meetAgendaHint": "One item per line",
+  "meetAgm": "Annual general meeting (AGM)",
+  "meetAgmFor": "AGM for FY {fy}",
+  "@meetAgmFor": {
+    "placeholders": {
+      "fy": {
+        "type": "String"
+      }
+    }
+  },
+  "meetAgmHeld": "Held on {date}",
+  "@meetAgmHeld": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "meetAgmNotYet": "AGM not held yet, due by {date}",
+  "@meetAgmNotYet": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "meetAgmOverdue": "Overdue: was due by {date}",
+  "@meetAgmOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "meetAgmPlanned": "Scheduled for {date}",
+  "@meetAgmPlanned": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "meetApprove": "Approve minutes",
+  "meetApproveConfirm": "Approved minutes are final and cannot be changed. Resolutions get numbers and a PDF is filed in Documents. Approve?",
+  "meetApproved": "Minutes approved",
+  "meetApprovedBy": "Approved by {name} on {date}",
+  "@meetApprovedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "meetAttach": "Attach document",
+  "meetAttendance": "Attendance: {n} of {count}",
+  "@meetAttendance": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "meetAttendees": "Invitees ({count})",
+  "@meetAttendees": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "meetBoard": "Board meeting",
+  "meetCancel": "Cancel meeting",
+  "meetCancelHint": "Reason for cancelling",
+  "meetCancelledBecause": "Cancelled: {reason}",
+  "@meetCancelledBecause": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "meetCancelledDone": "Meeting cancelled",
+  "meetChairedBy": "Chaired by {name}",
+  "@meetChairedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetChairperson": "Chairperson",
+  "meetCommittee": "Committee meeting",
+  "meetCopyLink": "Copy link",
+  "meetDate": "Date",
+  "meetDeferred": "Deferred",
+  "meetDesignation": "Designation",
+  "meetDesignationHint": "e.g. Secretary, Treasurer",
+  "meetDocuments": "Documents",
+  "meetDue": "Due {date}",
+  "@meetDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "meetDueDate": "Due date",
+  "meetEdit": "Edit meeting",
+  "meetEditMinutes": "Edit minutes",
+  "meetEgm": "Extraordinary general meeting (EGM)",
+  "meetEmptyHintAdmin": "Schedule your AGM, board and team meetings here. Minutes, resolutions and action items stay with each meeting.",
+  "meetEveryone": "Everyone",
+  "meetGuest": "Guest",
+  "meetGuestName": "Guest name",
+  "meetHybrid": "Hybrid",
+  "meetInPerson": "In person",
+  "meetInviteesOnly": "Invitees and administrators",
+  "meetLastAgm": "Last AGM: {date}",
+  "@meetLastAgm": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "meetLink": "Meeting link",
+  "meetLinkCopied": "Link copied",
+  "meetMeeting": "Meeting",
+  "meetMine": "Mine",
+  "meetMinutes": "Minutes",
+  "meetMinutesAfter": "Minutes can be recorded once the meeting has started.",
+  "meetMinutesHint": "What was discussed and decided",
+  "meetMinutesNote": "Mark who attended, then write the proceedings. You can edit until the minutes are approved.",
+  "meetMinutesPdf": "Minutes PDF",
+  "meetMinutesSaved": "Minutes saved",
+  "meetMinutesToApprove": "{count} minutes waiting for approval",
+  "@meetMinutesToApprove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "meetMyActions": "{count} open action items for you",
+  "@meetMyActions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "meetName": "Title",
+  "meetNoActions": "No action items",
+  "meetNoAttendees": "No invitees yet",
+  "meetNoDocuments": "No documents attached",
+  "meetNoMinutesYet": "Minutes not recorded yet",
+  "meetNoResolutions": "No resolutions",
+  "meetNonePast": "No past meetings",
+  "meetNoneUpcoming": "No upcoming meetings",
+  "meetOnline": "Online",
+  "meetOther": "Other meeting",
+  "meetOwner": "Owner",
+  "meetPassed": "Passed",
+  "meetPast": "Past",
+  "meetProposedBy": "Proposed by {name}",
+  "@meetProposedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetProposer": "Proposed by",
+  "meetQuorum": "Quorum (members needed)",
+  "meetQuorumHint": "Leave empty if not applicable",
+  "meetQuorumMet": "Quorum of {quorum} met",
+  "@meetQuorumMet": {
+    "placeholders": {
+      "quorum": {
+        "type": "String"
+      }
+    }
+  },
+  "meetQuorumNotMet": "Quorum of {quorum} not met",
+  "@meetQuorumNotMet": {
+    "placeholders": {
+      "quorum": {
+        "type": "String"
+      }
+    }
+  },
+  "meetRecordMinutes": "Record minutes",
+  "meetRejected": "Rejected",
+  "meetRemoved": "Removed",
+  "meetResolutionAdded": "Resolution added",
+  "meetResolutionDraft": "Number given on approval",
+  "meetResolutionHint": "the annual accounts for FY 2025-26 are adopted",
+  "meetResolutions": "Resolutions",
+  "meetResolvedThat": "Resolved that {text}",
+  "@meetResolvedThat": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "meetResolvedThatLabel": "Resolved that…",
+  "meetSaveMinutes": "Save minutes",
+  "meetSchedule": "Schedule meeting",
+  "meetScheduled": "Meeting scheduled",
+  "meetSecondedBy": "Seconded by {name}",
+  "@meetSecondedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetSeconder": "Seconded by",
+  "meetStaff": "Staff meeting",
+  "meetStatusApproved": "Minutes approved",
+  "meetStatusCancelled": "Cancelled",
+  "meetStatusDraft": "Minutes draft",
+  "meetStatusScheduled": "Scheduled",
+  "meetTime": "Time",
+  "meetTitle": "Meetings & minutes",
+  "meetType": "Meeting type",
+  "meetUpcoming": "Upcoming",
+  "meetUpcomingCount": "{count} upcoming meetings",
+  "@meetUpcomingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "meetVenue": "Venue",
+  "meetVisRestrictedHint": "Only invitees and administrators",
+  "meetVisTeamHint": "Everyone in the team",
+  "meetVotes": "For {yes} · Against {no}",
+  "@meetVotes": {
+    "placeholders": {
+      "yes": {
+        "type": "String"
+      },
+      "no": {
+        "type": "String"
+      }
+    }
+  },
+  "meetVotesAgainst": "Against",
+  "meetVotesFor": "For",
+  "meetWhoWasPresent": "Who was present ({n} of {count})",
+  "@meetWhoWasPresent": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docTooLarge": "This file is larger than 25 MB"
 }

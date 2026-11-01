@@ -49,3 +49,17 @@ to Sunil, and expenses added by Sunil with bill photos: notebooks Rs 9,600 (appr
 (approved by Ravi), tempo Rs 1,200 paid by Sunil from his advance (approved), school bags Rs 6,000 (waiting for
 approval) and tea Rs 450 without bill (sent back by Asha). Expenses are approved by administrators only (owner rule);
 Priya (finance) can record but not approve. `test-expenses.ps1` uses its own "E2E" campaign and cleans up.
+
+## Document vault and meetings (`seed-documents.ps1`, idempotent by title)
+| Item | Who | Notes |
+|---|---|---|
+| FCRA renewal acknowledgement | Asha | Tax & compliance, expires in 20 days (expiry warning) |
+| Audit report FY 2025-26 | Priya | Finance, whole team |
+| Volunteer guidelines 2026 | Sunil | Other, whole team |
+| Health camp, Wadi (photo) | Sunil | Photos & reports |
+| Office rent agreement 2026-27 | Ravi | Agreements, confidential by default (Ravi + admins) |
+| Registration documents, expense bills | - | listed automatically from registration and campaign expenses |
+| Annual General Meeting 2026 (20 Sep 2026) | Asha | minutes approved, 2 numbered resolutions, minutes PDF in Documents |
+| Board meeting - October | Asha | approved; action items for Sunil (quotations) and Priya (account sheet) |
+| Board meeting - November (yesterday) | Asha | draft minutes: waits for approval; action item for Ravi |
+| Staff meeting - campaign planning (+3 days), Health committee (+10 days) | Asha | upcoming |

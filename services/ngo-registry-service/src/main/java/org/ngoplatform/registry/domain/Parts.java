@@ -95,6 +95,7 @@ public final class Parts {
         public LocalDate getExpiresOn() { return expiresOn; }
         public String getReviewNote() { return reviewNote; }
         public Instant getCreatedAt() { return createdAt; }
+        public UUID getUploadedBy() { return uploadedBy; }
     }
 
     @Entity

@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: document-service
+  config:
+    import: classpath:commons-defaults.yml
+server:
+  port: ${PORT:8093}
+ngo:
+  db-name: document
+  storage:
+    endpoint: ${S3_ENDPOINT:http://localhost:8333}
+    access-key: ${S3_ACCESS_KEY:dev-access}
+    secret-key: ${S3_SECRET_KEY:dev-secret-change-me}
+  documents:
+    # Signs the 5-minute download links (/api/v1/public/files/<token>). Production: a long random secret.
+    link-secret: ${DOCUMENT_LINK_SECRET:dev-only-document-link-secret-change-me}
+    # Public base of those links (the gateway).
+    public-api-url: ${PUBLIC_API_URL:http://localhost:8080}
+    max-upload-mb: 25
+    purge-cron: "0 30 1 * * *"

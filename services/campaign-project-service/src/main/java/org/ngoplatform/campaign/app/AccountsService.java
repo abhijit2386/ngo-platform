@@ -169,6 +169,9 @@ public class AccountsService {
         if (wasRejected) {
             events.publish(EventTypes.CAMPAIGN_EXPENSE_SUBMITTED, ngoId, e.getId(), payload(c, e, Map.of("submittedBy", e.getSubmittedBy().toString())));
         }
+        for (Attachment a : attachments(id)) {
+            events.publish(EventTypes.DOCUMENT_FILE_REGISTERED, ngoId, a.id(), vaultFile(a, e, c.getTitle()));
+        }
         audit.record(ngoId, m.userId(), "EXPENSE_UPDATED", "EXPENSE", id, Map.of("amount", e.getAmount().toPlainString()));
         return e;
     }
@@ -182,7 +185,10 @@ public class AccountsService {
         jdbc.update("delete from expense_attachments where expense_id = ?", id);
         expenses.delete(e);
         expenses.flush();
-        atts.forEach(a -> deleteQuietly(a.key()));
+        atts.forEach(a -> {
+            deleteQuietly(a.key());
+            events.publish(EventTypes.DOCUMENT_FILE_REMOVED, ngoId, a.id(), Map.of("source", "EXPENSE_BILL", "sourceRef", a.id().toString()));
+        });
         audit.record(ngoId, m.userId(), "EXPENSE_WITHDRAWN", "EXPENSE", id, Map.of());
     }
 
@@ -258,6 +264,7 @@ public class AccountsService {
         AccountRules.checkEvidence(atts.size() - 1, e.getNoBillReason());
         jdbc.update("delete from expense_attachments where id = ?", attachmentId);
         deleteQuietly(a.key());
+        events.publish(EventTypes.DOCUMENT_FILE_REMOVED, ngoId, a.id(), Map.of("source", "EXPENSE_BILL", "sourceRef", a.id().toString()));
         audit.record(ngoId, m.userId(), "EXPENSE_BILL_REMOVED", "EXPENSE", id, Map.of("attachmentId", attachmentId.toString()));
     }
 
@@ -335,7 +342,52 @@ public class AccountsService {
         String name = f.fileName() == null ? null : FileInspector.safeName(f.fileName());
         jdbc.update("insert into expense_attachments(id, expense_id, object_key, content_type, size_bytes, file_name, uploaded_by) values (?,?,?,?,?,?,?)",
                 id, e.getId(), key, type, (long) data.length, name, actor);
-        return new Attachment(id, e.getId(), key, type, data.length, name, actor, Instant.now());
+        Attachment a = new Attachment(id, e.getId(), key, type, data.length, name, actor, Instant.now());
+        events.publish(EventTypes.DOCUMENT_FILE_REGISTERED, e.getNgoId(), id, vaultFile(a, e, campaignTitle(e.getCampaignId())));
+        return a;
+    }
+
+    private String campaignTitle(UUID campaignId) {
+        return campaigns.findById(campaignId).map(Campaign::getTitle).orElse(null);
+    }
+
+    /**
+     * A bill as an entry of the NGO's document vault (document-service): category Finance, visible to team members
+     * who can see expenses, linked to the expense. The file stays in this service.
+     */
+    public static Map<String, Object> vaultFile(Attachment a, Expense e, String campaignTitle) {
+        Map<String, Object> p = new LinkedHashMap<>();
+        p.put("ngoId", e.getNgoId().toString());
+        p.put("source", "EXPENSE_BILL");
+        p.put("sourceRef", a.id().toString());
+        p.put("storageKey", a.key());
+        p.put("title", "Bill: " + e.getDescription());
+        p.put("category", "FINANCE");
+        p.put("contentType", a.contentType());
+        p.put("sizeBytes", a.size());
+        if (a.fileName() != null) p.put("originalName", a.fileName());
+        if (a.uploadedBy() != null) p.put("uploadedBy", a.uploadedBy().toString());
+        p.put("visibility", "TEAM");
+        p.put("requiredPermission", "EXPENSE_VIEW");
+        p.put("linkType", "EXPENSE");
+        p.put("linkId", e.getId().toString());
+        p.put("linkParentId", e.getCampaignId().toString());
+        if (campaignTitle != null) p.put("linkLabel", campaignTitle);
+        p.put("documentDate", e.getExpenseDate().toString());
+        p.put("createdAt", a.createdAt().toString());
+        return p;
+    }
+
+    /** Every bill, for the vault's one-time backfill. */
+    public List<Map<String, Object>> vaultFiles() {
+        List<Map<String, Object>> out = new ArrayList<>();
+        Map<UUID, String> titles = new LinkedHashMap<>();
+        for (Expense e : expenses.findAll()) {
+            for (Attachment a : attachments(e.getId())) {
+                out.add(vaultFile(a, e, titles.computeIfAbsent(e.getCampaignId(), this::campaignTitle)));
+            }
+        }
+        return out;
     }
 
     private void deleteQuietly(String key) {

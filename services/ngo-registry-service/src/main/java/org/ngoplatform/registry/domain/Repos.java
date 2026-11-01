@@ -58,6 +58,7 @@ public final class Repos {
         List<Parts.Document> findByNgoIdAndTypeAndStatusNot(UUID ngoId, String type, String status);
         Optional<Parts.Document> findByIdAndNgoId(UUID id, UUID ngoId);
         List<Parts.Document> findByExpiresOnBeforeAndStatus(java.time.LocalDate date, String status);
+        List<Parts.Document> findByStatusNot(String status);
     }
 
     public interface Verifications extends JpaRepository<Parts.VerificationEntry, UUID> {

@@ -26,7 +26,7 @@ public class EventsListener implements EventHandler {
             EventTypes.SUBSCRIPTION_EXPIRING, EventTypes.SUBSCRIPTION_PAYMENT_FAILED,
             EventTypes.CAMPAIGN_SUBMITTED, EventTypes.CAMPAIGN_PUBLISHED, EventTypes.CAMPAIGN_REJECTED,
             EventTypes.DONATION_PAID, EventTypes.CAMPAIGN_EXPENSE_SUBMITTED, EventTypes.CAMPAIGN_EXPENSE_APPROVED,
-            EventTypes.CAMPAIGN_EXPENSE_REJECTED);
+            EventTypes.CAMPAIGN_EXPENSE_REJECTED, EventTypes.MEETING_SCHEDULED, EventTypes.MEETING_ACTION_ASSIGNED);
 
     private final IdempotentConsumer inbox;
     private final NotificationPlanner planner;
@@ -152,6 +152,26 @@ public class EventsListener implements EventHandler {
                 expenseVars(e, vars);
                 vars.put("voucherNo", nz(e.str("voucherNo")));
                 yield expenseToUser("EXPENSE_APPROVED", ngoId, by, vars, e, false);
+            }
+            case EventTypes.MEETING_SCHEDULED -> {
+                vars.put("meetingTitle", nz(e.str("title")));
+                vars.put("when", Labels.dateTime(e.str("startsAt")));
+                List<Recipient> to = new java.util.ArrayList<>();
+                for (String id : nz(e.str("userIds")).split(",")) {
+                    if (!id.isBlank()) directory.user(UUID.fromString(id.strip())).map(Recipient::of).ifPresent(to::add);
+                }
+                yield to.isEmpty() ? null : new Request("MEETING_SCHEDULED", ngoId, to, vars, "/ngo/meetings/" + e.resourceId(), "MEETING",
+                        e.resourceId(), e.eventId(), true, true);
+            }
+            case EventTypes.MEETING_ACTION_ASSIGNED -> {
+                UUID owner = e.uuid("ownerUserId");
+                if (owner == null) yield null;
+                vars.put("meetingTitle", nz(e.str("meetingTitle")));
+                vars.put("text", nz(e.str("text")));
+                vars.put("dueDate", e.str("dueDate") == null || e.str("dueDate").isBlank() ? "-" : Labels.date(e.str("dueDate")));
+                List<Recipient> to = directory.user(owner).map(Recipient::of).stream().toList();
+                yield new Request("MEETING_ACTION_ASSIGNED", ngoId, to, vars, "/ngo/meetings/" + e.str("meetingId"), "MEETING",
+                        e.resourceId(), e.eventId(), true, true);
             }
             case EventTypes.CAMPAIGN_EXPENSE_REJECTED -> {
                 expenseVars(e, vars);

@@ -42,6 +42,12 @@ public final class EventTypes {
     public static final String CAMPAIGN_EXPENSE_REJECTED = "campaign.expense.rejected";
     public static final String EXPENSE_APPROVED = "operations.expense.approved";
 
+    /** A file kept by another service (registration document, expense bill, receipt) is listed in the document vault. */
+    public static final String DOCUMENT_FILE_REGISTERED = "document.file.registered";
+    public static final String DOCUMENT_FILE_REMOVED = "document.file.removed";
+    public static final String MEETING_SCHEDULED = "document.meeting.scheduled";
+    public static final String MEETING_ACTION_ASSIGNED = "document.meeting.action-assigned";
+
     public static final String TICKET_CREATED = "helpdesk.ticket.created";
     public static final String TICKET_UPDATED = "helpdesk.ticket.updated";
     public static final String TICKET_ESCALATED = "helpdesk.ticket.escalated";

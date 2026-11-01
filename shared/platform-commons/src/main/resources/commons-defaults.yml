@@ -120,6 +120,10 @@ ngo:
       "[campaign.expense.submitted]": [notification]
       "[campaign.expense.approved]": [notification]
       "[campaign.expense.rejected]": [notification]
+      "[document.file.registered]": [document]
+      "[document.file.removed]": [document]
+      "[document.meeting.scheduled]": [notification]
+      "[document.meeting.action-assigned]": [notification]
       # The HTTP relay stops at the first unreachable subscriber, so only services that run today are listed.
       # Add receipt and donor here when receipt-service / donor-service ship (rabbit transport binds them anyway).
       "[donation.donation.paid]": [campaign, notification]
@@ -128,6 +132,9 @@ ngo:
       "[notification.delivery.succeeded]": [receipt]
       "[operations.expense.approved]": [campaign]
   storage:
+    # One private bucket for every service and NGO (owner decision 2026-11-01). Keys start with ngos/<ngo-id>/
+    # (users/<user-id>/ for profile photos); access is checked by the owning service on every request.
+    bucket: ${S3_BUCKET:ngo-files}
     type: ${STORAGE_TYPE:local}
     local-root: ${STORAGE_ROOT:.local-files}
   internal-token: ${INTERNAL_TOKEN:dev-internal-token-change-me}
@@ -147,3 +154,4 @@ ngo:
     helpdesk: ${HELPDESK_URL:http://helpdesk-service}
     notification: ${NOTIFICATION_URL:http://notification-service}
     reporting: ${REPORTING_URL:http://reporting-service}
+    document: ${DOCUMENT_URL:http://document-service}

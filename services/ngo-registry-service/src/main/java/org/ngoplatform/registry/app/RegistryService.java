@@ -190,9 +190,14 @@ public class RegistryService {
         UUID docId = UUID.randomUUID();
         String key = "ngos/" + ngoId + "/documents/" + docId + "." + f.extension();
         storage.put(key, data, f.contentType());
-        documents.findByNgoIdAndTypeAndStatusNot(ngoId, type, "SUPERSEDED").forEach(Parts.Document::supersede);
+        for (Parts.Document old : documents.findByNgoIdAndTypeAndStatusNot(ngoId, type, "SUPERSEDED")) {
+            old.supersede();
+            if (!"LOGO".equals(type)) events.publish(EventTypes.DOCUMENT_FILE_REMOVED, ngoId, old.getId(), VaultFiles.removed(old));
+        }
         Parts.Document d = documents.save(new Parts.Document(ngoId, type, key, FileInspector.safeName(originalName),
                 f.contentType(), f.size(), f.sha256(), expiresOn, guard.user().userId()));
+        // Listed in the NGO's document vault (document-service); the file stays here.
+        if (!"LOGO".equals(type)) events.publish(EventTypes.DOCUMENT_FILE_REGISTERED, ngoId, d.getId(), VaultFiles.registered(d));
         if ("LOGO".equals(type)) n.setLogoKey(key);
         audit.record(ngoId, guard.user().userId(), "NGO_DOCUMENT_UPLOADED", "NGO_DOCUMENT", d.getId(), Map.of("type", type));
         return d;

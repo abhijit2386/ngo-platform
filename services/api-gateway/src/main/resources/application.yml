@@ -55,3 +55,4 @@ ngo:
     helpdesk: ${HELPDESK_URL:lb://helpdesk-service}
     notification: ${NOTIFICATION_URL:lb://notification-service}
     reporting: ${REPORTING_URL:lb://reporting-service}
+    document: ${DOCUMENT_URL:lb://document-service}

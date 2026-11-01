@@ -21,5 +21,7 @@ CREATE ROLE notification LOGIN PASSWORD 'dev-only-password';
 CREATE DATABASE notification OWNER notification;
 CREATE ROLE reporting LOGIN PASSWORD 'dev-only-password';
 CREATE DATABASE reporting OWNER reporting;
+CREATE ROLE document LOGIN PASSWORD 'dev-only-password';
+CREATE DATABASE document OWNER document;
 CREATE ROLE keycloak LOGIN PASSWORD 'dev-only-password';
 CREATE DATABASE keycloak OWNER keycloak;
