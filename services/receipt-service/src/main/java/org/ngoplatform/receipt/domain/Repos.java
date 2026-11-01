@@ -19,6 +19,9 @@ public final class Repos {
         Page<Receipt> findByDonorUserIdOrderByCreatedAtDesc(UUID userId, Pageable p);
         List<Receipt> findByStatusAndNextAttemptAtBefore(Receipt.Status s, Instant now);
         List<Receipt> findByStatusAndUpdatedAtBefore(Receipt.Status s, Instant before);
+        List<Receipt> findByStatusAndNotifiedAtIsNullAndUpdatedAtBefore(Receipt.Status s, Instant before);
+        Optional<Receipt> findByVerifyCode(String code);
+        boolean existsByDonationId(UUID donationId);
     }
 
     public interface Headers extends JpaRepository<Template.Header, UUID> {

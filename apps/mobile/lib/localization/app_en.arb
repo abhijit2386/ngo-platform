@@ -1505,5 +1505,329 @@
     }
   },
   "docTooLarge": "This file is larger than 25 MB",
-  "meetNoOpenActions": "Action items: nothing pending for you"
+  "meetNoOpenActions": "Action items: nothing pending for you",
+  "rcp12a": "12A registration number",
+  "rcp80gCount": "80G: {count}",
+  "@rcp80gCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcpAdd": "Add",
+  "rcpAddSignatory": "Add signatory",
+  "rcpAll": "All",
+  "rcpAllYears": "All years",
+  "rcpAmountLabel": "received",
+  "rcpBeingPrepared": "Receipt being prepared",
+  "rcpCancelledCount": "{count} cancelled",
+  "@rcpCancelledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcpCancelledWhy": "Cancelled: {reason}",
+  "@rcpCancelledWhy": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "rcpChannelBank": "Bank transfer",
+  "rcpChannelCash": "Cash",
+  "rcpChannelCheque": "Cheque",
+  "rcpChannelInKind": "In kind",
+  "rcpChannelOnline": "Online",
+  "rcpCount": "Receipts: {count}",
+  "@rcpCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcpDate": "Donation date",
+  "rcpDesignation": "Designation",
+  "rcpDesignationHint": "e.g. Chairman, Secretary, Treasurer",
+  "rcpDonor": "Donor",
+  "rcpDonorAccount": "Donor has an app account",
+  "rcpDonorCancelled": "This receipt was cancelled by the organisation. If a new receipt was issued, it is in your list.",
+  "rcpDonorNameNote": "The receipt shows your name as it was in your profile when the receipt was issued. If it needs correcting, ask the organisation to reissue it.",
+  "rcpEditName": "Edit name",
+  "rcpEditSignatory": "Edit name and designation",
+  "rcpEmpty": "No receipts",
+  "rcpEmptyHint": "Receipts are issued automatically for every donation, online or recorded by the team.",
+  "rcpEvCreated": "Receipt requested",
+  "rcpEvDelivered": "E-mail delivered",
+  "rcpEvFailed": "Could not be prepared (will retry)",
+  "rcpEvGenerated": "PDF issued",
+  "rcpEvNumbered": "Number given",
+  "rcpEvReissued": "Cancelled and reissued",
+  "rcpEvResent": "Sent again",
+  "rcpEvSending": "Sent to the donor",
+  "rcpEvVoided": "Cancelled (donation corrected or refunded)",
+  "rcpFailedCount": "{count, plural, =1{1 receipt could not be prepared. Tap to see it.} other{{count} receipts could not be prepared. Tap to see them.}}",
+  "@rcpFailedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcpFailedWhy": "Problem: {error}",
+  "@rcpFailedWhy": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rcpFy": "FY {fy}",
+  "@rcpFy": {
+    "placeholders": {
+      "fy": {
+        "type": "String"
+      }
+    }
+  },
+  "rcpGroupCancelled": "Cancelled",
+  "rcpGroupIssued": "Issued",
+  "rcpHistory": "History",
+  "rcpIssuedLabel": "receipts issued",
+  "rcpIssuedOn": "Issued on",
+  "rcpLastNumber": "Last number: {number}",
+  "@rcpLastNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "rcpMine": "My receipts",
+  "rcpMineEmpty": "No receipts yet",
+  "rcpMineEmptyHint": "After you donate, your receipt appears here and is e-mailed to you.",
+  "rcpNameMatchPan": "Is this the name on your PAN? For 80G it should match.",
+  "rcpNameOnReceipt": "Your receipt will show: {name}",
+  "@rcpNameOnReceipt": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rcpNoAccount": "No (e-mail or printed)",
+  "rcpNoSignatories": "No signatories yet. Receipts show \"Authorised signatory\".",
+  "rcpNoSignature": "No signature image (a line for signing is printed)",
+  "rcpNotFound": "Receipt not found",
+  "rcpOpenPdf": "Open or share PDF",
+  "rcpOptional": "Optional, printed on receipts when filled",
+  "rcpPayment": "Payment",
+  "rcpPrefix": "Receipt number prefix",
+  "rcpPrefixExample": "Next financial year starts again at 1, e.g. {example}",
+  "@rcpPrefixExample": {
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
+  },
+  "rcpPrefixInvalid": "Use 2 to 10 letters or digits",
+  "rcpPreparingCount": "{count} being prepared",
+  "@rcpPreparingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcpReason": "Reason",
+  "rcpReasonHint": "e.g. Donor asked for the trust name",
+  "rcpReasonTooShort": "At least 5 characters",
+  "rcpReceipt": "Receipt",
+  "rcpReissue": "Cancel and reissue",
+  "rcpReissueConfirm": "This receipt will be marked cancelled (it stays in the records) and a new receipt with a new number is issued for the same donation, with the donor's current profile name.",
+  "rcpReissueHint": "Use this to correct a receipt. Issued receipts are never edited.",
+  "rcpReissued": "New receipt issued",
+  "rcpRemove": "Remove",
+  "rcpRemoveSignatory": "Remove signatory",
+  "rcpRemoveSignatoryConfirm": "New receipts will no longer show this person. Receipts already issued are not changed.",
+  "rcpReplacedBy": "Replaced by {number}",
+  "@rcpReplacedBy": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "rcpReplaces": "Replaces {number}",
+  "@rcpReplaces": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "rcpRequired": "Required",
+  "rcpResend": "Send to the donor again",
+  "rcpResent": "Sent again",
+  "rcpRetried": "Trying again",
+  "rcpRetry": "Try again now",
+  "rcpSample": "See a sample receipt",
+  "rcpSampleHint": "Uses your settings, signatories, logo and a sample donor.",
+  "rcpSaved": "Saved",
+  "rcpSearchHint": "Receipt number or donor name",
+  "rcpSentOn": "E-mailed on",
+  "rcpSettings": "Receipt settings",
+  "rcpSettingsIntro": "Receipts are printed in English with your organisation's details, the donor's name as in their profile, a QR code to verify them and up to 3 signatories.",
+  "rcpSignCamera": "Signature: take a photo",
+  "rcpSignFile": "Signature: choose a PNG/JPEG file",
+  "rcpSignGallery": "Signature: from gallery",
+  "rcpSignRemove": "Remove signature image",
+  "rcpSignatories": "Signatories",
+  "rcpSignatoriesHint": "Sign on white paper and take a photo: the paper is made transparent. PNG or JPEG, up to 1 MB.",
+  "rcpSignatoryName": "Name",
+  "rcpSignatureOnFile": "Signature on file",
+  "rcpSignatureSaved": "Signature saved",
+  "rcpSignatureTooBig": "The signature picture must be at most 1 MB",
+  "rcpStatusCancelled": "Cancelled",
+  "rcpStatusFailed": "Not prepared",
+  "rcpStatusIssued": "Issued",
+  "rcpStatusPreparing": "Being prepared",
+  "rcpStatusReplaced": "Replaced",
+  "rcpStatusSending": "Sending",
+  "rcpStatusSent": "Sent",
+  "rcpThanks": "Thank-you line on receipts",
+  "rcpTitle": "Receipts",
+  "rcpTowards": "Towards",
+  "rcpVerifyCode": "Verification code (QR)",
+  "rcpViewReceipt": "Receipt",
+  "rcpYes": "Yes",
+  "rcdActivated": "Your design is used for new receipts",
+  "rcdAddField": "Add field",
+  "rcdAdminsOnly": "Only administrators can create the receipt design.",
+  "rcdBackgroundSaved": "Background changed",
+  "rcdCamera": "Take a photo",
+  "rcdChangeBackground": "Change background picture",
+  "rcdChecks": "Check the design",
+  "rcdChk80gMissing": "No 80G statement: 80G receipts will not show the 80G text",
+  "rcdChkDuplicate": "{field} is placed twice",
+  "@rcdChkDuplicate": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "rcdChkNoSignatory": "No signature field: receipts will not show who signed",
+  "rcdChkOutside": "{field} goes outside the page",
+  "@rcdChkOutside": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "rcdChkOverlap": "Fields overlap: {where}",
+  "@rcdChkOverlap": {
+    "placeholders": {
+      "where": {
+        "type": "String"
+      }
+    }
+  },
+  "rcdChkQrMissing": "No QR code: donors cannot verify the receipt",
+  "rcdChkQrSmall": "The QR code is too small to scan (make it bigger)",
+  "rcdChkRequired": "{field} is required",
+  "@rcdChkRequired": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "rcdCreate": "Create from my receipt picture",
+  "rcdDeactivated": "The standard receipt is used again",
+  "rcdDefaultName": "Our receipt",
+  "rcdDiscard": "Leave without saving",
+  "rcdDone": "Done",
+  "rcdDraft": "Draft",
+  "rcdEdit": "Edit design",
+  "rcdEditText": "Edit text",
+  "rcdEditorTitle": "Receipt design",
+  "rcdEntryHint": "Use your own printed receipt as background and place the fields on it",
+  "rcdF80g": "80G statement",
+  "rcdFAmount": "Amount",
+  "rcdFAmountInWords": "Amount in words",
+  "rcdFDate": "Date",
+  "rcdFDonorAddress": "Donor address (80G)",
+  "rcdFDonorName": "Donor name",
+  "rcdFDonorPan": "Donor PAN (80G)",
+  "rcdFLogo": "Logo",
+  "rcdFMode": "Payment mode and reference",
+  "rcdFNgo12a": "12A number",
+  "rcdFNgoAddress": "Organisation address",
+  "rcdFNgoName": "Organisation name",
+  "rcdFNgoPan": "Organisation PAN",
+  "rcdFNgoReg": "Registration number",
+  "rcdFQr": "QR code (verify)",
+  "rcdFReceiptNumber": "Receipt number",
+  "rcdFSignatory": "Signature {n}",
+  "@rcdFSignatory": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcdFStaticText": "Fixed text",
+  "rcdFThankYou": "Thank-you line",
+  "rcdFTowards": "Towards (campaign / purpose)",
+  "rcdFVerifyCode": "Verification code",
+  "rcdFile": "Choose a PNG or JPEG file",
+  "rcdGallery": "From gallery",
+  "rcdHeight": "Height",
+  "rcdHintDrag": "Drag {field} to its place, or use the arrows",
+  "@rcdHintDrag": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "rcdHintSelect": "Tap a field to move or change it",
+  "rcdInUse": "In use",
+  "rcdIntro": "Use your organisation's own receipt: photograph or scan your printed receipt (without filled details), then place the donor name, amount, receipt number, signatures and QR code on its blanks. Receipts are still printed in English with the donor's profile name.",
+  "rcdLabel": "Label before the value",
+  "rcdLines": "Lines",
+  "rcdNoBackground": "No background picture",
+  "rcdNotFound": "Design not found",
+  "rcdNotInUse": "Not in use",
+  "rcdOk": "OK",
+  "rcdPictureRules": "About the picture",
+  "rcdPictureRulesText": "PNG or JPEG only (no PDF), up to 5 MB, at least 1240 pixels on the short side so it prints sharply. A landscape picture becomes an A5 landscape receipt, a portrait one an A4 page.",
+  "rcdPreview": "Preview PDF",
+  "rcdPublish": "Publish",
+  "rcdPublishText": "New receipts will be printed on this design. Receipts already issued do not change.",
+  "rcdPublishTitle": "Use this design for receipts?",
+  "rcdPublished": "Published: new receipts use your design",
+  "rcdRemoveField": "Remove field",
+  "rcdSaved": "Design saved",
+  "rcdSeePlans": "See plans",
+  "rcdSize": "Size",
+  "rcdSnap": "Snap to grid",
+  "rcdTitle": "Custom receipt design",
+  "rcdTooBig": "The picture must be at most 5 MB",
+  "rcdUndo": "Undo",
+  "rcdUnpublishedChanges": "Changes not published yet",
+  "rcdUnsavedText": "Your latest changes are not saved.",
+  "rcdUnsavedTitle": "Leave the designer?",
+  "rcdUpgradeHint": "Print receipts on your own receipt design with the Professional plan. Standard receipts with your logo, signatures and QR code are included in every plan.",
+  "rcdUpgradeTitle": "Your own receipt design",
+  "rcdUseStandard": "Use standard receipt",
+  "rcdUseThis": "Use this design",
+  "rcdWidth": "Width"
 }

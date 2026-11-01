@@ -11,6 +11,7 @@ import '../../design_system/components.dart';
 import '../../design_system/tokens.dart';
 import '../../localization/app_localizations.dart';
 import '../campaigns/campaign_api.dart';
+import '../receipts/receipts_api.dart' show myReceiptsProvider;
 
 /// Donor's last 80G details (their own data) for prefilling.
 final taxProfileProvider = FutureProvider<Map<String, dynamic>>((ref) async {
@@ -167,7 +168,31 @@ class _DonateSheetState extends ConsumerState<DonateSheet> {
               ],
             ],
             const SizedBox(height: AppSpacing.sm),
-            Text(t.receiptTo('${me?.name ?? ''}', me?.email ?? ''), style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+            // Owner decision 2026-11-01: the receipt shows the name exactly as in the donor's profile; donors can fix a
+            // nickname from Google/Facebook before paying.
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+              decoration: BoxDecoration(
+                color: _want80g ? const Color(0xFFFFF7E6) : AppColors.primarySoft,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(children: [
+                const Icon(Icons.receipt_long_outlined, size: 20, color: AppColors.textMuted),
+                const SizedBox(width: 8),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(t.rcpNameOnReceipt('${me?.name ?? ''}'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(_want80g ? t.rcpNameMatchPan : t.receiptTo('${me?.name ?? ''}', me?.email ?? ''),
+                      style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                ])),
+                TextButton(
+                  onPressed: () async {
+                    await context.push('/profile');
+                    ref.invalidate(meProvider);
+                  },
+                  child: Text(t.rcpEditName),
+                ),
+              ]),
+            ),
             const SizedBox(height: AppSpacing.md),
             FilledButton(
               onPressed: _busy ? null : _continue,
@@ -350,10 +375,17 @@ class MyDonationsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = L10n.of(context);
     final data = ref.watch(myDonationsProvider);
+    final receipts = {for (final r in ref.watch(myReceiptsProvider).value ?? const <Map<String, dynamic>>[])
+      if (r['status'] != 'VOIDED' && r['status'] != 'REISSUED') '${r['donationId']}': r};
     return Scaffold(
-      appBar: AppBar(title: Text(t.navDonations)),
+      appBar: AppBar(title: Text(t.navDonations), actions: [
+        IconButton(tooltip: t.rcpMine, icon: const Icon(Icons.receipt_long_outlined), onPressed: () => context.push('/donor/receipts')),
+      ]),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(myDonationsProvider),
+        onRefresh: () async {
+          ref.invalidate(myDonationsProvider);
+          ref.invalidate(myReceiptsProvider);
+        },
         child: data.when(
           loading: () => const LoadingView(),
           error: (e, _) => ListView(children: [ErrorState(message: ApiError.from(e).message, onRetry: () => ref.invalidate(myDonationsProvider))]),
@@ -388,6 +420,15 @@ class MyDonationsPage extends ConsumerWidget {
                         if (d['campaignTitle'] != null)
                           Text('${d['ngoName'] ?? ''}', style: const TextStyle(color: AppColors.textMuted)),
                         Text(formatDate(d['paidAt'] ?? d['createdAt']), style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                        if (receipts['${d['id']}'] != null)
+                          TextButton.icon(
+                            style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
+                            onPressed: () => context.push('/donor/receipts/${receipts['${d['id']}']!['id']}'),
+                            icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                            label: Text(t.rcpViewReceipt),
+                          )
+                        else if (d['status'] == 'PAID')
+                          Text(t.rcpBeingPrepared, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                       ])),
                       Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                         Text(formatInr(d['amount']), style: const TextStyle(fontWeight: FontWeight.w700)),

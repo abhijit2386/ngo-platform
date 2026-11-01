@@ -20,7 +20,7 @@ _Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (ses
 | subscription-service | catalog, entitlements, trial, quotes/checkout, proration, blocks, downgrade impact, lifecycle, reminders, invoices PDF, mock billing | NOT YET | none | |
 | donor-service | donors, dedupe/merge, import/export, segments, follows, privacy | NOT YET | none | |
 | donation-payment-service | online checkout with test provider, webhooks, ledger, team/80G/campaign rules (2026-10-29); refunds, reconciliation, offline/corrections drafted only | yes (2026-10-29) | 5 unit; e2e test-donations 34/34 | Razorpay adapter not built |
-| receipt-service | numbering per FY, PDF standard/custom, designers basic/advanced, approvals, versions, retries, signed guest links | NOT YET | none | |
+| receipt-service | receipts after every paid donation (online + offline), numbering PREFIX/<FY>/000001 per NGO and financial year (gap-free), standard A5 PDF (logo, 12A, 80G block, amount in words, up to 3 signatories with signature images, QR verification), e-mail + in-app delivery, donor/guest download, NGO register + search + summary, reissue/void with history, vault entries; Basic designer (own background picture + fields) (2026-11-01) | yes (2026-11-01) | unit 19+; e2e test-receipts | Advanced designer (Enterprise: conditions, several templates, approval UI) not in the app yet; Form 10BD export later |
 | campaign-project-service | campaigns: approval workflow, photos, share page, public discovery, test donations (2026-10-29); campaign accounts: budget, expenses + bills + approval, vendors, staff cash ledger, account sheet PDF/Excel (2026-11-01); projects drafted only | yes (2026-10-29) | 15 unit; e2e test-campaigns 58/58 | projects not reviewed/tested yet |
 | ngo-operations-service | **not started** (volunteers, beneficiaries, expenses/finance) | | | |
 | helpdesk-service | **not started** | | | |
@@ -259,6 +259,52 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
 - Regression: test-expenses 66/66, test-campaigns 77/77, test-donations 34/34, test-notifications 26/26.
 - Next (agreed phases): phase 2 donor receipts (PDF + QR) in the vault for donors; phase 3 expiry reminders,
   document versions, CA read-only access.
+
+### Session 2026-11-01 (evening): donation receipts R1 + Basic receipt designer R2 (receipt-service live)
+Owner decisions: receipts always in English; the donor's name printed exactly as in the donor's profile (Google,
+Facebook or e-mail sign-up; donors can edit their name in Profile and the app reminds them before an 80G donation);
+numbers PREFIX/<FY>/000001 restarting every financial year; custom design = premium (Basic designer on Professional,
+any admin publishes; Enterprise adds approval); background pictures PNG/JPEG only, size-limited (no PDF).
+- receipt-service (port 8087, DB receipt, V2): receipts created from donation.paid (online + offline) and by a one-time
+  backfill for earlier donations; the number and printed facts are committed first (gap-free series, retries print the
+  same receipt), then the PDF is rendered and stored, then the receipt is marked issued. DB triggers keep issued
+  receipts immutable and undeletable; corrections are cancel + reissue (new number, both linked); donation voided or
+  fully refunded -> receipt cancelled automatically. QR code + 10-character code on every receipt; public page
+  /api/v1/public/receipts/verify/<code> shows organisation, number, date, amount, donor initials and VALID/CANCELLED.
+- Standard receipt (all plans): A5 landscape, NGO header with logo, Reg./PAN/12A, number + date, donor name, PAN and
+  address (80G only), amount with the rupee sign and Indian grouping, amount in words (lakh/crore), payment mode and
+  reference, campaign/purpose, 80G statement (verified + valid on the donation date + donor asked with PAN), thank-you
+  line, QR, up to 3 signatories (signature image above a line, name, designation). Fonts embedded: DejaVu Sans (text,
+  rupee sign) and GNU FreeSans for names in Devanagari or other scripts, shaped by Java2D/HarfBuzz (PDFBox cannot
+  join Indic letters).
+- Settings (admins): prefix (default from the NGO name), 12A number, thank-you line; signatories with signature images
+  (PNG/JPEG, max 1 MB, re-encoded, white paper made transparent); "see a sample receipt".
+- Delivery: notification RECEIPT_ISSUED (category ACCOUNT = always sent, en/hi/mr) with a 30-day signed download link
+  for guests/offline donors with e-mail; in-app for donors with an account; DELIVERED when the e-mail was sent.
+- donation-service: signed-in donors' names are taken from the identity profile on the server (whatever the app sends);
+  internal list of paid donations (backfill). document-service V3: receipts appear in Documents > Receipts.
+- Basic designer (Professional+): background picture PNG/JPEG only, max 5 MB, at least 1240 px on the short side
+  (re-encoded JPEG, page 595 pt wide, height from the picture: landscape = A5, portrait = A4); default layout; fields:
+  receipt number, date, donor name/PAN/address, amount, amount in words, payment, towards, NGO name/address/PAN/
+  registration/12A, 80G statement, thank-you, verification code, fixed text, signature 1-3, QR code, logo; checks
+  (required fields, inside the page, QR at least 45 pt, overlaps); preview with a sample donor; publish = used for new
+  receipts; "use standard receipt" switches back. Issued receipts keep the design version they were printed with.
+- App: Receipts (summary per FY, search by number/donor, status and FY filters, detail with history, open/share PDF,
+  send again, cancel and reissue with reason, retry), Receipt settings + signatories (camera/gallery/file), sample
+  receipt, designer overview + editor (tap a field, drag it onto the receipt, arrows, size/width/height/lines/bold/
+  alignment/label, add/remove fields, zoom 1-3x, snap to grid, undo, check, preview, publish, change background);
+  donor: My receipts (profile + donations list button), receipt detail; donate sheet shows "Your receipt will show:
+  <name> - Edit name" (80G: "is this the name on your PAN?"). ~190 strings (hi/mr drafts).
+- Seeds/tests: seed-receipts.ps1; test-receipts.ps1 (settings, signatories, online + Devanagari profile name + cash
+  receipts, e-mail/in-app, guest link, QR check, register/search/summary, vault, reissue, correction, immutability,
+  designer); unit tests ReceiptRulesTest, ImagesTest, PdfRendererTest, TemplateDefinitionTest.
+- Stability: one run crashed the receipt-service JVM (native access violation, no report) while rendering; local
+  start now gives receipt-service the JDK default 1 MB thread stack (others keep 512k), 320 MB heap, and every service
+  writes `logs/hs_err_<service>_<pid>.log` if a JVM ever crashes; non-Latin name shaping is serialised.
+  Results: test-receipts 68/68 (repeated), test-donations 34/34, test-documents 57/57, test-notifications 26/26.
+- Design names: archived designs no longer block reusing a name (V3 partial unique index, NAME_TAKEN check).
+- Next: Advanced designer screens (several templates, conditions, approval), Form 10BD/10BE export for the CA,
+  receipts for in-kind donations with valuation notes.
 
 ## Next steps (in order) - agreed with the owner 2026-10-29
 Done since the original plan: first emulator runs, core services built and UI-tested (phase 1), notification-service.

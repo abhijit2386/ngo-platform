@@ -98,3 +98,15 @@ Admin Asha approves a bill added by staff (voucher number), then the account she
 <img src="meetings-08-agm.png" alt="meetings-08-agm" width="270">
 <img src="meetings-09-form.png" alt="meetings-09-form" width="270">
 <img src="meetings-10-form.png" alt="meetings-10-form" width="270">
+
+## Donation receipts and the custom receipt designer (2026-11-01, Asha / admin)
+
+Receipts are printed in English with the donor's profile name, numbered `PREFIX/2026-27/000001` per financial year,
+signed by up to 3 signatories and verifiable by QR code. Professional plans can print on their own receipt-book design.
+
+<img src="receipts-01-register.png" alt="receipts-01-register" width="270">
+<img src="receipts-02-detail.png" alt="receipts-02-detail" width="270">
+<img src="receipts-03-settings.png" alt="receipts-03-settings" width="270">
+<img src="receipts-04-signatories.png" alt="receipts-04-signatories" width="270">
+<img src="receipts-05-designs.png" alt="receipts-05-designs" width="270">
+<img src="receipts-06-designer.png" alt="receipts-06-designer" width="270">

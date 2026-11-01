@@ -266,6 +266,8 @@ class DonorProfilePage extends ConsumerWidget {
           onTap: () => context.push('/profile'),
         ),
         const Divider(),
+        ListTile(leading: const Icon(Icons.receipt_long_outlined), title: Text(t.rcpMine), trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/donor/receipts')),
         ListTile(leading: const Icon(Icons.apartment), title: Text(t.switchToNgo),
             onTap: () => ref.read(prefsProvider.notifier).setMode('ngo')),
         if (me?.isPlatformSupport ?? false)

@@ -1,7 +1,7 @@
 # Starts the container-free development stack: PostgreSQL, Keycloak, Mailpit, Eureka and the selected services.
 #   -Services identity-service,ngo-registry-service,...  (default: the core set below)
 param([string[]]$Services = @('identity-service', 'ngo-registry-service', 'subscription-service', 'notification-service',
-  'campaign-project-service', 'donation-payment-service', 'document-service', 'api-gateway'))
+  'campaign-project-service', 'donation-payment-service', 'receipt-service', 'document-service', 'api-gateway'))
 $ErrorActionPreference = 'Continue'
 $Repo = 'D:\ngo-platform'; $Tools = 'D:\tools'; $KcVer = '26.7.2'
 $jdk = (Get-ChildItem $Tools -Directory -Filter 'jdk-21*' | Select-Object -First 1).FullName
@@ -53,8 +53,12 @@ $pidFile = "$Repo\logs\backend.pids"
 foreach ($svc in $order) {
   if (Port-Open $ports[$svc]) { Log "already running $svc"; continue }
   $out = "$Repo\logs\svc-$svc.log"
-  $jargs = @('-Xms48m', '-Xmx256m', '-XX:MaxMetaspaceSize=160m', '-XX:+UseSerialGC', '-XX:TieredStopAtLevel=1',
-            '-Xss512k', '-Dfile.encoding=UTF-8', '-jar', "$Repo\services\$svc\target\app.jar")
+  # receipt-service renders PDFs (Java2D text shaping, image encoding run in native code): a 512k stack let it crash
+  # with an access violation and no report (2026-11-01), so it gets the JDK default 1 MB and a little more heap.
+  $stack = if ($svc -eq 'receipt-service') { '-Xss1m' } else { '-Xss512k' }
+  $heap = if ($svc -eq 'receipt-service') { '-Xmx320m' } else { '-Xmx256m' }
+  $jargs = @('-Xms48m', $heap, '-XX:MaxMetaspaceSize=160m', '-XX:+UseSerialGC', '-XX:TieredStopAtLevel=1',
+            $stack, "-XX:ErrorFile=$Repo\logs\hs_err_$svc`_%p.log", '-Dfile.encoding=UTF-8', '-jar', "$Repo\services\$svc\target\app.jar")
   $p = Start-Process -FilePath "$jdk\bin\java.exe" -ArgumentList $jargs -WorkingDirectory "$Repo\services\$svc" `
         -RedirectStandardOutput $out -RedirectStandardError "$out.err" -WindowStyle Hidden -PassThru
   Add-Content $pidFile "$($p.Id) $svc"

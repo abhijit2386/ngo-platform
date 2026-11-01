@@ -63,3 +63,13 @@ Priya (finance) can record but not approve. `test-expenses.ps1` uses its own "E2
 | Board meeting - October | Asha | approved; action items for Sunil (quotations) and Priya (account sheet) |
 | Board meeting - November (yesterday) | Asha | draft minutes: waits for approval; action item for Ravi |
 | Staff meeting - campaign planning (+3 days), Health committee (+10 days) | Asha | upcoming |
+
+## Donation receipts (`seed-receipts.ps1`, idempotent)
+| Item | Value |
+|---|---|
+| Prefix / numbers | ASF/<FY>/000001, restarting every 1 April |
+| 12A number | AAATA1234BE20214 (fictional) |
+| Thank-you line | Thank you for standing with the children of Wadi. |
+| Signatories | Asha Patil (Chairman), Ravi Kulkarni (Secretary), both with signature images |
+| Receipts | issued automatically for every paid donation (earlier seed donations by backfill) |
+| Designer | Asha Seva is on the Professional trial: Basic designer available (test-receipts creates and archives an E2E design) |

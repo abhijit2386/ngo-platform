@@ -136,8 +136,11 @@ public class DonationService {
         if (guest && (r.donorEmail() == null || r.donorEmail().isBlank())) {
             throw ApiException.badRequest("EMAIL_REQUIRED", "Email is required so we can send your receipt");
         }
-        UUID donorId = clients.resolveDonor(r.ngoId(), userId, r.donorName(), r.donorEmail(), r.donorPhone(), r.donorPan(), guest);
-        Donation d = new Donation(r.ngoId(), donorId, userId, r.donorName().trim(), lower(r.donorEmail()),
+        // Signed-in donors: the name on the donation and its receipt is the profile name, whatever the app sent.
+        String donorName = userId != null ? java.util.Optional.ofNullable(clients.profileName(userId)).orElse(r.donorName().trim())
+                : r.donorName().trim();
+        UUID donorId = clients.resolveDonor(r.ngoId(), userId, donorName, r.donorEmail(), r.donorPhone(), r.donorPan(), guest);
+        Donation d = new Donation(r.ngoId(), donorId, userId, donorName, lower(r.donorEmail()),
                 r.wants80g() ? r.donorPan().trim().toUpperCase() : null, r.campaignId(), r.projectId(), Money.round(r.amount()),
                 r.purpose(), Donation.Channel.ONLINE, r.wants80g());
         d.details(r.wants80g() ? r.donorAddress().strip() : null, ngo.get("displayName") == null ? null : ngo.get("displayName").toString(),

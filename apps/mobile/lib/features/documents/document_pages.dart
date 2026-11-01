@@ -755,6 +755,7 @@ class _DocumentBody extends ConsumerWidget {
         'CAMPAIGN' => '/ngo/campaigns/${d['linkId']}',
         'EXPENSE' => d['linkParentId'] == null ? null : '/ngo/campaigns/${d['linkParentId']}/expenses/${d['linkId']}',
         'MEETING' => '/ngo/meetings/${d['linkId']}',
+        'RECEIPT' => '/ngo/receipts/${d['linkId']}',
         'NGO' => '/ngo/profile',
         _ => null,
       };

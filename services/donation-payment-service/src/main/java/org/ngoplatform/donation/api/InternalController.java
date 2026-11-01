@@ -14,9 +14,18 @@ import org.springframework.web.bind.annotation.*;
 public class InternalController {
     private final Repos.Donations donations;
     private final Repos.Payments payments;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
-    public InternalController(Repos.Donations donations, Repos.Payments payments) {
-        this.donations = donations; this.payments = payments;
+    public InternalController(Repos.Donations donations, Repos.Payments payments, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+        this.donations = donations; this.payments = payments; this.jdbc = jdbc;
+    }
+
+    /** Paid donations, oldest first, 200 per page: receipt-service creates receipts for donations made before it ran. */
+    @GetMapping("/paid")
+    public java.util.List<Map<String, Object>> paid(@RequestParam(defaultValue = "0") int page) {
+        return jdbc.queryForList("select id::text as \"donationId\", ngo_id::text as \"ngoId\", donor_id::text as \"donorId\", "
+                + "donor_user_id::text as \"donorUserId\", amount::text as amount from donations "
+                + "where status in ('PAID','PARTIALLY_REFUNDED') and not voided order by paid_at, id limit 200 offset ?", Math.max(0, page) * 200);
     }
 
     @GetMapping("/{id}")
@@ -38,6 +47,10 @@ public class InternalController {
         if (d.getPurpose() != null) m.put("purpose", d.getPurpose());
         if (d.getCampaignId() != null) m.put("campaignId", d.getCampaignId().toString());
         if (d.getPaidAt() != null) m.put("paidAt", d.getPaidAt().toString());
+        if (d.getDonorAddress() != null) m.put("donorAddress", d.getDonorAddress());
+        if (d.getCampaignTitle() != null) m.put("campaignTitle", d.getCampaignTitle());
+        if (d.getNgoName() != null) m.put("ngoName", d.getNgoName());
+        m.put("voided", d.isVoided());
         String ref = d.getOfflineReference();
         if (ref == null) {
             ref = payments.findByDonationIdOrderByCreatedAtDesc(id).stream().map(p -> p.getProviderPaymentId())

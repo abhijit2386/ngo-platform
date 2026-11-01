@@ -26,6 +26,7 @@ class MorePage extends ConsumerWidget {
       appBar: AppBar(title: Text(t.navMore)),
       body: ListView(children: [
         item(Icons.apartment, t.ngoProfile, () => context.push('/ngo/profile')),
+        if (m?.can('RECEIPT_VIEW') ?? false) item(Icons.receipt_long_outlined, t.rcpTitle, () => context.push('/ngo/receipts')),
         if (m?.can('DOCUMENT_VIEW') ?? false) item(Icons.folder_copy_outlined, t.docTitle, () => context.push('/ngo/documents')),
         if (m?.can('GOVERNANCE_VIEW') ?? false) item(Icons.event_note_outlined, t.meetTitle, () => context.push('/ngo/meetings')),
         if (m?.can('SUBSCRIPTION_VIEW') ?? true) item(Icons.workspace_premium, t.subscription, () => context.push('/ngo/subscription')),

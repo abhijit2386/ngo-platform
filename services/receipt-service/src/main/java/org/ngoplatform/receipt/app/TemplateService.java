@@ -3,16 +3,12 @@ package org.ngoplatform.receipt.app;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import org.ngoplatform.commons.audit.AuditLog;
 import org.ngoplatform.commons.error.ApiException;
 import org.ngoplatform.commons.security.EntitlementResolver;
 import org.ngoplatform.commons.security.Entitlements;
-import org.ngoplatform.commons.storage.FileInspector;
 import org.ngoplatform.commons.storage.ObjectStorage;
 import org.ngoplatform.receipt.domain.Repos;
 import org.ngoplatform.receipt.domain.Template;
@@ -34,12 +30,15 @@ public class TemplateService {
     private final PdfRenderer pdf;
     private final AuditLog audit;
     private final ObjectMapper mapper;
+    private final ReceiptService receipts;
 
     public TemplateService(Repos.Headers headers, Repos.Versions versions, Repos.Approvals approvals, ObjectStorage storage,
-                           EntitlementResolver entitlements, PdfRenderer pdf, AuditLog audit, ObjectMapper mapper) {
+                           EntitlementResolver entitlements, PdfRenderer pdf, AuditLog audit, ObjectMapper mapper, ReceiptService receipts) {
         this.headers = headers; this.versions = versions; this.approvals = approvals; this.storage = storage;
-        this.entitlements = entitlements; this.pdf = pdf; this.audit = audit; this.mapper = mapper;
+        this.entitlements = entitlements; this.pdf = pdf; this.audit = audit; this.mapper = mapper; this.receipts = receipts;
     }
+
+    static final TemplateDefinition.Page A5_LANDSCAPE = new TemplateDefinition.Page(595.28f, 419.53f);
 
     Template.Header.Kind allowedKind(UUID ngoId) {
         Entitlements e = entitlements.get(ngoId);
@@ -60,8 +59,12 @@ public class TemplateService {
             throw ApiException.entitlement(Entitlements.RECEIPT_ADVANCED_DESIGNER,
                     "Your plan allows one custom template. Edit the existing one or upgrade to Enterprise for more.");
         }
+        if (headers.findByNgoIdOrderByUpdatedAtDesc(ngoId).stream()
+                .anyMatch(x -> x.getStatus() != Template.Header.Status.ARCHIVED && x.getName().equalsIgnoreCase(name.trim()))) {
+            throw ApiException.conflict("NAME_TAKEN", "A design with this name already exists");
+        }
         Template.Header h = headers.save(new Template.Header(ngoId, name.trim(), kind, actor));
-        versions.save(new Template.Version(h.getId(), 1, json(def), null, actor));
+        versions.save(new Template.Version(h.getId(), 1, json(def == null ? TemplateDefinition.defaults(A5_LANDSCAPE) : def), null, actor));
         audit.record(ngoId, actor, "RECEIPT_TEMPLATE_CREATED", "RECEIPT_TEMPLATE", h.getId(), Map.of("kind", kind.name()));
         return h;
     }
@@ -81,28 +84,26 @@ public class TemplateService {
         return h;
     }
 
+    /** Background: PNG/JPEG only (owner decision 2026-11-01), re-encoded as JPEG; page proportions follow the image. */
     @Transactional
     public Template.Header uploadBackground(UUID ngoId, UUID actor, UUID id, byte[] data) {
         allowedKind(ngoId);
         Template.Header h = load(ngoId, id);
-        FileInspector.Inspected f = FileInspector.inspect(data, 8L * 1024 * 1024, Set.of("application/pdf", "image/png", "image/jpeg"));
-        String key = "ngos/" + ngoId + "/templates/" + id + "/bg-" + UUID.randomUUID() + "." + f.extension();
-        storage.put(key, data, f.contentType());
+        Images.Background bg = Images.background(data);
+        String key = "ngos/" + ngoId + "/receipts/templates/" + id + "/bg-" + UUID.randomUUID() + ".jpg";
+        storage.put(key, bg.jpeg(), "image/jpeg");
         Template.Version cur = versions.findByTemplateIdAndVersionNo(id, h.getCurrentVersion()).orElseThrow();
         int next = h.getCurrentVersion() + 1;
-        String def = cur.getDefinition();
-        if ("application/pdf".equals(f.contentType())) {
-            // Match the page size to the uploaded printed receipt.
-            try {
-                var size = PdfRenderer.pdfPageSize(data);
-                TemplateDefinition d = mapper.readValue(def, TemplateDefinition.class);
-                def = json(new TemplateDefinition(new TemplateDefinition.Page(size.getWidth(), size.getHeight()), d.fields(), d.showLogo()));
-            } catch (Exception e) {
-                throw ApiException.badRequest("UNREADABLE_PDF", "The PDF could not be read");
-            }
+        String def;
+        try {
+            TemplateDefinition d = mapper.readValue(cur.getDefinition(), TemplateDefinition.class);
+            def = json(d.withPage(TemplateDefinition.pageFor(bg.width(), bg.height())));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
         }
         versions.save(new Template.Version(id, next, def, key, actor));
         h.newVersion(next);
+        audit.record(ngoId, actor, "RECEIPT_TEMPLATE_BACKGROUND", "RECEIPT_TEMPLATE", id, Map.of("version", next));
         return h;
     }
 
@@ -120,39 +121,40 @@ public class TemplateService {
         return definition(id, h.getCurrentVersion()).validate(h.getKind() == Template.Header.Kind.ADVANCED);
     }
 
-    /** REC-013: preview with sample data (never real donor data). */
+    /** REC-013: preview with this NGO's details and signatories and a sample donor (never real donor data). */
     public byte[] preview(UUID ngoId, UUID id) {
         Template.Header h = load(ngoId, id);
         Template.Version v = versions.findByTemplateIdAndVersionNo(id, h.getCurrentVersion()).orElseThrow();
-        TemplateDefinition def = definition(id, h.getCurrentVersion());
-        Map<String, String> sample = new HashMap<>();
-        sample.put("receiptNumber", "RCPT/2026-27/000123");
-        sample.put("donorName", "Sample Donor");
-        sample.put("donorPan", "ABCDE1234F");
-        sample.put("donorAddress", "12 Sample Road, Thane, Maharashtra 400601");
-        sample.put("amount", "5,001.00");
-        sample.put("amountInWords", AmountInWords.of(new BigDecimal("5001")));
-        sample.put("date", "15 Aug 2026");
-        sample.put("paymentReference", "UTR000000000");
-        sample.put("purpose", "Education support");
-        sample.put("channel", "ONLINE");
-        sample.put("ngoName", "Your Organization");
-        sample.put("ngoAddress", "Registered address");
-        sample.put("ngoPan", "AAATS0000A");
-        sample.put("ngoRegistrationNumber", "F-00000 (MUM)");
-        sample.put("tax80gText", "Eligible for deduction u/s 80G (sample text).");
-        sample.put("signatoryName", "Authorised Signatory");
-        sample.put("signatoryDesignation", "Secretary");
-        byte[] bg = null;
-        String bgType = null;
-        if (v.getBackgroundKey() != null) {
-            try (InputStream in = storage.get(v.getBackgroundKey())) { bg = in.readAllBytes(); } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-            bgType = v.getBackgroundKey().endsWith(".pdf") ? "application/pdf" : "image";
+        return receipts.previewTemplate(ngoId, definition(id, h.getCurrentVersion()), background(v));
+    }
+
+    /** The background picture of the current version (editor), or null. */
+    public byte[] background(UUID ngoId, UUID id) {
+        Template.Header h = load(ngoId, id);
+        byte[] b = background(versions.findByTemplateIdAndVersionNo(id, h.getCurrentVersion()).orElseThrow());
+        if (b == null) throw ApiException.notFound("Background");
+        return b;
+    }
+
+    private byte[] background(Template.Version v) {
+        if (v.getBackgroundKey() == null) return null;
+        try (InputStream in = storage.get(v.getBackgroundKey())) { return in.readAllBytes(); } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
-        return pdf.custom(def, bg, bgType, new PdfRenderer.Data(sample, null, true),
-                Map.of("tax80g", "true", "channel", "ONLINE", "hasPan", "true"));
+    }
+
+    /** "Use the standard receipt again": the design stays saved and can be switched back on. */
+    @Transactional
+    public Template.Header setActive(UUID ngoId, UUID actor, UUID id, boolean active) {
+        Template.Header h = load(ngoId, id);
+        if (active) {
+            allowedKind(ngoId);
+            if (h.getPublishedVersion() == null) throw ApiException.rule("NOT_PUBLISHED", "Publish the design first");
+            headers.findByNgoIdAndActiveTrue(ngoId).filter(o -> !o.getId().equals(id)).ifPresent(o -> { o.setActive(false); headers.saveAndFlush(o); });
+        }
+        h.setActive(active);
+        audit.record(ngoId, actor, active ? "RECEIPT_TEMPLATE_ACTIVATED" : "RECEIPT_TEMPLATE_DEACTIVATED", "RECEIPT_TEMPLATE", id, Map.of());
+        return h;
     }
 
     /** BASIC publishes directly; ADVANCED goes through maker-checker approval. */

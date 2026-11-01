@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+@org.springframework.scheduling.annotation.EnableScheduling
 @SpringBootApplication(scanBasePackages = {"org.ngoplatform.commons", "org.ngoplatform.receipt"})
 @EntityScan({"org.ngoplatform.commons", "org.ngoplatform.receipt"})
 @EnableJpaRepositories(basePackages = {"org.ngoplatform.commons", "org.ngoplatform.receipt"}, considerNestedRepositories = true)

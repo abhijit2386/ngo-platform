@@ -18,15 +18,33 @@ public class Clients {
     private final RestClient registry;
     private final RestClient donor;
     private final RestClient campaign;
+    private final RestClient identity;
     private final boolean donorResolveEnabled;
 
     public Clients(InternalClients clients, @Value("${ngo.services.ngo-registry}") String registry,
                    @Value("${ngo.services.donor}") String donor, @Value("${ngo.services.campaign}") String campaign,
+                   @Value("${ngo.services.identity}") String identity,
                    @Value("${ngo.donors.resolve-enabled:false}") boolean donorResolveEnabled) {
         this.registry = clients.forBaseUrl(registry);
         this.donor = clients.forBaseUrl(donor);
         this.campaign = clients.forBaseUrl(campaign);
+        this.identity = clients.forBaseUrl(identity);
         this.donorResolveEnabled = donorResolveEnabled;
+    }
+
+    /**
+     * The signed-in donor's name exactly as in their profile (Google / Facebook / e-mail sign-up, edited by the donor):
+     * receipts must match the account (owner decision 2026-11-01). Null when the profile has no name yet.
+     */
+    public String profileName(UUID userId) {
+        try {
+            Map<String, Object> c = identity.get().uri("/internal/v1/users/{id}/contact", userId).retrieve()
+                    .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+            Object n = c == null ? null : c.get("name");
+            return n == null || n.toString().isBlank() ? null : n.toString().strip();
+        } catch (RestClientException e) {
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "IDENTITY_UNAVAILABLE", "Please retry in a moment");
+        }
     }
 
     /** Campaign facts at checkout: ngoId, title, status, startDate, endDate. */

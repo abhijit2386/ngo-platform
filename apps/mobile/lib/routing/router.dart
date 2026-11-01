@@ -25,6 +25,8 @@ import '../features/accounts/sheet_pages.dart';
 import '../features/accounts/team_money_pages.dart';
 import '../features/documents/document_pages.dart';
 import '../features/meetings/meeting_pages.dart';
+import '../features/receipts/receipt_designer.dart';
+import '../features/receipts/receipt_pages.dart';
 import 'shells.dart';
 
 /// Bridges Riverpod state changes to GoRouter re-evaluation of redirects.
@@ -138,6 +140,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/ngo/meetings/:id', builder: (_, s) => MeetingDetailPage(meetingId: s.pathParameters['id']!)),
       GoRoute(path: '/ngo/meetings/:id/edit', builder: (_, s) => MeetingFormPage(meetingId: s.pathParameters['id']!)),
       GoRoute(path: '/ngo/action-items', builder: (_, __) => const ActionItemsPage()),
+      // Donation receipts: fixed paths before ':id'.
+      GoRoute(path: '/ngo/receipts', builder: (_, __) => const ReceiptsPage()),
+      GoRoute(path: '/ngo/receipts/settings', builder: (_, __) => const ReceiptSettingsPage()),
+      GoRoute(path: '/ngo/receipts/design', builder: (_, __) => const ReceiptDesignPage()),
+      GoRoute(path: '/ngo/receipts/design/:id', builder: (_, s) => TemplateEditorPage(templateId: s.pathParameters['id']!)),
+      GoRoute(path: '/ngo/receipts/:id', builder: (_, s) => ReceiptDetailPage(receiptId: s.pathParameters['id']!)),
+      GoRoute(path: '/donor/receipts', builder: (_, __) => const MyReceiptsPage()),
+      GoRoute(path: '/donor/receipts/:id', builder: (_, s) => DonorReceiptPage(receiptId: s.pathParameters['id']!)),
       GoRoute(path: '/ngo/staff-money/:uid', builder: (_, s) => StaffLedgerPage(userId: s.pathParameters['uid']!)),
       GoRoute(path: '/ngo/subscription', builder: (_, __) => const SubscriptionPage()),
       GoRoute(path: '/ngo/subscription/plans', builder: (_, __) => const PlansPage()),
