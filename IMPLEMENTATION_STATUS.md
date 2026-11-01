@@ -21,7 +21,7 @@ _Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (ses
 | donor-service | donors, dedupe/merge, import/export, segments, follows, privacy | NOT YET | none | |
 | donation-payment-service | online checkout with test provider, webhooks, ledger, team/80G/campaign rules (2026-10-29); refunds, reconciliation, offline/corrections drafted only | yes (2026-10-29) | 5 unit; e2e test-donations 34/34 | Razorpay adapter not built |
 | receipt-service | numbering per FY, PDF standard/custom, designers basic/advanced, approvals, versions, retries, signed guest links | NOT YET | none | |
-| campaign-project-service | campaigns: approval workflow, covers, public discovery, test donations (2026-10-29); projects/milestones/budgets drafted only | yes (2026-10-29) | 15 unit; e2e test-campaigns 58/58 | projects not reviewed/tested yet |
+| campaign-project-service | campaigns: approval workflow, photos, share page, public discovery, test donations (2026-10-29); campaign accounts: budget, expenses + bills + approval, vendors, staff cash ledger, account sheet PDF/Excel (2026-11-01); projects drafted only | yes (2026-10-29) | 15 unit; e2e test-campaigns 58/58 | projects not reviewed/tested yet |
 | ngo-operations-service | **not started** (volunteers, beneficiaries, expenses/finance) | | | |
 | helpdesk-service | **not started** | | | |
 | notification-service | done: templates en/hi/mr (10 events x e-mail + in-app), event consumer, in-app inbox, e-mail via SMTP (Mailpit), retries with backoff + dead letter + replay, preferences/opt-outs, history, admin template edit/preview | yes (2026-10-29) | 58 unit tests pass; API e2e `scripts/test-notifications.ps1` | push/SMS/WhatsApp adapters not built (interface ready); receipt e-mails wait for receipt-service |
@@ -178,6 +178,43 @@ dataset unchanged (2 admins / 2 staff / 3 donors).
   command runner hung when a test restarted Mailpit with Start-Process; the test now starts it detached (WMI).
 - Next: 80G/standard receipts (receipt-service), offline donations (cash/cheque) in the NGO app, NGO donations list,
   Razorpay adapter (needs the platform's Razorpay partner account), guest donations from the share page.
+
+### Session 2026-11-01: campaign accounts - expenses, bills, vendors, budget, staff cash, account sheet
+Owner request: "track expenses per campaign so that at the end of the campaign they can generate the account sheet,
+instead of registers and receipts kept by different staff members". Owner decisions: every expense is approved by an
+administrator; staff advances and reimbursements are tracked; budget vs actual per category; spending is NOT shown to
+donors.
+- campaign-project-service V4: vendors (NGO-wide, unique name, GSTIN/PAN/phone validated, CSV import/export +
+  template), campaign_budget_lines, campaign_expenses (SUBMITTED -> APPROVED with voucher EXP/<FY>/nnnn |
+  REJECTED -> edit -> SUBMITTED; APPROVED -> VOID with reason), expense_attachments (bill photos re-encoded without
+  EXIF/GPS, or PDF; max 5), staff_money_entries (immutable ledger: ADVANCE, EXPENSE, RETURN, REIMBURSEMENT,
+  EXPENSE_VOID). DB triggers keep approved expenses and the ledger immutable.
+- Rules (AccountRules): expenses only on live/closed campaigns; bill or "no bill" reason required; date not in the
+  future and at most 90 days before the campaign start; staff record only money they paid themselves; admins only
+  approve, never their own expense unless they are the only admin (marked self-approved); returns/reimbursements
+  cannot exceed the balance (advisory lock per staff member); budget edited by the team before approval, by admins
+  after; archiving blocked while expenses wait for approval (archive = books closed, account sheet FINAL).
+- Account sheet: JSON for the app, PDF (A4 landscape: summary, budget vs actual, vouchers, pending, voided, staff
+  cash, signature lines; Arial on Windows for the rupee sign, Helvetica + "Rs." fallback) and Excel (fastexcel:
+  Summary, Expenses, Pending and void, Staff cash).
+- Notifications (V5, en/hi/mr): EXPENSE_SUBMITTED to admins (not the submitter), EXPENSE_APPROVED (in-app) and
+  EXPENSE_REJECTED (in-app + e-mail) to the submitter. Gateway routes /expenses, /vendors, /staff-money.
+- Roles: CAMPAIGN_MANAGER and VOLUNTEER_COORDINATOR also get EXPENSE_VIEW + EXPENSE_RECORD.
+- App: "Campaign money" card on the campaign page (received / spent / balance, budget used, pending), expenses list
+  with filters, add/edit expense (camera, gallery or PDF bills; vendor picker with quick add; who paid), expense
+  detail (bills full screen, approve / send back / cancel), budget editor with spend bars, account sheet with
+  PDF / Excel download (open or share), vendors (search, add, edit, CSV import/template/export), staff advances
+  (admins: everyone's position, give advance, cash returned, reimburse; staff: My advances), home card
+  "Expenses to approve" for admins. ~175 new strings (hi/mr drafts).
+- Seeds/tests: `seed-expenses.ps1` (School books: budget, 3 vendors, approved bills, one pending, one sent back,
+  advance to Sunil); `test-expenses.ps1` e2e; unit tests AccountRulesTest (10), AccountSheetExportTest (2),
+  notification EventsListenerTest (+4). E2E cleanup moved to `scripts/sql/cleanup-e2e-campaigns.sql`.
+- Found: the PC's helper hung on a psql password prompt (test script missed PGPASSWORD); psql now runs with -w.
+- Tests: campaign unit 31, notification unit 68; e2e test-expenses 66/66, test-campaigns 77/77, test-donations 34/34,
+  test-notifications 26/26; app analyze 0 errors (infos only); verified on the emulator as Asha (approve a bill,
+  account sheet, budget, add expense, vendors, staff advances) - screenshots docs/screenshots/accounts-*.
+- Next for accounts: projects get the same expense module; NGO-wide (non-campaign) expenses and income register for the
+  annual accounts; Form 10B / utilisation certificate export for the CA; expense receipts by e-mail to vendors.
 
 ## Next steps (in order) - agreed with the owner 2026-10-29
 Done since the original plan: first emulator runs, core services built and UI-tested (phase 1), notification-service.

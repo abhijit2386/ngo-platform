@@ -226,4 +226,47 @@ class EventsListenerTest {
         assertThat(r.vars()).containsEntry("amount", "₹250.50").containsEntry("campaignTitle", "Asha Seva");
         assertThat(r.link()).isEqualTo("/ngo/home");
     }
+
+    @Test
+    void expenseSubmissionGoesToOtherAdminsWithLinkToTheExpense() {
+        UUID sunil = UUID.randomUUID();
+        when(directory.user(sunil)).thenReturn(Optional.of(new Directory.Person(sunil, "sunil@ngo.test", "Sunil More", "en")));
+        admins();
+        var r = listener.toRequest(event(EventTypes.CAMPAIGN_EXPENSE_SUBMITTED, Map.of("campaignId", "c-9", "campaignTitle", "School books",
+                "amount", "4500.00", "description", "Notebooks", "submittedBy", sunil.toString())));
+        assertThat(r.templateCode()).isEqualTo("EXPENSE_SUBMITTED");
+        assertThat(r.recipients()).extracting(NotificationPlanner.Recipient::userId).containsExactly(asha);
+        assertThat(r.vars()).containsEntry("memberName", "Sunil More").containsEntry("description", "Notebooks");
+        assertThat(r.link()).isEqualTo("/ngo/campaigns/c-9/expenses/r-1");
+        assertThat(r.email()).isTrue();
+    }
+
+    @Test
+    void expenseApprovalTellsTheSubmitterInAppOnly() {
+        UUID sunil = UUID.randomUUID();
+        when(directory.user(sunil)).thenReturn(Optional.of(new Directory.Person(sunil, "sunil@ngo.test", "Sunil More", "en")));
+        var r = listener.toRequest(event(EventTypes.CAMPAIGN_EXPENSE_APPROVED, Map.of("campaignId", "c-9", "campaignTitle", "T",
+                "amount", "10", "description", "D", "submittedBy", sunil.toString(), "decidedBy", asha.toString(), "voucherNo", "EXP/2026-27/0001")));
+        assertThat(r.templateCode()).isEqualTo("EXPENSE_APPROVED");
+        assertThat(r.vars()).containsEntry("voucherNo", "EXP/2026-27/0001");
+        assertThat(r.recipients()).extracting(NotificationPlanner.Recipient::userId).containsExactly(sunil);
+        assertThat(r.email()).isFalse();
+    }
+
+    @Test
+    void selfApprovedExpenseNotifiesNobody() {
+        assertThat(listener.toRequest(event(EventTypes.CAMPAIGN_EXPENSE_APPROVED, Map.of("campaignId", "c", "campaignTitle", "T",
+                "amount", "10", "description", "D", "submittedBy", asha.toString(), "decidedBy", asha.toString())))).isNull();
+    }
+
+    @Test
+    void expenseRejectionCarriesReason() {
+        UUID sunil = UUID.randomUUID();
+        when(directory.user(sunil)).thenReturn(Optional.of(new Directory.Person(sunil, "sunil@ngo.test", "Sunil More", "en")));
+        var r = listener.toRequest(event(EventTypes.CAMPAIGN_EXPENSE_REJECTED, Map.of("campaignId", "c", "campaignTitle", "T",
+                "amount", "10", "description", "D", "submittedBy", sunil.toString(), "decidedBy", asha.toString(), "reason", "Bill is blurred")));
+        assertThat(r.templateCode()).isEqualTo("EXPENSE_REJECTED");
+        assertThat(r.vars()).containsEntry("reason", "Bill is blurred");
+        assertThat(r.email()).isTrue();
+    }
 }

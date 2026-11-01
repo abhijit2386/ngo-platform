@@ -50,7 +50,7 @@ spring:
   servlet:
     multipart:
       max-file-size: 10MB
-      max-request-size: 12MB
+      max-request-size: 30MB   # an expense can carry up to 5 bills
 
 server:
   shutdown: graceful
@@ -117,6 +117,9 @@ ngo:
       "[campaign.campaign.submitted]": [notification]
       "[campaign.campaign.published]": [notification]
       "[campaign.campaign.rejected]": [notification]
+      "[campaign.expense.submitted]": [notification]
+      "[campaign.expense.approved]": [notification]
+      "[campaign.expense.rejected]": [notification]
       # The HTTP relay stops at the first unreachable subscriber, so only services that run today are listed.
       # Add receipt and donor here when receipt-service / donor-service ship (rabbit transport binds them anyway).
       "[donation.donation.paid]": [campaign, notification]

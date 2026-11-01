@@ -20,6 +20,9 @@ import '../features/registration/registration_pages.dart';
 import '../features/settings/settings_pages.dart';
 import '../features/staff/staff_pages.dart';
 import '../features/subscription/subscription_pages.dart';
+import '../features/accounts/expense_pages.dart';
+import '../features/accounts/sheet_pages.dart';
+import '../features/accounts/team_money_pages.dart';
 import 'shells.dart';
 
 /// Bridges Riverpod state changes to GoRouter re-evaluation of redirects.
@@ -110,6 +113,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/ngo/campaigns/new', builder: (_, __) => const CampaignFormPage()),
       GoRoute(path: '/ngo/campaigns/:id', builder: (_, s) => CampaignDetailPage(campaignId: s.pathParameters['id']!)),
       GoRoute(path: '/ngo/campaigns/:id/edit', builder: (_, s) => CampaignFormPage(campaignId: s.pathParameters['id']!)),
+      // Campaign accounts: 'new' must precede ':eid'.
+      GoRoute(path: '/ngo/campaigns/:id/expenses', builder: (_, s) => CampaignExpensesPage(campaignId: s.pathParameters['id']!)),
+      GoRoute(path: '/ngo/campaigns/:id/expenses/new', builder: (_, s) => ExpenseFormPage(campaignId: s.pathParameters['id']!)),
+      GoRoute(path: '/ngo/campaigns/:id/expenses/:eid',
+          builder: (_, s) => ExpenseDetailPage(campaignId: s.pathParameters['id']!, expenseId: s.pathParameters['eid']!)),
+      GoRoute(path: '/ngo/campaigns/:id/expenses/:eid/edit',
+          builder: (_, s) => ExpenseFormPage(campaignId: s.pathParameters['id']!, expenseId: s.pathParameters['eid']!)),
+      GoRoute(path: '/ngo/campaigns/:id/budget', builder: (_, s) => BudgetPage(campaignId: s.pathParameters['id']!)),
+      GoRoute(path: '/ngo/campaigns/:id/accounts', builder: (_, s) => AccountSheetPage(campaignId: s.pathParameters['id']!)),
+      GoRoute(path: '/ngo/expenses/pending', builder: (_, __) => const PendingExpensesPage()),
+      GoRoute(path: '/ngo/vendors', builder: (_, __) => const VendorsPage()),
+      GoRoute(path: '/ngo/staff-money', builder: (_, __) => const StaffMoneyPage()),
+      GoRoute(path: '/ngo/staff-money/:uid', builder: (_, s) => StaffLedgerPage(userId: s.pathParameters['uid']!)),
       GoRoute(path: '/ngo/subscription', builder: (_, __) => const SubscriptionPage()),
       GoRoute(path: '/ngo/subscription/plans', builder: (_, __) => const PlansPage()),
       GoRoute(path: '/ngo/subscription/billing', builder: (_, __) => const BillingHistoryPage()),

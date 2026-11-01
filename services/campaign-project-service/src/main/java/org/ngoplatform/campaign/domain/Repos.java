@@ -40,6 +40,21 @@ public final class Repos {
         };
     }
 
+    public interface Expenses extends JpaRepository<Expense, UUID> {
+        Optional<Expense> findByIdAndNgoId(UUID id, UUID ngoId);
+        List<Expense> findByCampaignIdOrderByExpenseDateDescCreatedAtDesc(UUID campaignId);
+        List<Expense> findByNgoIdAndStatusOrderBySubmittedAtAsc(UUID ngoId, org.ngoplatform.campaign.app.AccountRules.Status s);
+        long countByCampaignIdAndStatus(UUID campaignId, org.ngoplatform.campaign.app.AccountRules.Status s);
+        boolean existsByBudgetLineId(UUID budgetLineId);
+        boolean existsByVendorId(UUID vendorId);
+    }
+
+    public interface Vendors extends JpaRepository<Vendor, UUID> {
+        Optional<Vendor> findByIdAndNgoId(UUID id, UUID ngoId);
+        List<Vendor> findByNgoIdOrderByNameAsc(UUID ngoId);
+        Optional<Vendor> findByNgoIdAndNameIgnoreCase(UUID ngoId, String name);
+    }
+
     public interface Projects extends JpaRepository<Project, UUID> {
         Optional<Project> findByIdAndNgoId(UUID id, UUID ngoId);
         Page<Project> findByNgoIdOrderByCreatedAtDesc(UUID ngoId, Pageable p);

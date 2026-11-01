@@ -9,6 +9,7 @@ import '../../design_system/tokens.dart';
 import '../../localization/app_localizations.dart';
 import '../notifications/notification_pages.dart';
 import 'ngo_api.dart';
+import '../accounts/accounts_api.dart' show pendingExpensesProvider;
 
 /// DASH-001: home dashboard. Shows verification state first, then subscription and quick actions.
 class NgoHomePage extends ConsumerWidget {
@@ -51,6 +52,7 @@ class NgoHomePage extends ConsumerWidget {
             const SizedBox(height: AppSpacing.md),
             if (n != null) _VerificationBanner(ngo: n),
             sub.maybeWhen(data: (s) => s == null ? const SizedBox.shrink() : _SubscriptionCard(sub: s), orElse: () => const SizedBox.shrink()),
+            if ((membership?.isAdmin ?? false) && n != null) const _ExpensesToApproveCard(),
             SectionHeader(t.quickActions),
             GridView.count(
               crossAxisCount: 2,
@@ -144,6 +146,36 @@ class _SubscriptionCard extends StatelessWidget {
               backgroundColor: color.withValues(alpha: 0.15), minHeight: 6, borderRadius: BorderRadius.circular(6)),
         ],
       ]),
+    );
+  }
+}
+
+/// Administrators: expenses waiting for their approval across all campaigns.
+class _ExpensesToApproveCard extends ConsumerWidget {
+  const _ExpensesToApproveCard();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = L10n.of(context);
+    final ngoId = ref.watch(currentNgoIdProvider);
+    if (ngoId == null) return const SizedBox.shrink();
+    final p = ref.watch(pendingExpensesProvider(ngoId)).value;
+    final count = (p?['count'] as num?)?.toInt() ?? 0;
+    if (count == 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: AppCard(
+        color: const Color(0xFFB45309).withValues(alpha: 0.08),
+        onTap: () => context.push('/ngo/expenses/pending'),
+        child: Row(children: [
+          const Icon(Icons.fact_check_outlined, color: Color(0xFFB45309)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(t.accToApprove, style: const TextStyle(fontWeight: FontWeight.w700)),
+            Text(t.accPendingLine(count, formatInr(p?['total'], whole: true)), style: const TextStyle(color: AppColors.textMuted)),
+          ])),
+          const Icon(Icons.chevron_right),
+        ]),
+      ),
     );
   }
 }

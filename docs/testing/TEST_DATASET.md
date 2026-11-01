@@ -41,3 +41,11 @@ start-local) stand in for online payments until donation-payment-service exists.
 Asha Seva gets a fictional 80G registration (valid to 31 Mar 2031) and online payments with the TEST provider
 (no money moves; the app shows a "Test payment" screen). Donors Meera, Kiran and Anil can donate; the NGO's own team
 (Asha, Ravi, Sunil, Priya) cannot (owner rule). `test-donations.ps1` uses its own "E2E" campaign and cleans up.
+
+## Campaign accounts (`seed-expenses.ps1`, idempotent)
+"School books for 200 children" gets a budget (Notebooks 20,000, Textbooks 18,000, School bags 10,000,
+Transport 2,000), three vendors (Sharma Stationers, Pune Book Depot, Patil Tempo Service), a Rs 3,000 cash advance
+to Sunil, and expenses added by Sunil with bill photos: notebooks Rs 9,600 (approved by Asha), textbooks Rs 14,500
+(approved by Ravi), tempo Rs 1,200 paid by Sunil from his advance (approved), school bags Rs 6,000 (waiting for
+approval) and tea Rs 450 without bill (sent back by Asha). Expenses are approved by administrators only (owner rule);
+Priya (finance) can record but not approve. `test-expenses.ps1` uses its own "E2E" campaign and cleans up.

@@ -776,5 +776,322 @@
   "connectRazorpay": "Connect Razorpay account",
   "razorpayComingSoon": "Razorpay connection arrives once the platform's Razorpay partner account is approved.",
   "turnOnTestPayments": "Turn on test payments",
-  "paymentsAdminOnly": "Only an administrator can change payment settings."
+  "paymentsAdminOnly": "Only an administrator can change payment settings.",
+  "accAccountSheet": "Account sheet",
+  "accAddExpense": "Add expense",
+  "accAddLine": "Add line",
+  "accAddedBy": "Added by",
+  "accAmount": "Amount",
+  "accApprovalNote": "An administrator checks the bill and approves it. Only approved expenses go into the account sheet.",
+  "accApprove": "Approve",
+  "accApproveConfirm": "Approve this expense of {amount}? It gets a voucher number and cannot be changed afterwards.",
+  "@accApproveConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accApproved": "Expense approved",
+  "accApprovedBy": "Approved by",
+  "accApprovedTotal": "Approved",
+  "accAtMost": "At most {amount}",
+  "@accAtMost": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accBalance": "Balance",
+  "accBillDate": "Bill date",
+  "accBillNumber": "Bill / invoice number (optional)",
+  "accBillPhotos": "Bill",
+  "accBillPhotosHint": "Take a clear photo of the bill or attach a PDF (up to 5).",
+  "accBillRequired": "Add the bill, or say why there is no bill.",
+  "accBills": "Bills",
+  "accBudget": "Budget",
+  "accBudgetAdminOnly": "The campaign is live, so only administrators can change its budget.",
+  "accBudgetEditHint": "Plan what you expect to spend per category. Expenses are compared with this plan.",
+  "accBudgetSaved": "Budget saved",
+  "accBudgetVsActual": "Budget vs actual",
+  "accCampaignMoney": "Campaign money",
+  "accCategory": "Category",
+  "accCategoryHint": "e.g. Books, Food, Transport",
+  "accChooseVendor": "Choose from vendor list",
+  "accClear": "Clear",
+  "accCorrectAndResend": "Correct and send again",
+  "accCouldNotReadFile": "Could not read that file. Try another photo.",
+  "accCsvTemplate": "Download CSV template",
+  "accDeleteConfirm": "Delete this expense and its bills? This cannot be undone.",
+  "accDeleteExpense": "Delete expense",
+  "accDeleted": "Expense deleted",
+  "accDownloadExcel": "Excel",
+  "accDownloadPdf": "PDF",
+  "accEditBudget": "Edit budget",
+  "accEditExpense": "Edit expense",
+  "accEditVendor": "Edit vendor",
+  "accExpense": "Expense",
+  "accExpenses": "Expenses",
+  "accExportCsv": "Export list (CSV)",
+  "accFileReady": "Saved on this phone",
+  "accFileTooLarge": "The file is larger than 10 MB.",
+  "accFilterAll": "All",
+  "accFinal": "Final",
+  "accFinalNote": "Final: the campaign is archived and its books are closed.",
+  "accForCampaign": "For campaign (optional)",
+  "accFromGallery": "Gallery",
+  "accGiveAdvance": "Give advance",
+  "accHeldByStaff": "Cash with staff",
+  "accHistory": "History",
+  "accHolds": "Holds {amount}",
+  "@accHolds": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accHoldsHint": "NGO cash still with this person. Record bills against it or record the cash returned.",
+  "accHowPaid": "Payment mode",
+  "accImportCsv": "Import from CSV",
+  "accImportDone": "Import finished",
+  "accImportErrors": "{count} rows could not be added:",
+  "@accImportErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accImportLine": "Line {n}: {message}",
+  "@accImportLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "accImportResult": "{count} vendors added, {n} already on the list.",
+  "@accImportResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "accInvalidGstin": "GSTIN has 15 characters, like 27ABCDE1234F1Z5",
+  "accKindAdvance": "Advance given",
+  "accKindExpense": "Spent for NGO (approved bill)",
+  "accKindExpenseVoid": "Bill cancelled",
+  "accKindReimbursement": "Reimbursed",
+  "accKindReturn": "Cash returned",
+  "accModeBank": "Bank transfer",
+  "accModeCard": "Card",
+  "accModeCash": "Cash",
+  "accModeCheque": "Cheque",
+  "accModeUpi": "UPI",
+  "accMoneyIn": "Money received",
+  "accMoreOptions": "More options",
+  "accMyAdvances": "My advances",
+  "accNewVendor": "New vendor",
+  "accNgoOwes": "NGO owes {amount}",
+  "@accNgoOwes": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accNoAppToOpen": "No app on this phone can open this file. Use Share instead.",
+  "accNoApprovedYet": "No approved expenses yet.",
+  "accNoBill": "No bill",
+  "accNoBillBecause": "No bill: {reason}",
+  "@accNoBillBecause": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "accNoBillReason": "Why is there no bill?",
+  "accNoBillReasonHint": "e.g. Auto fare, no receipt given",
+  "accNoBillSwitch": "I have no bill for this",
+  "accNoBudget": "No budget yet",
+  "accNoBudgetHint": "Plan the spend per category (books, food, transport...) to compare with real expenses.",
+  "accNoCampaign": "General (no campaign)",
+  "accNoEntries": "Nothing recorded yet.",
+  "accNoExpenses": "No expenses here",
+  "accNoExpensesHint": "Add each bill as you spend: photo of the bill, amount and who was paid. An administrator approves it and it goes into the account sheet.",
+  "accNoVendors": "No vendors yet",
+  "accNoVendorsFound": "No matching vendor",
+  "accNoVendorsHint": "Add the shops and services you buy from, or import your existing list from a CSV file.",
+  "accNotInBudget": "Not in budget",
+  "accNotInBudgetSpent": "Not in budget: {amount} spent",
+  "@accNotInBudgetSpent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accNote": "Note (optional)",
+  "accNothingToApprove": "Nothing waiting for approval",
+  "accOfBudget": "{spent} of {planned} budget used",
+  "@accOfBudget": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "planned": {
+        "type": "String"
+      }
+    }
+  },
+  "accOnlineDonations": "Online donations ({count})",
+  "@accOnlineDonations": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accOpenFile": "Open",
+  "accOtherCategory": "Category name",
+  "accOverBudget": "Over budget by {amount}",
+  "@accOverBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accOwedToStaff": "NGO owes staff",
+  "accOwesHint": "This person paid from their own pocket. Record the reimbursement when you pay them back.",
+  "accPaidByMe": "I paid",
+  "accPaidByNgo": "NGO account",
+  "accPaidByStaff": "A staff member",
+  "accPaidByStaffHint": "From a cash advance or own money. After approval it is set against their advance, or the NGO owes it to them.",
+  "accPaidTo": "Paid to",
+  "accPaidToOneOff": "Or type who was paid",
+  "accPaidToOneOffHint": "e.g. Tea stall, Auto-rickshaw",
+  "accPdf": "PDF",
+  "accPendingAdmin": "Check the bill and approve, or send it back with a reason.",
+  "accPendingLine": "{count} waiting for approval · {amount}",
+  "@accPendingLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accPendingOwnAdmin": "Your own expense: another administrator must approve it.",
+  "accPendingTeam": "Waiting for an administrator to approve.",
+  "accPlanBudget": "Plan budget",
+  "accPlanBudgetHint": "Expected spend per category, compared later with real bills",
+  "accPlanned": "Planned",
+  "accProvisionalNote": "Provisional: changes as expenses are approved. It becomes final when the campaign is archived.",
+  "accReceived": "Received",
+  "accRecordReturn": "Cash returned",
+  "accRecorded": "Recorded",
+  "accRefunded": "Refunded",
+  "accReimburse": "Reimburse",
+  "accRemoveBill": "Remove bill",
+  "accRemoveBillConfirm": "Remove this bill from the expense?",
+  "accRemoveLine": "Remove line",
+  "accSaveAndResend": "Save and send for approval",
+  "accSearchVendors": "Search vendors",
+  "accSelfApproved": "only administrator",
+  "accSendBack": "Send back",
+  "accSendBackHint": "What should be corrected?",
+  "accSendForApproval": "Send for approval",
+  "accSentBack": "Sent back to the team member",
+  "accSentBackBy": "Sent back by {name}",
+  "@accSentBackBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accSentForApproval": "Sent for approval",
+  "accSettled": "Settled",
+  "accSettledHint": "No cash with this person and nothing owed to them.",
+  "accShareFile": "Share (WhatsApp, e-mail...)",
+  "accSpent": "Spent",
+  "accSpentLeft": "{spent} spent · {left} left",
+  "@accSpentLeft": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "accStaffCash": "Staff advances",
+  "accStaffCashHint": "Cash advances given to staff, bills they paid and what was settled.",
+  "accStatusApproved": "Approved",
+  "accStatusRejected": "Sent back",
+  "accStatusSubmitted": "Awaiting approval",
+  "accStatusVoid": "Cancelled",
+  "accTakePhoto": "Camera",
+  "accTestDonations": "Test donations ({count})",
+  "@accTestDonations": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accToApprove": "Expenses to approve",
+  "accTotal": "Total",
+  "accTotalPlanned": "Total planned",
+  "accVendorActive": "Active (shown when adding expenses)",
+  "accVendorAddress": "Address (optional)",
+  "accVendorCategory": "What they supply (optional)",
+  "accVendorCategoryHint": "e.g. Stationery, Transport",
+  "accVendorEmail": "E-mail (optional)",
+  "accVendorGstin": "GSTIN (optional)",
+  "accVendorInactive": "Inactive",
+  "accVendorName": "Vendor / shop name",
+  "accVendorPan": "PAN (optional)",
+  "accVendorPhone": "Mobile (optional)",
+  "accVendors": "Vendors",
+  "accVendorsHint": "Shared by all campaigns. Tap a vendor to edit.",
+  "accVoid": "Cancel this expense",
+  "accVoidHint": "Why? e.g. entered twice",
+  "accVoided": "Expense cancelled",
+  "accVoidedBy": "Cancelled by {name}",
+  "@accVoidedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accVoucher": "Voucher",
+  "accVouchers": "Approved vouchers ({count})",
+  "@accVouchers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accWhatFor": "What was it for?",
+  "accWhatForHint": "e.g. 200 notebooks for Class 5",
+  "accWhichStaff": "Who paid?",
+  "accWhoPaid": "Who paid",
+  "accChooseCategory": "Choose a category"
 }

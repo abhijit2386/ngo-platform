@@ -28,6 +28,12 @@ class MorePage extends ConsumerWidget {
         item(Icons.apartment, t.ngoProfile, () => context.push('/ngo/profile')),
         if (m?.can('SUBSCRIPTION_VIEW') ?? true) item(Icons.workspace_premium, t.subscription, () => context.push('/ngo/subscription')),
         if (m?.can('DONATION_VIEW') ?? false) item(Icons.payments_outlined, t.onlinePayments, () => context.push('/ngo/payments')),
+        if (m?.isAdmin ?? false) item(Icons.fact_check_outlined, t.accToApprove, () => context.push('/ngo/expenses/pending')),
+        if (m?.can('EXPENSE_VIEW') ?? false) item(Icons.storefront_outlined, t.accVendors, () => context.push('/ngo/vendors')),
+        if (m?.isAdmin ?? false)
+          item(Icons.account_balance_wallet_outlined, t.accStaffCash, () => context.push('/ngo/staff-money'))
+        else if (m?.can('EXPENSE_RECORD') ?? false)
+          item(Icons.account_balance_wallet_outlined, t.accMyAdvances, () => context.push('/ngo/staff-money/me')),
         if (m?.can('STAFF_VIEW') ?? false) item(Icons.groups, t.staffDirectory, () => context.push('/ngo/staff')),
         item(Icons.settings, t.settings, () => context.push('/settings')),
         if (me?.isPlatformSupport ?? false) ...[

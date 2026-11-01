@@ -16,6 +16,7 @@ import '../../localization/app_localizations.dart';
 import '../registration/registration_pages.dart' show causeLabel;
 import '../donations/donation_pages.dart' show startDonation;
 import 'campaign_api.dart';
+import '../accounts/expense_pages.dart' show CampaignMoneyCard;
 
 String _day(Object? iso) {
   final d = parseDay(iso);
@@ -494,6 +495,8 @@ class _CampaignDetailBody extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         CampaignShareRow(campaign: c),
       ],
+      const SizedBox(height: AppSpacing.md),
+      CampaignMoneyCard(ngoId: ngoId, campaign: c),
       const SizedBox(height: AppSpacing.md),
       AppCard(child: Column(children: [
         KeyValueRow(t.campaignCause, c['cause'] == null ? '—' : causeLabel('${c['cause']}')),

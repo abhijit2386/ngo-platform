@@ -193,6 +193,12 @@ public class CampaignService {
     public Campaign archive(UUID ngoId, Membership m, UUID id) {
         Campaign c = load(ngoId, id);
         CampaignRules.checkArchive(c.getStatus(), m.isAdmin());
+        // Archiving closes the books: the account sheet becomes final, so nothing may be waiting for approval.
+        Integer pending = jdbc.queryForObject("select count(*) from campaign_expenses where campaign_id = ? and status = 'SUBMITTED'",
+                Integer.class, id);
+        if (pending != null && pending > 0) {
+            throw ApiException.rule("EXPENSES_PENDING", pending + " expense(s) are still waiting for approval. Approve or reject them before archiving.");
+        }
         c.archive();
         audit.record(ngoId, m.userId(), "CAMPAIGN_ARCHIVED", "CAMPAIGN", id, Map.of());
         return c;

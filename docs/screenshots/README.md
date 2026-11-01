@@ -62,3 +62,21 @@ Donor Meera gives ₹1,000 to a live campaign; with 80G on she adds PAN and addr
 <img src="donations-04-test-payment.png" alt="donations-04-test-payment" width="270">
 <img src="donations-05-thank-you.png" alt="donations-05-thank-you" width="270">
 <img src="donations-06-my-donations.png" alt="donations-06-my-donations" width="270">
+
+## Campaign accounts (expenses, bills, budget, vendors, staff advances)
+
+Admin Asha approves a bill added by staff (voucher number), then the account sheet (PDF / Excel), budget vs actual, vendor list and staff cash.
+
+<img src="accounts-01-admin-home-expenses-to-approve.png" alt="accounts-01-admin-home-expenses-to-approve" width="270">
+<img src="accounts-02-campaign-money-card.png" alt="accounts-02-campaign-money-card" width="270">
+<img src="accounts-03-expenses-list.png" alt="accounts-03-expenses-list" width="270">
+<img src="accounts-04-expense-awaiting-approval.png" alt="accounts-04-expense-awaiting-approval" width="270">
+<img src="accounts-05-expense-approved-voucher.png" alt="accounts-05-expense-approved-voucher" width="270">
+<img src="accounts-06-account-sheet.png" alt="accounts-06-account-sheet" width="270">
+<img src="accounts-07-budget-vs-actual-vouchers.png" alt="accounts-07-budget-vs-actual-vouchers" width="270">
+<img src="accounts-08-budget.png" alt="accounts-08-budget" width="270">
+<img src="accounts-09-add-expense.png" alt="accounts-09-add-expense" width="270">
+<img src="accounts-10-vendors.png" alt="accounts-10-vendors" width="270">
+<img src="accounts-11-staff-advances.png" alt="accounts-11-staff-advances" width="270">
+<img src="accounts-12-staff-ledger.png" alt="accounts-12-staff-ledger" width="270">
+<img src="accounts-13-account-sheet-pdf.png" alt="accounts-13-account-sheet-pdf" width="820">

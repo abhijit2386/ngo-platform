@@ -37,7 +37,17 @@ public final class CoverImage {
         return new Result(jpeg(scale(wide, LARGE_W, LARGE_H)), jpeg(scale(wide, SMALL_W, SMALL_H)));
     }
 
-    static BufferedImage decode(byte[] input) {
+    /** Bill photos: keep the whole page (no crop), longest side at most 1600 px, re-encoded without metadata. */
+    public static byte[] bill(byte[] input) {
+        BufferedImage img = decode(input, 200, 200);
+        int w = img.getWidth(), h = img.getHeight();
+        double f = Math.min(1.0, 1600.0 / Math.max(w, h));
+        return jpeg(scale(img, Math.max(1, (int) Math.round(w * f)), Math.max(1, (int) Math.round(h * f))));
+    }
+
+    static BufferedImage decode(byte[] input) { return decode(input, MIN_W, MIN_H); }
+
+    static BufferedImage decode(byte[] input, int minW, int minH) {
         try (ImageInputStream in = ImageIO.createImageInputStream(new ByteArrayInputStream(input))) {
             if (in == null) throw unreadable();
             Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
@@ -49,8 +59,8 @@ public final class CoverImage {
                 if (w > MAX_SIDE || h > MAX_SIDE) {
                     throw ApiException.badRequest("IMAGE_TOO_LARGE", "The picture is too large. Please use a smaller one.");
                 }
-                if (w < MIN_W || h < MIN_H) {
-                    throw ApiException.badRequest("IMAGE_TOO_SMALL", "The picture is too small. Use one at least 400 x 225 pixels.");
+                if (w < minW || h < minH) {
+                    throw ApiException.badRequest("IMAGE_TOO_SMALL", "The picture is too small. Use one at least " + minW + " x " + minH + " pixels.");
                 }
                 BufferedImage img = reader.read(0);
                 if (img == null) throw unreadable();

@@ -37,6 +37,9 @@ public final class EventTypes {
     public static final String CAMPAIGN_SUBMITTED = "campaign.campaign.submitted";
     public static final String CAMPAIGN_PUBLISHED = "campaign.campaign.published";
     public static final String CAMPAIGN_REJECTED = "campaign.campaign.rejected";
+    public static final String CAMPAIGN_EXPENSE_SUBMITTED = "campaign.expense.submitted";
+    public static final String CAMPAIGN_EXPENSE_APPROVED = "campaign.expense.approved";
+    public static final String CAMPAIGN_EXPENSE_REJECTED = "campaign.expense.rejected";
     public static final String EXPENSE_APPROVED = "operations.expense.approved";
 
     public static final String TICKET_CREATED = "helpdesk.ticket.created";

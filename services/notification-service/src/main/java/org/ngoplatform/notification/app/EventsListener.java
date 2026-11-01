@@ -25,7 +25,8 @@ public class EventsListener implements EventHandler {
             EventTypes.NGO_SUSPENDED, EventTypes.STAFF_INVITED, EventTypes.STAFF_ACCEPTED,
             EventTypes.SUBSCRIPTION_EXPIRING, EventTypes.SUBSCRIPTION_PAYMENT_FAILED,
             EventTypes.CAMPAIGN_SUBMITTED, EventTypes.CAMPAIGN_PUBLISHED, EventTypes.CAMPAIGN_REJECTED,
-            EventTypes.DONATION_PAID);
+            EventTypes.DONATION_PAID, EventTypes.CAMPAIGN_EXPENSE_SUBMITTED, EventTypes.CAMPAIGN_EXPENSE_APPROVED,
+            EventTypes.CAMPAIGN_EXPENSE_REJECTED);
 
     private final IdempotentConsumer inbox;
     private final NotificationPlanner planner;
@@ -138,6 +139,25 @@ public class EventsListener implements EventHandler {
                 yield toUser("CAMPAIGN_REJECTED", ngoId, e.uuid("requestedBy"), vars, e);
             }
             case EventTypes.DONATION_PAID -> donationPaid(e, ngoId, vars);
+            case EventTypes.CAMPAIGN_EXPENSE_SUBMITTED -> {
+                UUID by = e.uuid("submittedBy");
+                expenseVars(e, vars);
+                vars.put("memberName", by == null ? "" : directory.user(by).map(EventsListener::displayName).orElse(""));
+                List<Recipient> admins = directory.admins(ngoId).stream().filter(p -> by == null || !by.equals(p.userId())).map(Recipient::of).toList();
+                yield new Request("EXPENSE_SUBMITTED", ngoId, admins, vars, expenseLink(e), "EXPENSE", e.resourceId(), e.eventId(), true, true);
+            }
+            case EventTypes.CAMPAIGN_EXPENSE_APPROVED -> {
+                UUID by = e.uuid("submittedBy");
+                if (by == null || by.equals(e.uuid("decidedBy"))) yield null; // self-approved (single administrator)
+                expenseVars(e, vars);
+                vars.put("voucherNo", nz(e.str("voucherNo")));
+                yield expenseToUser("EXPENSE_APPROVED", ngoId, by, vars, e, false);
+            }
+            case EventTypes.CAMPAIGN_EXPENSE_REJECTED -> {
+                expenseVars(e, vars);
+                vars.put("reason", nz(e.str("reason")));
+                yield expenseToUser("EXPENSE_REJECTED", ngoId, e.uuid("submittedBy"), vars, e, true);
+            }
             default -> null;
         };
     }
@@ -161,6 +181,22 @@ public class EventsListener implements EventHandler {
         List<Recipient> admins = directory.admins(ngoId).stream().map(Recipient::of).toList();
         String link = e.str("campaignId") == null ? "/ngo/home" : "/ngo/campaigns/" + e.str("campaignId");
         return new Request("DONATION_RECEIVED", ngoId, admins, vars, link, "DONATION", e.resourceId(), e.eventId(), true, false);
+    }
+
+    private static void expenseVars(EventEnvelope e, Map<String, Object> vars) {
+        vars.put("campaignTitle", nz(e.str("campaignTitle")));
+        vars.put("amount", Labels.inr(e.str("amount")));
+        vars.put("description", nz(e.str("description")));
+    }
+
+    private static String expenseLink(EventEnvelope e) {
+        return "/ngo/campaigns/" + e.str("campaignId") + "/expenses/" + e.resourceId();
+    }
+
+    private Request expenseToUser(String template, UUID ngoId, UUID userId, Map<String, Object> vars, EventEnvelope e, boolean email) {
+        if (userId == null) return null;
+        List<Recipient> to = directory.user(userId).map(Recipient::of).stream().toList();
+        return new Request(template, ngoId, to, vars, expenseLink(e), "EXPENSE", e.resourceId(), e.eventId(), true, email);
     }
 
     private Request toUser(String template, UUID ngoId, UUID userId, Map<String, Object> vars, EventEnvelope e) {

@@ -57,6 +57,8 @@ public final class Permissions {
      * Default role templates. NGOs can customise per member; identity-service stores the effective set.
      * Campaigns: every team role except VOLUNTEER may draft and submit (CAMPAIGN_MANAGE); only administrators
      * approve and publish - owner decision 2026-10-29 (campaign-service also checks the admin role).
+     * Campaign expenses: anyone who runs campaigns records them with bills (EXPENSE_RECORD); only administrators
+     * approve (FINANCE holds EXPENSE_APPROVE for other finance work, campaign-service also requires the admin role).
      */
     public static final Map<String, Set<String>> ROLE_TEMPLATES = Map.of(
             "PRIMARY_ADMIN", ALL,
@@ -68,9 +70,9 @@ public final class Permissions {
                     RECEIPT_VIEW, RECEIPT_MANAGE, EXPENSE_VIEW, EXPENSE_RECORD, EXPENSE_APPROVE, REPORT_VIEW,
                     REPORT_EXPORT, HELPDESK_USE, STAFF_VIEW, SUBSCRIPTION_VIEW, CAMPAIGN_VIEW, CAMPAIGN_MANAGE),
             "CAMPAIGN_MANAGER", Set.of(CAMPAIGN_VIEW, CAMPAIGN_MANAGE, PROJECT_VIEW, PROJECT_MANAGE, DONOR_VIEW,
-                    DONATION_VIEW, REPORT_VIEW, HELPDESK_USE, STAFF_VIEW),
+                    DONATION_VIEW, REPORT_VIEW, HELPDESK_USE, STAFF_VIEW, EXPENSE_VIEW, EXPENSE_RECORD),
             "VOLUNTEER_COORDINATOR", Set.of(VOLUNTEER_VIEW, VOLUNTEER_MANAGE, PROJECT_VIEW, BENEFICIARY_VIEW, CAMPAIGN_VIEW, CAMPAIGN_MANAGE,
-                    HELPDESK_USE, STAFF_VIEW, REPORT_VIEW),
+                    HELPDESK_USE, STAFF_VIEW, REPORT_VIEW, EXPENSE_VIEW, EXPENSE_RECORD),
             "VOLUNTEER", Set.of(PROJECT_VIEW, HELPDESK_USE));
 
     public static boolean isAdminRole(String role) {

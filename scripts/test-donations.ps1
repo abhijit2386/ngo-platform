@@ -101,8 +101,8 @@ Check 'Asha Seva takes online donations (test provider)' ($ps.status -eq 'ACTIVE
 
 # Own live campaign for this test.
 $env:PGPASSWORD = 'dev-only-password'
-& 'D:\tools\pgsql\bin\psql.exe' -h localhost -U postgres -d donation -q -c "delete from donation_payments where donation_id in (select id from donations where campaign_title like 'E2E %'); delete from donations where campaign_title like 'E2E %';" | Out-Null
-& 'D:\tools\pgsql\bin\psql.exe' -h localhost -U postgres -d campaign -q -c "delete from campaign_donations where campaign_id in (select id from campaigns where title like 'E2E %'); delete from campaigns where title like 'E2E %';" | Out-Null
+& 'D:\tools\pgsql\bin\psql.exe' -w -h localhost -U postgres -d donation -q -c "delete from donation_payments where donation_id in (select id from donations where campaign_title like 'E2E %'); delete from donations where campaign_title like 'E2E %';" | Out-Null
+& 'D:\tools\pgsql\bin\psql.exe' -w -h localhost -U postgres -d campaign -q -f "$PSScriptRoot\sql\cleanup-e2e-campaigns.sql" | Out-Null
 $base = "/api/v1/ngos/$NgoId/campaigns"
 $camp = Api POST $base $asha @{ title = 'E2E Donation test campaign'; summary = 'Used by the donation end-to-end test only.'; cause = 'EDUCATION'; goalAmount = '20000'; startDate = (Get-Date).ToString('yyyy-MM-dd'); endDate = (Get-Date).AddDays(20).ToString('yyyy-MM-dd') }
 $camp = Api POST "$base/$($camp.id)/approve" $asha @{ version = $camp.version }
@@ -198,8 +198,8 @@ $x = Checkout $meera $gift
 Check 'closed campaign refuses donations' ($x.__code -eq 'CAMPAIGN_NOT_LIVE') (J $x)
 
 # cleanup: keep the sample campaigns and donors' histories tidy
-& 'D:\tools\pgsql\bin\psql.exe' -h localhost -U postgres -d donation -q -c "delete from donation_payments where donation_id in (select id from donations where campaign_title like 'E2E %'); delete from donations where campaign_title like 'E2E %';" | Out-Null
-& 'D:\tools\pgsql\bin\psql.exe' -h localhost -U postgres -d campaign -q -c "delete from campaign_donations where campaign_id in (select id from campaigns where title like 'E2E %'); delete from campaigns where title like 'E2E %';" | Out-Null
+& 'D:\tools\pgsql\bin\psql.exe' -w -h localhost -U postgres -d donation -q -c "delete from donation_payments where donation_id in (select id from donations where campaign_title like 'E2E %'); delete from donations where campaign_title like 'E2E %';" | Out-Null
+& 'D:\tools\pgsql\bin\psql.exe' -w -h localhost -U postgres -d campaign -q -f "$PSScriptRoot\sql\cleanup-e2e-campaigns.sql" | Out-Null
 
 ""
 "donations e2e: $pass passed, $fail failed"

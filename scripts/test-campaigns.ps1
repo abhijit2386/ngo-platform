@@ -78,7 +78,7 @@ function Status($path, $tok) {
 
 # --- reset (DEV ONLY) ---
 $env:PGPASSWORD = 'dev-only-password'
-& 'D:\tools\pgsql\bin\psql.exe' -h localhost -U postgres -d campaign -q -c "delete from campaign_donations where campaign_id in (select id from campaigns where title like 'E2E %'); delete from campaigns where title like 'E2E %';" | Out-Null
+& 'D:\tools\pgsql\bin\psql.exe' -w -h localhost -U postgres -d campaign -q -f "$PSScriptRoot\sql\cleanup-e2e-campaigns.sql" | Out-Null
 
 $asha = Token 'asha.admin@ngo.test' 'DevNgo#2026'
 $ravi = Token 'ravi.staff@ngo.test' 'DevStaff#2026'
@@ -304,7 +304,7 @@ $all = Api GET "${base}?size=100" $sunil
 Check 'archived campaigns hidden from the default list' ($null -ne $all.items -and -not (@($all.items) | Where-Object { $_.id -eq $c.id })) (J $all)
 
 # Leave the sample campaigns (seed-campaigns.ps1) uncluttered for UI checks.
-& 'D:\tools\pgsql\bin\psql.exe' -h localhost -U postgres -d campaign -q -c "delete from campaign_donations where campaign_id in (select id from campaigns where title like 'E2E %'); delete from campaigns where title like 'E2E %';" | Out-Null
+& 'D:\tools\pgsql\bin\psql.exe' -w -h localhost -U postgres -d campaign -q -f "$PSScriptRoot\sql\cleanup-e2e-campaigns.sql" | Out-Null
 
 ""
 "campaigns e2e: $pass passed, $fail failed"
