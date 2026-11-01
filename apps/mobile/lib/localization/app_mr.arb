@@ -1004,5 +1004,7 @@
   "rcdUpgradeTitle": "तुमचे स्वतःचे पावती डिझाइन",
   "rcdUseStandard": "मानक पावती वापरा",
   "rcdUseThis": "हे डिझाइन वापरा",
-  "rcdWidth": "रुंदी"
+  "rcdWidth": "रुंदी",
+  "rcdChkFooter": "{field} खालच्या पट्टीत आहे, जिथे छोटी Seva Setu ओळ छापली जाते. ते थोडे वर हलवा.",
+  "rcdFooterMark": "Seva Setu श्रेय ओळ"
 }

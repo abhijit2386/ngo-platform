@@ -1829,5 +1829,14 @@
   "rcdUpgradeTitle": "Your own receipt design",
   "rcdUseStandard": "Use standard receipt",
   "rcdUseThis": "Use this design",
-  "rcdWidth": "Width"
+  "rcdWidth": "Width",
+  "rcdChkFooter": "{field} is in the bottom strip, where the small Seva Setu line is printed. Move it up a little.",
+  "@rcdChkFooter": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "rcdFooterMark": "Seva Setu credit line"
 }

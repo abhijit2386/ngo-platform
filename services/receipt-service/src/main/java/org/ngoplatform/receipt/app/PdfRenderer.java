@@ -26,6 +26,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,6 +45,13 @@ public class PdfRenderer {
     public record Data(Map<String, String> values, byte[] logo, boolean tax80g, List<Signatory> signatories, String verifyUrl) {
         String v(String k) { return values.get(k); }
     }
+
+    /**
+     * App credit printed small at the foot of every receipt (owner request 2026-11-02: every receipt advertises the app).
+     * Text from ngo.receipts.branding; blank turns it off. Kept out of the way of the NGO's own content.
+     */
+    @Value("${ngo.receipts.branding:Generated with Seva Setu - donations and accounts app for NGOs}")
+    String branding = "Generated with Seva Setu - donations and accounts app for NGOs";
 
     static final Color INK = new Color(20, 33, 61), MUTED = new Color(91, 100, 120), BRAND = new Color(8, 122, 75),
             BRAND_LIGHT = new Color(230, 243, 236), RULE = new Color(210, 214, 222);
@@ -272,7 +280,9 @@ public class PdfRenderer {
                 }
                 // Signatures, bottom right.
                 signatures(p, d.signatories(), m + qr + 20, w - m, 34);
-                p.textCenter(p.regular, 6, w / 2 + 40, 8, "This is a computer-generated receipt.", MUTED);
+                String foot = "This is a computer-generated receipt."
+                        + (branding == null || branding.isBlank() ? "" : "  ·  " + branding.trim());
+                p.textCenter(p.regular, 6, w / 2 + 40, 8, p.fit(p.regular, 6, foot, w - 2 * m), MUTED);
             }
             doc.save(out);
             return out.toByteArray();
@@ -397,6 +407,13 @@ public class PdfRenderer {
                         p.text(font, field.fontSize(), x, y, l, color);
                         y -= field.fontSize() * 1.25f;
                     }
+                }
+                // App credit on a white strip at the foot so it reads on any background picture.
+                if (branding != null && !branding.isBlank()) {
+                    String foot = p.fit(p.regular, 5.5f, branding.trim(), pw - 40);
+                    float fw = p.width(p.regular, 5.5f, foot) + 10;
+                    p.rect((pw - fw) / 2, 1.5f, fw, 9, Color.WHITE);
+                    p.textCenter(p.regular, 5.5f, pw / 2, 4, foot, MUTED);
                 }
             }
             doc.save(out);

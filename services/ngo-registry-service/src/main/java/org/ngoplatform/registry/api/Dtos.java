@@ -91,7 +91,7 @@ public final class Dtos {
                     n.getAreasOfActivity(), a == null ? null : a.getCity(), a == null ? null : a.getDistrict(),
                     a == null ? null : a.getState(), n.getWebsite(), n.getLogoKey() != null, n.getBrandColor(),
                     n.getVerificationStatus() == Ngo.VerificationStatus.APPROVED, n.getVerifiedAt(),
-                    n.isTax80gVerified() && n.getTax80gValidUntil() != null && n.getTax80gValidUntil().isAfter(LocalDate.now()),
+                    n.isTax80gVerified() && n.getTax80gValidUntil() != null && n.getTax80gValidUntil().isAfter(LocalDate.now(java.time.ZoneId.of("Asia/Kolkata"))),
                     n.donationEligible());
         }
     }

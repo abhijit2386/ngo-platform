@@ -303,6 +303,13 @@ any admin publishes; Enterprise adds approval); background pictures PNG/JPEG onl
   writes `logs/hs_err_<service>_<pid>.log` if a JVM ever crashes; non-Latin name shaping is serialised.
   Results: test-receipts 68/68 (repeated), test-donations 34/34, test-documents 57/57, test-notifications 26/26.
 - Design names: archived designs no longer block reusing a name (V3 partial unique index, NAME_TAKEN check).
+- App credit (owner request 2026-11-02): every receipt prints a small line "Generated with Seva Setu - donations and
+  accounts app for NGOs" at the foot (standard: after "computer-generated receipt"; custom designs: centred on a white
+  strip in the bottom 11 pt). Setting ngo.receipts.branding / RECEIPT_BRANDING (blank = off). The designer marks the
+  strip and warns FOOTER_OVERLAP when a field is placed in it. Not yet tied to plans (could be removable on Enterprise).
+- Fix (found 2026-11-02 00:15 IST): "today" was the UTC date in donation-service (offline donation date, reconciliation)
+  and ngo-registry-service (registration/expiry dates, 80G validity), so a cash donation entered between midnight and
+  05:30 IST was refused as "in the future". These now use India time, like campaign-service already did.
 - Next: Advanced designer screens (several templates, conditions, approval), Form 10BD/10BE export for the CA,
   receipts for in-kind donations with valuation notes.
 

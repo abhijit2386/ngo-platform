@@ -48,7 +48,7 @@ class PdfRendererTest {
             String text = new PDFTextStripper().getText(doc);
             assertThat(text).contains("DONATION RECEIPT", "ASF/2026-27/000124", "Meera Shah", "₹ 12,500.00",
                     "Rupees Twelve Thousand Five Hundred Only", "80G", "ABCDE1234F", "Chairman", "Secretary", "12A AAATA1234BE20214",
-                    "ABCD234567");
+                    "ABCD234567", "Generated with Seva Setu");
         }
         Files.write(Path.of("target", "sample-receipt.pdf"), pdf);
     }
@@ -62,6 +62,21 @@ class PdfRendererTest {
             assertThat(text).doesNotContain("ABCDE1234F"); // no PAN without 80G
         }
         Files.write(Path.of("target", "sample-receipt-devanagari.pdf"), pdf);
+    }
+
+    @Test
+    void customReceiptCarriesTheAppCreditUnlessTurnedOff() throws Exception {
+        TemplateDefinition def = TemplateDefinition.defaults(new TemplateDefinition.Page(595.28f, 420.84f));
+        PdfRenderer.Data d = new PdfRenderer.Data(values("Meera Shah"), null, true, List.of(), "http://x/verify/ABCD234567");
+        Map<String, String> facts = Map.of("tax80g", "true", "channel", "ONLINE", "hasPan", "true");
+        PdfRenderer pdf = new PdfRenderer();
+        try (PDDocument doc = Loader.loadPDF(pdf.custom(def, null, d, facts))) {
+            assertThat(new PDFTextStripper().getText(doc)).contains("Meera Shah", "Generated with Seva Setu");
+        }
+        pdf.branding = " ";
+        try (PDDocument doc = Loader.loadPDF(pdf.custom(def, null, d, facts))) {
+            assertThat(new PDFTextStripper().getText(doc)).contains("Meera Shah").doesNotContain("Seva Setu");
+        }
     }
 
     @Test

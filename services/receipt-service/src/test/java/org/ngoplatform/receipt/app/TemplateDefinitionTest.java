@@ -87,4 +87,18 @@ class TemplateDefinitionTest {
             assertThat(new PDFTextStripper().getText(doc)).contains("Kiran Rao").doesNotContain("80G");
         }
     }
+
+    @Test
+    void fieldInTheCreditStripIsWarned() {
+        var page = new TemplateDefinition.Page(595.28f, 420.84f);
+        var def = TemplateDefinition.defaults(page);
+        assertThat(def.validate(false).warnings()).noneMatch(w -> w.startsWith("FOOTER_OVERLAP"));
+        var fields = new java.util.ArrayList<>(def.fields());
+        fields.add(TemplateDefinition.text("staticText", 200, 412, 200, 7, false, null));
+        fields.set(fields.size() - 1, new TemplateDefinition.Field("staticText", 200, 412, 200, 7, "LEFT", false, null, null,
+                "Office hours 10-5", null, null, null, 1));
+        var r = new TemplateDefinition(page, fields, false).validate(false);
+        assertThat(r.ok()).isTrue();
+        assertThat(r.warnings()).anyMatch(w -> w.startsWith("FOOTER_OVERLAP") && w.endsWith("staticText"));
+    }
 }

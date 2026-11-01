@@ -400,6 +400,7 @@ class _TemplateEditorPageState extends ConsumerState<TemplateEditorPage> {
       'TAX80G_MISSING' => t.rcdChk80gMissing,
       'OVERLAPPING_FIELDS' => t.rcdChkOverlap(where),
       'DUPLICATE_FIELD' => t.rcdChkDuplicate(field),
+      'FOOTER_OVERLAP' => t.rcdChkFooter(field),
       _ => c,
     };
   }
@@ -610,6 +611,23 @@ class _TemplateEditorPageState extends ConsumerState<TemplateEditorPage> {
                     Positioned.fill(child: bg == null
                         ? Container(color: Colors.white, alignment: Alignment.center, child: Text(t.rcdNoBackground))
                         : Image.memory(bg, fit: BoxFit.fill)),
+                    // Where the server prints the small app credit line (TemplateDefinition.FOOTER_PT = 11 pt).
+                    Positioned(
+                      left: canvasW / 2 - 140 * px,
+                      width: 280 * px,
+                      bottom: 0,
+                      height: 11 * px,
+                      child: IgnorePointer(
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            border: Border.all(color: AppColors.textMuted.withValues(alpha: 0.5), width: 0.5),
+                          ),
+                          child: FittedBox(child: Text(t.rcdFooterMark, style: const TextStyle(color: AppColors.textMuted))),
+                        ),
+                      ),
+                    ),
                     for (var i = 0; i < _fields.length; i++) _fieldBox(i, px, sample),
                   ]),
                 ),

@@ -56,7 +56,7 @@ public class Reconciliation {
                 .orElseThrow(() -> ApiException.rule("PAYMENTS_NOT_CONFIGURED", "Online payments are not configured"));
         PaymentProvider provider = providers.get(ps.getProvider());
         Records.ReconRun run = runs.save(new Records.ReconRun(ngoId, actor));
-        LocalDate today = LocalDate.now(clock);
+        LocalDate today = LocalDate.now(clock.withZone(java.time.ZoneId.of("Asia/Kolkata")));
         int batchCount = 0, matched = 0, exc = 0;
         for (PaymentProvider.Settlement s : provider.getSettlements(ps.getMerchantReference(), today.minusDays(30), today)) {
             if (batches.existsByProviderAndProviderSettlementId(provider.name(), s.settlementId())) {

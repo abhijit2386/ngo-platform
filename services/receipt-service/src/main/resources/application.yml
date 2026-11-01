@@ -15,3 +15,5 @@ ngo:
     link-secret: ${RECEIPT_LINK_SECRET:dev-receipt-link-secret-change-me}
     link-ttl: P30D
     public-base-url: ${PUBLIC_API_BASE:http://localhost:8080}
+    # App credit at the foot of every receipt (advertises the app); blank = off.
+    branding: ${RECEIPT_BRANDING:Generated with Seva Setu - donations and accounts app for NGOs}

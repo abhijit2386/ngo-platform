@@ -139,7 +139,7 @@ public class RegistryService {
             throw ApiException.rule("SENSITIVE_CHANGE_REQUIRES_REVIEW",
                     "Registration details can only be changed through a change request after verification");
         }
-        if (req.registrationDate() != null && req.registrationDate().isAfter(LocalDate.now(clock))) {
+        if (req.registrationDate() != null && req.registrationDate().isAfter(LocalDate.now(clock.withZone(java.time.ZoneId.of("Asia/Kolkata"))))) {
             throw ApiException.badRequest("REGISTRATION_DATE_FUTURE", "Registration date cannot be in the future");
         }
         if (!Reference.STATES.contains(req.registrationState())) {
@@ -182,7 +182,7 @@ public class RegistryService {
     public Parts.Document uploadDocument(UUID ngoId, String type, byte[] data, String originalName, LocalDate expiresOn) {
         Ngo n = editable(ngoId);
         if (!Reference.DOC_TYPES.contains(type)) throw ApiException.badRequest("INVALID_DOC_TYPE", "Unknown document type");
-        if (expiresOn != null && expiresOn.isBefore(LocalDate.now(clock))) {
+        if (expiresOn != null && expiresOn.isBefore(LocalDate.now(clock.withZone(java.time.ZoneId.of("Asia/Kolkata"))))) {
             throw ApiException.badRequest("DOCUMENT_EXPIRED", "This document has already expired");
         }
         Set<String> allowed = "LOGO".equals(type) ? Set.of("image/png", "image/jpeg") : DOC_TYPES_ALLOWED;
@@ -258,7 +258,7 @@ public class RegistryService {
         if (n.getPan() != null && !ngos.findOthersByPan(n.getPan(), n.getId()).isEmpty()) flags.add("DUPLICATE_PAN");
         if (!ngos.findOthersByName(n.getDisplayName(), n.getId()).isEmpty()) flags.add("SIMILAR_NAME");
         if (n.getDarpanId() == null) flags.add("NO_DARPAN_ID");
-        if (n.getRegistrationDate() != null && n.getRegistrationDate().isAfter(LocalDate.now(clock).minusMonths(6))) {
+        if (n.getRegistrationDate() != null && n.getRegistrationDate().isAfter(LocalDate.now(clock.withZone(java.time.ZoneId.of("Asia/Kolkata"))).minusMonths(6))) {
             flags.add("RECENTLY_REGISTERED");
         }
         if (n.getOfficialEmail() != null && n.getOfficialEmail().matches(".*@(gmail|yahoo|hotmail|outlook)\\..*")) {
@@ -400,7 +400,7 @@ public class RegistryService {
                         "Please review and re-upload current registration documents."));
             }
         }
-        LocalDate soon = LocalDate.now(clock).plusDays(30);
+        LocalDate soon = LocalDate.now(clock.withZone(java.time.ZoneId.of("Asia/Kolkata"))).plusDays(30);
         for (Parts.Document d : documents.findByExpiresOnBeforeAndStatus(soon, "ACCEPTED")) {
             Ngo n = load(d.getNgoId());
             String flag = "DOCUMENT_EXPIRING_" + d.getType();

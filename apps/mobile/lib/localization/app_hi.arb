@@ -1004,5 +1004,7 @@
   "rcdUpgradeTitle": "आपकी अपनी रसीद डिज़ाइन",
   "rcdUseStandard": "मानक रसीद उपयोग करें",
   "rcdUseThis": "यह डिज़ाइन उपयोग करें",
-  "rcdWidth": "चौड़ाई"
+  "rcdWidth": "चौड़ाई",
+  "rcdChkFooter": "{field} नीचे की पट्टी में है, जहाँ छोटी Seva Setu पंक्ति छपती है। इसे थोड़ा ऊपर करें।",
+  "rcdFooterMark": "Seva Setu श्रेय पंक्ति"
 }

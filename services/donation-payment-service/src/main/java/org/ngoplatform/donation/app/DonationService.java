@@ -305,7 +305,7 @@ public class DonationService {
             throw ApiException.badRequest("INVALID_AMOUNT", "Enter a positive amount with at most 2 decimals");
         }
         if (r.channel() == Donation.Channel.ONLINE) throw ApiException.badRequest("INVALID_CHANNEL", "Use an offline channel");
-        if (r.receivedOn() == null || r.receivedOn().isAfter(LocalDate.now(clock))) {
+        if (r.receivedOn() == null || r.receivedOn().isAfter(LocalDate.now(clock.withZone(java.time.ZoneId.of("Asia/Kolkata"))))) {
             throw ApiException.badRequest("INVALID_DATE", "Received date cannot be in the future");
         }
         if ((r.channel() == Donation.Channel.CHEQUE || r.channel() == Donation.Channel.BANK_TRANSFER

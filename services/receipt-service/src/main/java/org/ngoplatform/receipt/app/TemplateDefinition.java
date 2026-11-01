@@ -46,6 +46,8 @@ public record TemplateDefinition(Page page, List<Field> fields, boolean showLogo
     public static final Set<String> BASIC_KEYS = ALL_KEYS;
     public static final Set<String> REQUIRED_KEYS = Set.of("receiptNumber", "donorName", "amount", "date");
     public static final Set<String> FONTS = Set.of("SANS");
+    /** Height kept for the app credit line at the foot of a custom receipt. */
+    public static final float FOOTER_PT = 11;
     public static final Set<String> CONDITION_FIELDS = Set.of("tax80g", "channel", "hasPan");
 
     /**
@@ -135,6 +137,14 @@ public record TemplateDefinition(Page page, List<Field> fields, boolean showLogo
         if (!images.contains("qrCode")) warnings.add("QR_MISSING");
         if (images.stream().noneMatch(k -> k.startsWith("signatory"))) warnings.add("SIGNATORY_MISSING");
         if (fields.stream().noneMatch(f -> "tax80gText".equals(f.key()))) warnings.add("TAX80G_MISSING");
+        // The app credit line sits centred in the bottom FOOTER_PT of the page (PdfRenderer.custom).
+        for (int i = 0; i < fields.size(); i++) {
+            Field f = fields.get(i);
+            if (f.key() != null && ALL_KEYS.contains(f.key()) && f.y() + f.boxHeight() > page.height() - FOOTER_PT
+                    && f.x() < page.width() / 2 + 140 && f.x() + f.width() > page.width() / 2 - 140) {
+                warnings.add("FOOTER_OVERLAP: field[" + i + "] " + f.key());
+            }
+        }
         for (int i = 0; i < fields.size(); i++) {
             for (int j = i + 1; j < fields.size(); j++) {
                 if (overlap(fields.get(i), fields.get(j))) {
