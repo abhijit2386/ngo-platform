@@ -1121,7 +1121,7 @@
   "docChooseFile": "Choose a file",
   "docChooseFileFirst": "Choose a file first",
   "docChooseFileHint": "PDF, photo, Word, Excel or PowerPoint, up to 25 MB",
-  "docCount": "{count} documents",
+  "docCount": "Documents: {count}",
   "@docCount": {
     "placeholders": {
       "count": {
@@ -1376,7 +1376,7 @@
   "meetMinutesNote": "Mark who attended, then write the proceedings. You can edit until the minutes are approved.",
   "meetMinutesPdf": "Minutes PDF",
   "meetMinutesSaved": "Minutes saved",
-  "meetMinutesToApprove": "{count} minutes waiting for approval",
+  "meetMinutesToApprove": "Minutes to approve: {count} meeting(s)",
   "@meetMinutesToApprove": {
     "placeholders": {
       "count": {
@@ -1384,7 +1384,7 @@
       }
     }
   },
-  "meetMyActions": "{count} open action items for you",
+  "meetMyActions": "Your open action items: {count}",
   "@meetMyActions": {
     "placeholders": {
       "count": {
@@ -1469,7 +1469,7 @@
   "meetTitle": "Meetings & minutes",
   "meetType": "Meeting type",
   "meetUpcoming": "Upcoming",
-  "meetUpcomingCount": "{count} upcoming meetings",
+  "meetUpcomingCount": "Upcoming meetings: {count}",
   "@meetUpcomingCount": {
     "placeholders": {
       "count": {
@@ -1504,5 +1504,6 @@
       }
     }
   },
-  "docTooLarge": "This file is larger than 25 MB"
+  "docTooLarge": "This file is larger than 25 MB",
+  "meetNoOpenActions": "Action items: nothing pending for you"
 }

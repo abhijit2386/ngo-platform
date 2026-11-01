@@ -80,3 +80,21 @@ Admin Asha approves a bill added by staff (voucher number), then the account she
 <img src="accounts-11-staff-advances.png" alt="accounts-11-staff-advances" width="270">
 <img src="accounts-12-staff-ledger.png" alt="accounts-12-staff-ledger" width="270">
 <img src="accounts-13-account-sheet-pdf.png" alt="accounts-13-account-sheet-pdf" width="820">
+
+## Document vault and meetings (2026-11-01, Asha / admin)
+
+<img src="documents-01-home.png" alt="documents-01-home" width="270">
+<img src="documents-02-list.png" alt="documents-02-list" width="270">
+<img src="documents-03-detail.png" alt="documents-03-detail" width="270">
+<img src="documents-04-photo.png" alt="documents-04-photo" width="270">
+<img src="documents-05-upload.png" alt="documents-05-upload" width="270">
+<img src="meetings-01-list.png" alt="meetings-01-list" width="270">
+<img src="meetings-02-past.png" alt="meetings-02-past" width="270">
+<img src="meetings-03-draft.png" alt="meetings-03-draft" width="270">
+<img src="meetings-04-draft.png" alt="meetings-04-draft" width="270">
+<img src="meetings-05-confirm.png" alt="meetings-05-confirm" width="270">
+<img src="meetings-06-approved.png" alt="meetings-06-approved" width="270">
+<img src="meetings-07-agm.png" alt="meetings-07-agm" width="270">
+<img src="meetings-08-agm.png" alt="meetings-08-agm" width="270">
+<img src="meetings-09-form.png" alt="meetings-09-form" width="270">
+<img src="meetings-10-form.png" alt="meetings-10-form" width="270">

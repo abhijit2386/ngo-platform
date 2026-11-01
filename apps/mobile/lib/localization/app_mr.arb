@@ -647,7 +647,7 @@
   "docChooseFile": "फाइल निवडा",
   "docChooseFileFirst": "आधी फाइल निवडा",
   "docChooseFileHint": "PDF, फोटो, Word, Excel किंवा PowerPoint, 25 MB पर्यंत",
-  "docCount": "{count} दस्तऐवज",
+  "docCount": "दस्तऐवज: {count}",
   "docDate": "दस्तऐवजाची तारीख",
   "docDelete": "हटवा",
   "docDeleteConfirm": "हा दस्तऐवज रिसायकल बिनमध्ये हलवायचा?",
@@ -760,8 +760,8 @@
   "meetMinutesNote": "कोण उपस्थित होते ते निवडा, मग कामकाज लिहा. मंजुरीपर्यंत बदलता येते.",
   "meetMinutesPdf": "इतिवृत्त PDF",
   "meetMinutesSaved": "इतिवृत्त जतन केले",
-  "meetMinutesToApprove": "{count} इतिवृत्त मंजुरीसाठी",
-  "meetMyActions": "तुमच्या {count} प्रलंबित कृती",
+  "meetMinutesToApprove": "मंजुरीसाठी इतिवृत्त: {count} सभा",
+  "meetMyActions": "तुमच्या प्रलंबित कृती: {count}",
   "meetName": "शीर्षक",
   "meetNoActions": "कृती नाहीत",
   "meetNoAttendees": "अजून निमंत्रित नाहीत",
@@ -804,7 +804,7 @@
   "meetTitle": "सभा व इतिवृत्त",
   "meetType": "सभेचा प्रकार",
   "meetUpcoming": "आगामी",
-  "meetUpcomingCount": "{count} आगामी सभा",
+  "meetUpcomingCount": "आगामी सभा: {count}",
   "meetVenue": "स्थळ",
   "meetVisRestrictedHint": "फक्त निमंत्रित व प्रशासक",
   "meetVisTeamHint": "टीममधील सर्वजण",
@@ -812,5 +812,6 @@
   "meetVotesAgainst": "विरोधात",
   "meetVotesFor": "बाजूने",
   "meetWhoWasPresent": "कोण उपस्थित होते ({count} पैकी {n})",
-  "docTooLarge": "ही फाइल 25 MB पेक्षा मोठी आहे"
+  "docTooLarge": "ही फाइल 25 MB पेक्षा मोठी आहे",
+  "meetNoOpenActions": "कृती मुद्दे: तुमच्यासाठी काही प्रलंबित नाही"
 }

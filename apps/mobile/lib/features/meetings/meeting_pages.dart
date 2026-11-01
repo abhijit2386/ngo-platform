@@ -74,7 +74,7 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
               child: Row(children: [
                 const Icon(Icons.checklist, color: AppColors.primary),
                 const SizedBox(width: AppSpacing.sm),
-                Expanded(child: Text(t.meetMyActions((summary['myOpenActions'] as num? ?? 0).toInt()),
+                Expanded(child: Text((summary['myOpenActions'] as num? ?? 0) > 0 ? t.meetMyActions((summary['myOpenActions'] as num).toInt()) : t.meetNoOpenActions,
                     style: const TextStyle(fontWeight: FontWeight.w600))),
                 const Icon(Icons.chevron_right),
               ]),
