@@ -83,7 +83,11 @@ foreach ($svc in $order) {
   $heap = if ($svc -eq 'receipt-service') { '-Xmx320m' } else { '-Xmx256m' }
   $jit = if ($svc -ne 'receipt-service' -or $ReceiptJit -eq 'c1') { '-XX:TieredStopAtLevel=1' } elseif ($ReceiptJit -eq 'int') { '-Xint' } else { '-XX:+TieredCompilation' }
   $diag = if ($svc -eq 'receipt-service' -and $ReceiptDiag) { '-XX:+PrintCompilation' } else { '-Dngo.diag=off' }
-  $jargs = @('-Xms48m', $heap, '-XX:MaxMetaspaceSize=160m', '-XX:+UseSerialGC', $jit, $diag,
+  # Native caps (2026-11-02): code cache, compressed class space and direct buffers are sized for big servers by
+  # default; the heap gives memory back after a burst (SerialGC honours the free ratios).
+  $jargs = @('-Xms48m', $heap, '-XX:MaxMetaspaceSize=160m', '-XX:CompressedClassSpaceSize=64m',
+            '-XX:ReservedCodeCacheSize=48m', '-XX:MaxDirectMemorySize=64m', '-XX:MinHeapFreeRatio=10',
+            '-XX:MaxHeapFreeRatio=30', '-XX:+UseSerialGC', $jit, $diag,
             $stack, "-XX:ErrorFile=$Repo\logs\hs_err_$svc`_%p.log", '-Dfile.encoding=UTF-8', '-jar', "$Repo\services\$svc\target\app.jar")
   $p = Start-Process -FilePath "$jdk\bin\java.exe" -ArgumentList $jargs -WorkingDirectory "$Repo\services\$svc" `
         -RedirectStandardOutput $out -RedirectStandardError "$out.err" -WindowStyle Hidden -PassThru

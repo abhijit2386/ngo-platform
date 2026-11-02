@@ -21,7 +21,15 @@ notifications (e-mail + in-app, en/hi/mr), CSR suite (Enterprise). Adults only (
 
 ## How Claude works on the laptop
 - The chat must be linked to the laptop (Claude desktop app). Files live in D:\ngo-platform.
+- PC runner ("agent"): scripts\agent.cmd opens a window running scripts\agent.ps1, which executes command files
+  from D:\ngo-platform\.agent. It belongs to the laptop, not to a chat: any linked chat can use it. If no
+  out-cmd log appears within ~10 s, ask the owner to double-click D:\ngo-platform\scripts\agent.cmd (needed
+  after every laptop restart). Use it from one chat at a time. scripts\keep-awake.ps1 keeps the laptop awake
+  (only when the owner asks).
 - Code is edited in the cloud copy, packed with sync (tar) and copied to D:\ngo-platform\.sync, then applied.
+  If GitHub is not linked in the chat (no cloud copy): edit D:\ngo-platform, apply the SAME edits to the repo
+  D:\ngo-git\ngo-platform (it is ahead of D:\ngo-platform for docs and some scripts: never copy whole files; .ps1
+  there is CRLF without BOM) and commit + push there through the runner. Both folders need linking to the chat.
 - PC commands: write D:\ngo-platform\.agent\cmd-NNN-name.ps1; the runner executes them in order and writes
   out-cmd-NNN-name.log (moved to .agent\done after). Read logs with grep/tail.
 - Build: scripts\build-backend.cmd -pl <modules> (stop those services first). Start: scripts\start-local.ps1
@@ -29,7 +37,7 @@ notifications (e-mail + in-app, en/hi/mr), CSR suite (Enterprise). Adults only (
   UI helper scripts\ui.ps1 (Tap, TypeText, Labels, Shot...). psql needs $env:PGPASSWORD='dev-only-password' and -w.
 - PowerShell 5.1 misreads non-ASCII (e.g. the rupee sign) in .ps1 command files: avoid it there.
 - Push: git bundle (<last pushed>..main) -> D:\ngo-platform\.sync -> fetched into D:\ngo-git\ngo-platform -> push.
-  Last pushed commit: db04e26 (CSR 3).
+  Last pushed commit: "Memory: fix HttpClient thread leak..." (2 Nov 2026; see git log).
 
 ## Test data (DEV ONLY)
 NGO "Asha Seva" (id 0cf945f6-1183-42f5-aeb1-20bab9be302b), Professional trial; tests switch to ENTERPRISE via
@@ -44,24 +52,25 @@ Profile + 18+ gate, verified mobile (OTP), campaigns + approval + share page, on
 receipts R1/R2 + parallel workers (3 copies tested: 75 receipts in 11.5 s), campaign accounts, document vault +
 meetings, Yogdaan rename + master config, CSR 1 compliance pack (expiring public link), CSR 2 utilisation
 certificate (NGO signs, CA certifies via link with UDIN check, PDF in vault), CSR 3 funding proposals (from a
-campaign, frozen PDF when sent, follow-ups, funded -> UC pre-filled, pipeline).
+campaign, frozen PDF when sent, follow-ups, funded -> UC pre-filled, pipeline), memory fix (HttpClient thread leak in
+platform-commons: 1,908 -> 45 threads; JVM native caps ~15% less per service; emulator restarted by run-mobile once
+its commit passes 8 GB - it grows ~12 GB a day).
 
 ## Open issues
-- Intermittent JVM crash (access violation, offset ...6d12, no hs_err) in receipt and campaign services, around PDF
-  rendering. Laptop memory is near its limit (1.6 GB RAM free, commit 34.7/37.3 GB): a likely factor.
-  Windows crash dumps need the owner's approval.
+- JVM crash (access violation, offset ...6d12, no hs_err; receipt and campaign services, PDF rendering): not seen
+  since the 2 Nov memory fix (75-receipt load + UC + proposals E2E clean; commit 24/30 GB). Likely memory
+  starvation. If it returns: Windows crash dump (needs the owner's approval).
 - Event relay: one service down holds up later events for all (head-of-line blocking).
 - test-receipts archives the owner's custom receipt design.
 - S3 region hard-coded (US_EAST_1) in commons S3ObjectStorage: fix before Oracle Cloud.
 - UC page refreshes only on pull-down when the CA certifies.
 
 ## Next (suggested order)
-1. Trim service memory (stacks, metaspace, code cache) and re-check the crash.
-2. Payment gateway (real) or Google/Facebook/Apple sign-in (owner creates the OAuth apps).
-3. Account deletion end to end; unsubscribe links; donor PAN only when 80G is wanted; referral links.
-4. Form 10BD/10BE export, advanced receipt designer, donor receipts in their vault.
-5. Operations (volunteers, beneficiaries), helpdesk, reporting; push notifications.
-6. Oracle Cloud free tier (A1 2 OCPU/12 GB, Mumbai/Hyderabad, Caddy, one bucket), iOS (needs a Mac), Play release.
+1. Payment gateway (real) or Google/Facebook/Apple sign-in (owner creates the OAuth apps).
+2. Account deletion end to end; unsubscribe links; donor PAN only when 80G is wanted; referral links.
+3. Form 10BD/10BE export, advanced receipt designer, donor receipts in their vault.
+4. Operations (volunteers, beneficiaries), helpdesk, reporting; push notifications.
+5. Oracle Cloud free tier (A1 2 OCPU/12 GB, Mumbai/Hyderabad, Caddy, one bucket), iOS (needs a Mac), Play release.
 
 ## Owner decisions on record
 CSR = Enterprise for now (flags CSR_COMPLIANCE_PACK, CSR_UTILISATION_CERT, CSR_PROPOSALS, re-decidable). CSR papers

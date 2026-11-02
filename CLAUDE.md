@@ -31,6 +31,10 @@ Every feature is built and tested with the standard dataset (>= 2 admins, 2 staf
 E2E: test-profile, test-phone, test-notifications, test-campaigns, test-admin-limit, test-donations, test-expenses, test-documents, test-receipts, test-csr, test-uc, test-proposals. Load: test-load-receipts (with `start-local.ps1 -ReceiptCopies 3`).
 Never pipe or redirect the output of start-local.ps1 in helper commands (started services inherit the handle and the command never ends).
 PC scripts that call psql must set `$env:PGPASSWORD = 'dev-only-password'` and pass `-w` (a password prompt hangs the runner).
+Service-to-service calls: always `InternalClients.forBaseUrl(...)` (cached; one HttpClient per service). Never build a
+`java.net.http.HttpClient` per call: each one keeps a selector thread alive (1,908 leaked threads, 2026-11-02).
+Memory: the emulator's commit grows ~12 GB a day; run-mobile.ps1 restarts it past 8 GB. Check memory with a
+Get-Process sweep (threads + private bytes) before blaming a service.
 
 ## Configuration
 All keys and passwords (e-mail SMTP, Google/Facebook sign-in, secrets, storage, payments) go in ONE file:

@@ -260,6 +260,23 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
 - Next (agreed phases): phase 2 donor receipts (PDF + QR) in the vault for donors; phase 3 expiry reminders,
   document versions, CA read-only access.
 
+### Session 2026-11-02 (afternoon): memory - thread leak fixed, emulator guard, JVM native caps
+- Measured first (cmd-356): donation-payment-service had 1,908 threads (others ~50); the emulator (qemu) held
+  16.5 GB of commit after ~22 h of uptime; all 10 services together ~4 GB. Laptop commit 36.9/40.2 GB.
+- Thread leak (platform-commons InternalClients): every forBaseUrl() call built a new java.net.http.HttpClient,
+  each with its own SelectorManager thread; HttpOutboxRelay called it once per relayed event (1,856 leaked
+  selector threads). Now one HttpClient per service and one cached RestClient per base URL. Unit test
+  InternalClientsTest (same instance; 400 calls start no selector thread). After the fix + donations E2E:
+  45 threads, 2 selector threads per service.
+- Emulator: a fresh boot commits 4.3 GB (vs 16.5 GB after a day): restarting freed 12 GB (commit 36.4 -> 24.2 GB).
+  run-mobile.ps1 now restarts the emulator when its commit passes 8 GB.
+- JVM flags (start-local.ps1): CompressedClassSpaceSize=64m, ReservedCodeCacheSize=48m, MaxDirectMemorySize=64m,
+  Min/MaxHeapFreeRatio=10/30. Per service ~290-315 MB private after load (was 350-370 MB).
+- Verified: build + all unit tests OK; E2E donations 34/34, UC 29/29, proposals 35/35; load test 75 receipts on
+  3 receipt copies in 15.5 s, 5/5. No JVM crash, no hs_err, no service down. The crash stays "open, not seen
+  since": memory starvation (commit near the limit) is the likely cause; re-check if it ever returns.
+- No UI change, so no emulator walkthrough.
+
 ### Session 2026-11-02: receipts Phase 1 - parallel workers, fair queue, load test
 - Worker: claims batches of 10 with FOR UPDATE SKIP LOCKED (several copies, all in Eureka, share the queue without
   collisions); order = new receipts before retries, round-robin across NGOs (oldest of every NGO first); a round

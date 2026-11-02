@@ -2,6 +2,8 @@ package org.ngoplatform.commons.config;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.ngoplatform.commons.security.InternalTokenFilter;
 import org.ngoplatform.commons.web.CorrelationIdFilter;
 import org.springframework.beans.factory.ObjectProvider;
@@ -17,6 +19,13 @@ public class InternalClients {
     private final String token;
     private final RestClient.Builder builder;
     private final DeferringLoadBalancerInterceptor loadBalancer;
+    /**
+     * One JDK HttpClient for the whole service: each HttpClient owns a selector thread that lives until the client
+     * is garbage collected, so building one per call (the outbox relay did, once per event) leaked thousands of
+     * threads (donation-payment-service reached 1,908 on 2026-11-02).
+     */
+    private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
+    private final Map<String, RestClient> byBaseUrl = new ConcurrentHashMap<>();
 
     /**
      * When {@code ngo.discovery.enabled} (local development with Eureka), service URLs such as
@@ -31,8 +40,15 @@ public class InternalClients {
         this.loadBalancer = discovery ? loadBalancer.getIfAvailable() : null;
     }
 
+    /** Returns the (cached) client for a base URL; safe to call per request. */
     public RestClient forBaseUrl(String baseUrl) {
-        HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
+        return byBaseUrl.computeIfAbsent(baseUrl, this::build);
+    }
+
+    /** Number of distinct base URLs with a client (for tests and diagnostics). */
+    int cachedClients() { return byBaseUrl.size(); }
+
+    private RestClient build(String baseUrl) {
         JdkClientHttpRequestFactory rf = new JdkClientHttpRequestFactory(http);
         rf.setReadTimeout(Duration.ofSeconds(5));
         RestClient.Builder b = builder.clone();

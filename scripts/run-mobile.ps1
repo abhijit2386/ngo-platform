@@ -55,6 +55,14 @@ if (-not $SkipBuild) {
 }
 Set-Content "$Repo\logs\run-mobile.status" 'BUILT'
 # Start the emulator only after the build (this PC cannot hold Gradle and the emulator in RAM together).
+# The emulator's commit grows from ~4.3 GB at boot to 16.5 GB after a day (measured 2026-11-02), which starved the
+# backend JVMs: restart it once it passes 8 GB. The app is reinstalled below anyway.
+$qemu = Get-Process qemu-system-x86_64 -ErrorAction SilentlyContinue
+if ($qemu -and $qemu.PrivateMemorySize64 -gt 8GB) {
+  Add-Content $log "=== restarting emulator (commit $([int]($qemu.PrivateMemorySize64/1MB)) MB)"
+  & adb emu kill | Out-Null
+  for ($i = 0; $i -lt 30 -and (Get-Process qemu-system-x86_64 -ErrorAction SilentlyContinue); $i++) { Start-Sleep 2 }
+}
 $devices = (& adb devices) -match 'emulator-\d+\s+device'
 if (-not $devices) {
   Add-Content $log '=== starting emulator'
