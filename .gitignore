@@ -23,3 +23,5 @@ infrastructure/podman/secrets/
 
 # Master configuration with real keys (template: config/yogdaan.env.example)
 config/yogdaan.env
+config/yogdaan.env.prod
+.deploy/

@@ -33,6 +33,9 @@ Never pipe or redirect the output of start-local.ps1 in helper commands (started
 PC scripts that call psql must set `$env:PGPASSWORD = 'dev-only-password'` and pass `-w` (a password prompt hangs the runner).
 Service-to-service calls: always `InternalClients.forBaseUrl(...)` (cached; one HttpClient per service). Never build a
 `java.net.http.HttpClient` per call: each one keeps a selector thread alive (1,908 leaked threads, 2026-11-02).
+Cloud (OCI, one Oracle Linux server, no containers): deploy/oci (install.sh steps, README) from the laptop with
+scripts/deploy-cloud.ps1 -Server <ip> -Steps <step...> [-Only svc,...]; settings in config/yogdaan.env.prod (gitignored).
+Every server program listens on 127.0.0.1 except Caddy (80/443) and ssh.
 Screenshots: every walkthrough adds its shots to docs/screenshots/<feature>-NN-<what-it-shows>.png (full size) and a
 section in docs/screenshots/README.md (heading with date and user, one-line summary, <img ... width="270">).
 80G rule (owner): a receipt is 80G when the NGO's 80G registration is verified and valid on the donation date; never

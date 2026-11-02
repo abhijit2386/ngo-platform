@@ -1,6 +1,9 @@
 # Builds the debug APK, installs and launches it on the running emulator. Each step runs with stdin from NUL,
 # output to a file, and a timeout (a Windows console quirk can otherwise hang dart tools).
-param([switch]$Analyze, [switch]$Test, [switch]$SkipBuild, [ValidateSet('debug','profile')][string]$Mode = 'debug')
+param([switch]$Analyze, [switch]$Test, [switch]$SkipBuild, [ValidateSet('debug','profile')][string]$Mode = 'debug',
+  # -Cloud: the app talks to the OCI server (https://api.yogdaan.co.in, https://auth.yogdaan.co.in), HTTPS only,
+  # no test-payment screen. Default: the laptop stack through adb reverse.
+  [switch]$Cloud, [string]$ApiUrl = 'https://api.yogdaan.co.in', [string]$AuthUrl = 'https://auth.yogdaan.co.in/realms/ngo')
 $ErrorActionPreference = 'Continue'
 $Repo = 'D:\ngo-platform'
 $env:PATH = "D:\tools\flutter\bin;D:\tools\android-sdk\platform-tools;D:\tools\git\cmd;$env:PATH"
@@ -50,7 +53,8 @@ if (-not $SkipBuild -and (Test-Path $apk)) {
 }
 if (-not $SkipBuild) {
   $before = if (Test-Path $apk) { (Get-Item $apk).LastWriteTime } else { [datetime]::MinValue }
-  Step 'build' "flutter build apk --$Mode" 60 | Out-Null
+  $defines = if ($Cloud) { " --dart-define=API_BASE_URL=$ApiUrl --dart-define=OIDC_ISSUER=$AuthUrl --dart-define=ALLOW_INSECURE=false --dart-define=MOCK_PAYMENTS=false" } else { '' }
+  Step 'build' "flutter build apk --$Mode$defines" 60 | Out-Null
   if (-not (Test-Path $apk) -or (Get-Item $apk).LastWriteTime -le $before) { Set-Content "$Repo\logs\run-mobile.status" 'BUILD_FAIL'; exit 1 }
 }
 Set-Content "$Repo\logs\run-mobile.status" 'BUILT'

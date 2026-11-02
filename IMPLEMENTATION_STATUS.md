@@ -260,6 +260,23 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
 - Next (agreed phases): phase 2 donor receipts (PDF + QR) in the vault for donors; phase 3 expiry reminders,
   document versions, CA read-only access.
 
+### Session 2026-11-02 (late night): OCI deployment kit (one Oracle Linux server, no containers)
+- Owner decisions: one OCI machine (8 OCPU / 32 GB, x86_64, Oracle Linux), no Podman/containers, Eureka kept,
+  OCI Object Storage for files, Elastic ELK for logs (Filebeat straight to Elasticsearch, no Logstash).
+- deploy/oci: install.sh + steps config, base, postgres, keycloak, caddy, services, elk, backup, smoke (each re-runnable;
+  see deploy/oci/README.md). Everything except ssh/http/https listens on 127.0.0.1 (SERVER_ADDRESS for every
+  service); Caddy blocks /internal, /actuator and Keycloak /admin; production realm without test users or the
+  password-grant client; secrets generated on the server; mock payments/billing OFF; nightly pg_dumpall to the backup
+  bucket; ECS JSON log files -> Filebeat -> Elasticsearch (30 days).
+- Laptop: scripts/deploy-cloud.ps1 (sends the tested jars + kit over SSH, -Only, -Rollback, -PackOnly);
+  run-mobile.ps1 -Cloud (app against https://api. / https://auth.yogdaan.co.in); config/yogdaan.env.prod.example.
+- Code: S3ObjectStorage region from S3_REGION (was hard-coded US_EAST_1), checksums only when required (AWS SDK 2.30
+  defaults break S3-compatible stores), S3 settings in commons defaults for every service. S3ObjectStorageTest.
+- Checked: bash -n + ShellCheck on the kit, full backend build + all unit tests, documents E2E 57/57 (local storage),
+  -PackOnly kit (963 MB: 11 jars of ~105 MB; updates should use -Only). Not run on Oracle Linux yet (no image
+  reachable from the build machine): first real run is the server install, step by step.
+- Found: PostgreSQL needs max_connections 300 (12 services x pool 10 + Keycloak); no SMS provider for phone OTP.
+
 ### Session 2026-11-02 (night): 80G receipts follow the NGO (owner rule)
 - Owner rule: when the NGO's 80G registration is verified and valid on the donation date, every receipt is an 80G
   receipt (shows the 80G number); otherwise none is. The donor's "I want 80G" choice and PAN no longer decide it

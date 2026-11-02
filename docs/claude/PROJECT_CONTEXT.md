@@ -59,7 +59,8 @@ campaign, frozen PDF when sent, follow-ups, funded -> UC pre-filled, pipeline), 
 platform-commons: 1,908 -> 45 threads; JVM native caps ~15% less per service; emulator restarted by run-mobile once
 its commit passes 8 GB - it grows ~12 GB a day), Reports R1 (Reports tab: NGO-wide for admins + Finance, My report
 for other staff; plan levels Community/Growth/Professional+; PDF/Excel; 80G register + Form 10BD data, audited),
-80G rule (receipt is 80G when the NGO's 80G is valid on the donation date, never a donor choice).
+80G rule (receipt is 80G when the NGO's 80G is valid on the donation date, never a donor choice), OCI deploy kit
+(deploy/oci + scripts/deploy-cloud.ps1; checked with ShellCheck and packing, not yet run on the server).
 
 ## Open issues
 - JVM crash (access violation, offset ...6d12, no hs_err; receipt and campaign services, PDF rendering): not seen
@@ -67,20 +68,23 @@ for other staff; plan levels Community/Growth/Professional+; PDF/Excel; 80G regi
   starvation. If it returns: Windows crash dump (needs the owner's approval).
 - Event relay: one service down holds up later events for all (head-of-line blocking).
 - test-receipts archives the owner's custom receipt design.
-- S3 region hard-coded (US_EAST_1) in commons S3ObjectStorage: fix before Oracle Cloud.
 - UC page refreshes only on pull-down when the CA certifies.
 - Cash above Rs 2,000 and in-kind donations get the 80G receipt text although not deductible (sec. 80G(5D)); the
   donation form still shows the old 80G tick box. Owner kept only "receipt follows the NGO" for now. 10BD data flags.
 
 ## Next (suggested order)
+0. Deploy on OCI (one Oracle Linux 8/9 x86_64 server, 8 OCPU/32 GB, no containers, Eureka, OCI Object Storage,
+   Elastic ELK): owner provides IP, SSH key on laptop, DNS, config/yogdaan.env.prod; run deploy-cloud.ps1 step by step
+   (config, base, postgres, keycloak, caddy, services, elk, backup, smoke); then social sign-in (needs privacy-policy and
+   data-deletion pages).
 1. Payment gateway (real) or Google/Facebook/Apple sign-in (owner creates the OAuth apps).
 2. Account deletion end to end; unsubscribe links; referral links; 80G form follow-up (tick box -> "add PAN for tax
    benefit", not-deductible line for cash above Rs 2,000 / in kind) when the owner wants it.
 3. Form 10BD/10BE export, advanced receipt designer, donor receipts in their vault.
 4. Operations (volunteers, beneficiaries), helpdesk, push notifications; more reports (donor retention, custom).
-5. Oracle Cloud free tier (A1 2 OCPU/12 GB, Mumbai/Hyderabad, Caddy, one bucket), iOS (needs a Mac), Play release.
+5. iOS (needs a Mac), Play release (release signing).
 
 ## Owner decisions on record
-80G receipt follows the NGO's registration (2 Nov). Reports: NGO-wide = admins + Finance; plan levels as above. CSR = Enterprise for now (flags CSR_COMPLIANCE_PACK, CSR_UTILISATION_CERT, CSR_PROPOSALS, re-decidable). CSR papers
+80G receipt follows the NGO's registration (2 Nov). Cloud: one OCI server, no containers, Eureka, ELK (2 Nov). Reports: NGO-wide = admins + Finance; plan levels as above. CSR = Enterprise for now (flags CSR_COMPLIANCE_PACK, CSR_UTILISATION_CERT, CSR_PROPOSALS, re-decidable). CSR papers
 are linked from the NGO's vault, not copied. Receipts carry "Generated with Yogdaan". No under-18 accounts.
 Gender question pending (recommendation: optional, "Prefer not to say").
