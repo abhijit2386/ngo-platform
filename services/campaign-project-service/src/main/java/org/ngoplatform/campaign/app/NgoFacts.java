@@ -32,5 +32,18 @@ public class NgoFacts {
                 str(m.get("donationEligibility")));
     }
 
+    /** Legal name, address, PAN, registration and 80G details (printed on utilisation certificates). */
+    public Map<String, Object> details(UUID ngoId) {
+        try {
+            Map<String, Object> m = registry.get().uri("/internal/v1/ngos/{id}", ngoId).retrieve().body(new ParameterizedTypeReference<>() {});
+            if (m == null) throw ApiException.notFound("Organization");
+            return m;
+        } catch (ApiException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw ApiException.rule("REGISTRY_UNAVAILABLE", "Could not read the organization's details right now. Try again shortly.");
+        }
+    }
+
     private static String str(Object o) { return o == null ? null : o.toString(); }
 }

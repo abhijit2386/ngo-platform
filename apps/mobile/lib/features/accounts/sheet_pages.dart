@@ -245,7 +245,13 @@ class AccountSheetPage extends ConsumerWidget {
     final base = '/api/v1/ngos/$ngoId/campaigns/$campaignId';
     String file(String ext) => 'account-sheet-${DateFormat('yyyy-MM-dd').format(DateTime.now())}.$ext';
     return Scaffold(
-      appBar: AppBar(title: Text(t.accAccountSheet)),
+      appBar: AppBar(title: Text(t.accAccountSheet), actions: [
+        if (ref.watch(currentMembershipProvider)?.isAdmin ?? false)
+          IconButton(
+              tooltip: t.ucTitle,
+              icon: const Icon(Icons.verified_outlined),
+              onPressed: () => context.push('/ngo/ucs?campaignId=$campaignId')),
+      ]),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(accountSheetProvider(key)),
         child: data.when(

@@ -2057,5 +2057,171 @@
   "csrKindUtilisation": "Utilisation certificate",
   "csrKindProposal": "Project proposal",
   "csrKindOther": "Other document",
-  "docCatCsr": "CSR"
+  "docCatCsr": "CSR",
+  "ucTitle": "Utilisation certificates",
+  "ucEntryHint": "Prepare from the campaign accounts, sign, get the CA to certify",
+  "ucNew": "New certificate",
+  "ucEdit": "Edit details",
+  "ucNewHint": "The figures come from the approved expenses of the campaign in this period.",
+  "ucIntroTitle": "Show the company how its grant was used",
+  "ucIntro": "Yogdaan prepares the utilisation certificate from your accounts. You sign it, send a link to your chartered accountant, and the certified PDF is kept in your documents.",
+  "ucEnterpriseOnly": "Utilisation certificates are part of the Enterprise plan. You can still view existing ones.",
+  "ucCertificates": "Certificates",
+  "ucNone": "No certificates yet.",
+  "ucCampaign": "Campaign",
+  "ucCampaignRequired": "Choose the campaign",
+  "ucFunder": "Company / CSR foundation",
+  "ucFunderRequired": "Enter the funder's name",
+  "ucReference": "Grant reference",
+  "ucReferenceHint": "Agreement or sanction letter number (optional)",
+  "ucCsr1": "CSR-1 registration number",
+  "ucGrant": "Grant amount",
+  "ucGrantShort": "Grant",
+  "ucGrantRequired": "Enter the grant amount",
+  "ucReceivedOn": "Grant received on",
+  "ucPeriodFrom": "Period from",
+  "ucPeriodTo": "Period to",
+  "ucChooseDate": "Choose date",
+  "ucDatesRequired": "Choose the received date and the period",
+  "ucPrepare": "Prepare certificate",
+  "ucPdf": "PDF",
+  "ucPeriod": "Period {from} – {to}",
+  "@ucPeriod": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "ucReferenceIs": "Reference {ref}",
+  "@ucReferenceIs": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "ucGrantReceived": "{amount} received on {date}",
+  "@ucGrantReceived": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ucStageDraft": "Draft",
+  "ucStageDraftText": "Check the figures. When they are right, sign the certificate; the figures are then frozen.",
+  "ucStageAwaiting": "Waiting for the chartered accountant",
+  "ucStageAwaitingText": "Send this link to your CA. They review the figures and certify with their UDIN. The link works until {date}.",
+  "@ucStageAwaitingText": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ucStageExpired": "CA link expired",
+  "ucStageExpiredText": "Create a new link and send it to your CA again.",
+  "ucStageCertified": "Certified",
+  "ucStageCertifiedText": "Certified by CA {name} (M. No. {membership}), UDIN {udin}, on {date}. The PDF is saved in your documents.",
+  "@ucStageCertifiedText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "membership": {
+        "type": "String"
+      },
+      "udin": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ucStageCancelled": "Cancelled",
+  "ucSignedBy": "Signed by {name}, {role} on {date}",
+  "@ucSignedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ucSendToCa": "Send to CA",
+  "ucFigures": "Figures",
+  "ucUtilised": "Utilised",
+  "ucUnspent": "Unspent",
+  "ucOwnFunds": "From own funds",
+  "ucFromAccounts": "From {count} approved expenses totalling {amount}",
+  "@ucFromAccounts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ucWithoutBill": "{count} expenses have no bill attached",
+  "@ucWithoutBill": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ucLiveFigures": "Live figures: they follow the accounts until you sign.",
+  "ucByHead": "By budget head (budget · spent)",
+  "ucExpenses": "Expenses ({count})",
+  "@ucExpenses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ucNoBill": "no bill",
+  "ucSign": "Sign certificate",
+  "ucSignHint": "The person who signs for the NGO. After signing the figures cannot change.",
+  "ucSignatory": "Name",
+  "ucDesignation": "Designation",
+  "ucSignNow": "Sign",
+  "ucNewLink": "New CA link",
+  "ucCancel": "Cancel certificate",
+  "ucCancelHint": "The certificate stays on record as cancelled. Give the reason.",
+  "ucCancelReason": "Reason",
+  "ucStatusDraft": "Draft",
+  "ucStatusAwaitingCa": "With CA",
+  "ucStatusLinkExpired": "Link expired",
+  "ucStatusCertified": "Certified",
+  "ucStatusCancelled": "Cancelled",
+  "ucShareText": "Please review and certify utilisation certificate {number} for {funder}: {url}",
+  "@ucShareText": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "funder": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  }
 }

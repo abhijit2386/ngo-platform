@@ -27,6 +27,7 @@ import '../features/documents/document_pages.dart';
 import '../features/meetings/meeting_pages.dart';
 import '../features/receipts/receipt_designer.dart';
 import '../features/csr/csr_pages.dart';
+import '../features/csr/uc_pages.dart';
 import '../features/receipts/receipt_pages.dart';
 import 'shells.dart';
 
@@ -144,6 +145,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Donation receipts: fixed paths before ':id'.
       GoRoute(path: '/ngo/csr', builder: (_, __) => const CsrPage()),
       GoRoute(path: '/ngo/csr/:id', builder: (_, s) => CsrPackPage(packId: s.pathParameters['id']!)),
+      GoRoute(path: '/ngo/ucs', builder: (_, s) => UcListPage(campaignId: s.uri.queryParameters['campaignId'])),
+      GoRoute(path: '/ngo/ucs/:id', builder: (_, s) => UcPage(ucId: s.pathParameters['id']!)),
       GoRoute(path: '/ngo/receipts', builder: (_, __) => const ReceiptsPage()),
       GoRoute(path: '/ngo/receipts/settings', builder: (_, __) => const ReceiptSettingsPage()),
       GoRoute(path: '/ngo/receipts/design', builder: (_, __) => const ReceiptDesignPage()),

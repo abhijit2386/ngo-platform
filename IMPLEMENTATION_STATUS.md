@@ -21,7 +21,7 @@ _Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (ses
 | donor-service | donors, dedupe/merge, import/export, segments, follows, privacy | NOT YET | none | |
 | donation-payment-service | online checkout with test provider, webhooks, ledger, team/80G/campaign rules (2026-10-29); refunds, reconciliation, offline/corrections drafted only | yes (2026-10-29) | 5 unit; e2e test-donations 34/34 | Razorpay adapter not built |
 | receipt-service | receipts after every paid donation (online + offline), numbering PREFIX/<FY>/000001 per NGO and financial year (gap-free), standard A5 PDF (logo, 12A, 80G block, amount in words, up to 3 signatories with signature images, QR verification), e-mail + in-app delivery, donor/guest download, NGO register + search + summary, reissue/void with history, vault entries; Basic designer (own background picture + fields) (2026-11-01) | yes (2026-11-01) | unit 19+; e2e test-receipts | Advanced designer (Enterprise: conditions, several templates, approval UI) not in the app yet; Form 10BD export later |
-| campaign-project-service | campaigns: approval workflow, photos, share page, public discovery, test donations (2026-10-29); campaign accounts: budget, expenses + bills + approval, vendors, staff cash ledger, account sheet PDF/Excel (2026-11-01); projects drafted only | yes (2026-10-29) | 15 unit; e2e test-campaigns 58/58 | projects not reviewed/tested yet |
+| campaign-project-service | campaigns: approval workflow, photos, share page, public discovery, test donations (2026-10-29); campaign accounts: budget, expenses + bills + approval, vendors, staff cash ledger, account sheet PDF/Excel (2026-11-01); CSR utilisation certificates with CA certification (Enterprise, 2026-11-02); projects drafted only | yes (2026-10-29) | 15 unit; e2e test-campaigns 58/58 | projects not reviewed/tested yet |
 | ngo-operations-service | **not started** (volunteers, beneficiaries, expenses/finance) | | | |
 | helpdesk-service | **not started** | | | |
 | notification-service | done: templates en/hi/mr (10 events x e-mail + in-app), event consumer, in-app inbox, e-mail via SMTP (Mailpit), retries with backoff + dead letter + replay, preferences/opt-outs, history, admin template edit/preview | yes (2026-10-29) | 58 unit tests pass; API e2e `scripts/test-notifications.ps1` | push/SMS/WhatsApp adapters not built (interface ready); receipt e-mails wait for receipt-service |
@@ -278,6 +278,37 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
   not crash in either burst. Root cause still open: reproduce with the old jar under -ReceiptJit full / int.
 - Event relay note: HttpOutboxRelay retries forever (nothing lost) but delivers in order, so one unreachable
   subscriber holds up later events for every subscriber until it is back.
+
+### Session 2026-11-02: CSR 2 - utilisation certificate (campaign-project-service, Enterprise)
+- campaign V5: utilisation_certificates (+ uc_counters, numbering UC/<FY>/nnn per NGO) with guard trigger: no delete,
+  figures frozen into JSONB at signing, certified rows can only be cancelled, cancelled rows immutable.
+  document V5: vault source UTILISATION_CERT.
+- Flow: DRAFT (live figures from the campaign's APPROVED expenses in the period, grouped by budget head, with
+  unspent balance and "from own funds" when spending exceeds the grant) -> NGO signs (name + designation; figures
+  frozen; CA link valid 14 days; API status AWAITING_CA / CA_LINK_EXPIRED) -> the CA opens the public page
+  /api/v1/public/uc/{code} (no login; own CSP incl. form-action 'self'), reviews statement + expenses + draft PDF and
+  certifies with name, ICAI membership no. (6 digits), UDIN (18 chars, must contain the membership no., this or last
+  year), optional firm/FRN, place, declaration -> final PDF stored at ngos/<id>/csr/uc/<id>.pdf with SHA-256 and
+  filed in the vault (category CSR, linked to the campaign, suggested for CSR packs). Cancel keeps the record
+  (vault entry renamed "Cancelled: ..."); new CA link invalidates the old one. Writes need CSR_UTILISATION_CERT;
+  reading and cancelling still work after a downgrade.
+- UcPdf (A4): letterhead, grant details, statement by budget head, certificate wording, NGO + CA sign-off with the
+  CA declaration, annexure of every expense (bill yes/no), "Generated with Yogdaan" footer; drafts carry
+  "DRAFT - NOT CERTIFIED" (watermark + footer).
+- App: CSR documents > Utilisation certificates, and a button on the campaign account sheet (admins). List, form
+  sheet (campaign, funder, reference, CSR-1 no., grant, received date, period), certificate page (stage card,
+  figures, heads, expenses, PDF, sign dialog, CA link share/copy/renew, cancel with reason). 66 strings en/hi/mr.
+- Tests: UcRulesTest (5), UcPdfTest (2); test-uc.ps1 29/29; regressions test-csr 39, test-documents 57,
+  test-expenses 66, test-campaigns 77. Emulator walkthrough: UC/2026-27/004 prepared, signed and certified by a
+  test CA through the emulator browser (demo data, Sahyadri Industries CSR Foundation).
+- Fixed during the walkthrough: CA declaration overlapped the signature blocks in the PDF. UC/2026-27/004 was
+  certified before that fix and keeps its stored PDF (certified files are never re-rendered).
+- Open: the certificate page refreshes only on pull-down when the CA certifies while the app is open.
+- Crash note: campaign-project-service crashed once (10:39 IST) with the SAME signature as the receipt-service
+  crashes (access violation in unknown module, offset ...6d12, no hs_err although ErrorFile is set), right after
+  rendering a UC PDF. So the crash is not receipt-specific and not caused by C2 (all services already run C1). The
+  re-run passed 29/29 without a crash. Suspect the JDK 21.0.12 build / PDFBox font path on this PC; next step is a
+  Windows crash dump (needs owner approval) or another JDK build.
 
 ### Session 2026-11-02: CSR 1 - compliance pack (document-service, Enterprise)
 Owner decisions: CSR is an Enterprise feature for now; each CSR component has its own entitlement

@@ -57,7 +57,7 @@ public class EdgeFilters implements GlobalFilter, Ordered {
         }
         String client = clientKey(req);
         boolean sensitive = path.startsWith("/api/v1/public/donations") || path.startsWith("/api/v1/public/receipts")
-                || path.startsWith("/api/v1/public/csr")
+                || path.startsWith("/api/v1/public/csr") || path.startsWith("/api/v1/public/uc")
                 || path.contains("/checkout") || path.startsWith("/api/v1/webhooks");
         int limit = sensitive ? perMinuteSensitive : perMinute;
         long count = windows.get((sensitive ? "s:" : "g:") + client, k -> new AtomicLong()).incrementAndGet();
