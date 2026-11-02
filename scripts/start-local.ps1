@@ -1,7 +1,15 @@
 # Starts the container-free development stack: PostgreSQL, Keycloak, Mailpit, Eureka and the selected services.
 #   -Services identity-service,ngo-registry-service,...  (default: the core set below)
 param([string[]]$Services = @('identity-service', 'ngo-registry-service', 'subscription-service', 'notification-service',
-  'campaign-project-service', 'donation-payment-service', 'receipt-service', 'document-service', 'api-gateway'))
+  'campaign-project-service', 'donation-payment-service', 'receipt-service', 'document-service', 'api-gateway'),
+  # Extra copies of receipt-service (ports 8097, 8107, ...), all registered in Eureka: the gateway spreads requests over
+  # them and their workers share the receipt queue (SKIP LOCKED). Used by the load test.
+  [int]$ReceiptCopies = 1,
+  # Compiler mode for receipt-service only (crash investigation 2026-11-02): c1 = -XX:TieredStopAtLevel=1 (like every
+  # other service), full = normal tiered JIT (C1 + C2), int = interpreter only (-Xint, slow; proves whether the JIT is involved).
+  [ValidateSet('c1', 'full', 'int')][string]$ReceiptJit = 'c1',
+  # Logs every JIT compilation of receipt-service to its log (the last lines before a crash show what was compiling).
+  [switch]$ReceiptDiag)
 $ErrorActionPreference = 'Continue'
 $Repo = 'D:\ngo-platform'; $Tools = 'D:\tools'; $KcVer = '26.7.2'
 $jdk = (Get-ChildItem $Tools -Directory -Filter 'jdk-21*' | Select-Object -First 1).FullName
@@ -53,8 +61,9 @@ if (-not (Port-Open 8025)) {
 
 # 4. Spring Boot: discovery first, then services, gateway last.
 $order = @('discovery-server') + ($Services | Where-Object { $_ -ne 'api-gateway' -and $_ -ne 'discovery-server' })
+for ($k = 2; $k -le $ReceiptCopies; $k++) { $ports["receipt-service-$k"] = 8087 + 10 * ($k - 1); $order += "receipt-service-$k" }
 if ($Services -contains 'api-gateway') { $order += 'api-gateway' }
-$missing = $order | Where-Object { -not (Test-Path "$Repo\services\$_\target\app.jar") }
+$missing = $order | Where-Object { -not (Test-Path "$Repo\services\$($_ -replace '^receipt-service-\d+$', 'receipt-service')\target\app.jar") }
 if ($missing) { Log "missing jars: $($missing -join ', ') - run build-backend.cmd first"; Set-Content "$Repo\logs\start-local.status" 'NO_JARS'; exit 1 }
 
 $env:STORAGE_ROOT = "$Repo\.local\files"
@@ -65,16 +74,22 @@ $pidFile = "$Repo\logs\backend.pids"
 foreach ($svc in $order) {
   if (Port-Open $ports[$svc]) { Log "already running $svc"; continue }
   $out = "$Repo\logs\svc-$svc.log"
+  $copy = $svc -like 'receipt-service-*'
+  $port = $ports[$svc]
+  if ($copy) { $env:PORT = "$port"; $svc = 'receipt-service' } else { Remove-Item env:PORT -ErrorAction SilentlyContinue }
   # receipt-service renders PDFs (Java2D text shaping, image encoding run in native code): a 512k stack let it crash
   # with an access violation and no report (2026-11-01), so it gets the JDK default 1 MB and a little more heap.
   $stack = if ($svc -eq 'receipt-service') { '-Xss1m' } else { '-Xss512k' }
   $heap = if ($svc -eq 'receipt-service') { '-Xmx320m' } else { '-Xmx256m' }
-  $jargs = @('-Xms48m', $heap, '-XX:MaxMetaspaceSize=160m', '-XX:+UseSerialGC', '-XX:TieredStopAtLevel=1',
+  $jit = if ($svc -ne 'receipt-service' -or $ReceiptJit -eq 'c1') { '-XX:TieredStopAtLevel=1' } elseif ($ReceiptJit -eq 'int') { '-Xint' } else { '-XX:+TieredCompilation' }
+  $diag = if ($svc -eq 'receipt-service' -and $ReceiptDiag) { '-XX:+PrintCompilation' } else { '-Dngo.diag=off' }
+  $jargs = @('-Xms48m', $heap, '-XX:MaxMetaspaceSize=160m', '-XX:+UseSerialGC', $jit, $diag,
             $stack, "-XX:ErrorFile=$Repo\logs\hs_err_$svc`_%p.log", '-Dfile.encoding=UTF-8', '-jar', "$Repo\services\$svc\target\app.jar")
   $p = Start-Process -FilePath "$jdk\bin\java.exe" -ArgumentList $jargs -WorkingDirectory "$Repo\services\$svc" `
         -RedirectStandardOutput $out -RedirectStandardError "$out.err" -WindowStyle Hidden -PassThru
+  if ($copy) { Remove-Item env:PORT -ErrorAction SilentlyContinue }
   Add-Content $pidFile "$($p.Id) $svc"
-  Log "started $svc pid=$($p.Id)"
+  Log "started $svc pid=$($p.Id) port=$port $(if ($svc -eq 'receipt-service') { "jit=$ReceiptJit" })"
   if ($svc -eq 'discovery-server') {
     for ($i = 0; $i -lt 60 -and -not (Port-Open 8761); $i++) { Start-Sleep 2 }
   }

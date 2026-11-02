@@ -260,6 +260,25 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
 - Next (agreed phases): phase 2 donor receipts (PDF + QR) in the vault for donors; phase 3 expiry reminders,
   document versions, CA read-only access.
 
+### Session 2026-11-02: receipts Phase 1 - parallel workers, fair queue, load test
+- Worker: claims batches of 10 with FOR UPDATE SKIP LOCKED (several copies, all in Eureka, share the queue without
+  collisions); order = new receipts before retries, round-robin across NGOs (oldest of every NGO first); a round
+  stops after 60 s so retries and e-mail re-sends get their turn. The copy (host:port) is written on GENERATED.
+- Caches: published design version (definition + background) and logo by storage key (both immutable).
+- Designer previews in their own lane: at most 2 at a time, 20 per NGO per minute (429/503 with a clear message).
+- Metrics: receipts.generate timer (ok/failed), receipts.preview timer, receipts.queue.pending gauge (prometheus).
+- start-local.ps1 -ReceiptCopies 3 (extra copies on 8097, 8107), -ReceiptJit c1|full|int, -ReceiptDiag
+  (PrintCompilation) for the crash investigation. scripts/test-load-receipts.ps1 (-Count 75 -Threads 25).
+- Load test, 75 cash donations at once (standard design): 1 copy - all issued in 22 s, average wait 8.3 s, longest
+  11.7 s; 3 copies - 11.5 s, average 1.7 s, longest 3.9 s, split 23/13/39; one receipt per donation, numbers
+  consecutive, no errors; test-receipts 68/68 with 3 copies running.
+- Crash: the previous build (one-at-a-time lock, old worker) crashed within a minute of the first burst; Windows
+  reports the same faulting address ending ...6d12 every time (1 Nov 23:08 and 2 Nov 09:25: same instruction in
+  JIT-generated code, no hs_err), so the lock was not the fix and the JVM/JIT is the prime suspect. The new build did
+  not crash in either burst. Root cause still open: reproduce with the old jar under -ReceiptJit full / int.
+- Event relay note: HttpOutboxRelay retries forever (nothing lost) but delivers in order, so one unreachable
+  subscriber holds up later events for every subscriber until it is back.
+
 ### Session 2026-11-02: CSR 1 - compliance pack (document-service, Enterprise)
 Owner decisions: CSR is an Enterprise feature for now; each CSR component has its own entitlement
 (CSR_COMPLIANCE_PACK, CSR_UTILISATION_CERT, CSR_PROPOSALS; subscription V3) so it can later move to another plan or

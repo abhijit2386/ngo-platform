@@ -1,6 +1,19 @@
 package org.ngoplatform.receipt.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import java.net.InetAddress;
+import java.time.Duration;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -72,17 +85,42 @@ public class ReceiptService {
     private final TransactionTemplate tx;
     private final byte[] linkSecret;
     private final String publicBase;
+    private final MeterRegistry meters;
+    /** host:port of this copy (several copies may run, all registered in Eureka); written on the GENERATED event. */
+    private final String instanceId;
+
+    /** Receipts claimed per round by one copy; FOR UPDATE SKIP LOCKED lets other copies take the next ones. */
+    static final int BATCH = 10;
+    /** One worker round stops after this long so retries and e-mail re-sends also get their turn. */
+    static final Duration ROUND = Duration.ofSeconds(60);
+
+    /** A published design version never changes: its parsed definition and background are prepared once. */
+    record Design(TemplateDefinition definition, byte[] background) {}
+    private final Cache<String, Design> designs = Caffeine.newBuilder().maximumSize(200).expireAfterAccess(Duration.ofHours(1)).build();
+    /** Logos by storage key (a new upload gets a new key, so a cached logo is never stale). */
+    private final Cache<String, byte[]> logos = Caffeine.newBuilder().maximumSize(500).expireAfterAccess(Duration.ofHours(1)).build();
+
+    /** Designer previews must never hold up real receipts: at most 2 at a time, 20 per NGO per minute. */
+    private final Semaphore previews = new Semaphore(2);
+    private final Cache<UUID, AtomicInteger> previewCounts = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(1)).build();
 
     public ReceiptService(Repos.Receipts receipts, Repos.Headers headers, Repos.Versions versions, JdbcTemplate jdbc, Facts facts,
                           ReceiptSettings settings, PdfRenderer pdf, ObjectStorage storage, EventPublisher events, AuditLog audit,
                           EntitlementResolver entitlements, ObjectMapper mapper, Clock clock, PlatformTransactionManager txm,
                           @Value("${ngo.receipts.link-secret}") String linkSecret,
-                          @Value("${ngo.receipts.public-base-url}") String publicBase) {
+                          @Value("${ngo.receipts.public-base-url}") String publicBase, MeterRegistry meters,
+                          @Value("${server.port:8087}") int port) {
         this.receipts = receipts; this.headers = headers; this.versions = versions; this.jdbc = jdbc; this.facts = facts;
         this.settings = settings; this.pdf = pdf; this.storage = storage; this.events = events; this.audit = audit;
         this.entitlements = entitlements; this.mapper = mapper; this.clock = clock; this.tx = new TransactionTemplate(txm);
         this.linkSecret = linkSecret.getBytes(StandardCharsets.UTF_8);
         this.publicBase = publicBase;
+        this.meters = meters;
+        String host;
+        try { host = InetAddress.getLocalHost().getHostName(); } catch (Exception e) { host = "local"; }
+        this.instanceId = host + ":" + port;
+        Gauge.builder("receipts.queue.pending", () -> jdbc.queryForObject(
+                "select count(*) from donation_receipts where status = 'PENDING'", Long.class)).register(meters);
     }
 
     // ------------------------------------------------------------------ creation
@@ -111,15 +149,23 @@ public class ReceiptService {
             return receipts.saveAndFlush(r);
         });
         if (claimed == null) return receipts.findById(receiptId).orElseThrow();
+        return produce(receiptId);
+    }
+
+    /** Steps 1-3 for a receipt this copy has already claimed (status GENERATING). */
+    private Receipt produce(UUID receiptId) {
+        Timer.Sample timing = Timer.start(meters);
         try {
             Printed p = number(receiptId);
             byte[] bytes = render(p);
             String key = "ngos/" + p.receipt().getNgoId() + "/receipts/" + p.receipt().getFiscalYear() + "/" + p.receipt().getId() + ".pdf";
             storage.put(key, bytes, "application/pdf");
             Receipt done = tx.execute(s -> issued(receiptId, key, bytes, p));
+            timing.stop(meters.timer("receipts.generate", "result", "ok"));
             notifyDonor(done.getId());
             return receipts.findById(receiptId).orElseThrow();
         } catch (Exception e) {
+            timing.stop(meters.timer("receipts.generate", "result", "failed"));
             log.warn("Receipt {} generation failed: {}", receiptId, e.toString());
             String error = e instanceof ApiException a ? a.getMessage() : e.getClass().getSimpleName() + ": " + e.getMessage();
             return tx.execute(s -> {
@@ -221,19 +267,39 @@ public class ReceiptService {
             v.put("signatoryName", signatories.getFirst().name());
             v.put("signatoryDesignation", signatories.getFirst().designation());
         }
-        byte[] logo = ngo.get("logoKey") != null ? facts.logo(r.getNgoId()) : null;
+        byte[] logo = logo(r.getNgoId(), ngo);
         PdfRenderer.Data data = new PdfRenderer.Data(v, logo, p.tax80g(), signatories, verifyUrl(r.getVerifyCode()));
         Template.Header active = activeTemplate(r.getNgoId());
         if (active == null) return pdf.standard(data);
         Template.Version tv = versions.findByTemplateIdAndVersionNo(active.getId(), active.getPublishedVersion()).orElseThrow();
-        TemplateDefinition def = mapper.readValue(tv.getDefinition(), TemplateDefinition.class);
-        byte[] bg = null;
-        if (tv.getBackgroundKey() != null) {
-            try (InputStream in = storage.get(tv.getBackgroundKey())) { bg = in.readAllBytes(); }
-        }
+        Design design = designs.get(tv.getTemplateId() + "/" + tv.getVersionNo(), k -> loadDesign(tv));
         Map<String, String> conditionFacts = Map.of("tax80g", String.valueOf(p.tax80g()), "channel", str(r.getChannel()),
                 "hasPan", String.valueOf(d.get("donorPan") != null));
-        return pdf.custom(def, bg, data, conditionFacts);
+        return pdf.custom(design.definition(), design.background(), data, conditionFacts);
+    }
+
+    private Design loadDesign(Template.Version tv) {
+        try {
+            TemplateDefinition def = mapper.readValue(tv.getDefinition(), TemplateDefinition.class);
+            byte[] bg = null;
+            if (tv.getBackgroundKey() != null) {
+                try (InputStream in = storage.get(tv.getBackgroundKey())) { bg = in.readAllBytes(); }
+            }
+            return new Design(def, bg);
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not load design " + tv.getTemplateId() + " v" + tv.getVersionNo(), e);
+        }
+    }
+
+    private byte[] logo(UUID ngoId, Map<String, Object> ngo) {
+        Object key = ngo.get("logoKey");
+        if (key == null) return null;
+        byte[] b = logos.getIfPresent(ngoId + "/" + key);
+        if (b == null) {
+            b = facts.logo(ngoId);
+            if (b != null) logos.put(ngoId + "/" + key, b);
+        }
+        return b;
     }
 
     /** Step 3: mark issued; vault entry and events through the outbox (same transaction). */
@@ -244,7 +310,7 @@ public class ReceiptService {
         r.generated(key, FileInspector.sha256(bytes), bytes.length, active == null ? null : active.getId(),
                 active == null ? null : active.getPublishedVersion(), p.tax80g(), hasRecipient, clock.instant());
         receipts.saveAndFlush(r);
-        event(r, "GENERATED", r.getReceiptNumber());
+        event(r, "GENERATED", r.getReceiptNumber() + " on " + instanceId);
         Map<String, Object> payload = new HashMap<>();
         payload.put("receiptId", r.getId().toString());
         payload.put("donationId", r.getDonationId().toString());
@@ -365,15 +431,43 @@ public class ReceiptService {
     @Scheduled(fixedDelayString = "${ngo.receipts.worker-ms:5000}", initialDelay = 20000)
     public void worker() {
         Instant now = clock.instant();
-        // Receipts stuck in GENERATING (crash mid-generation) are retried.
+        // Receipts stuck in GENERATING (a copy crashed mid-generation) are retried.
         for (Receipt r : receipts.findByStatusAndUpdatedAtBefore(Receipt.Status.GENERATING, now.minusSeconds(300))) {
-            tx.executeWithoutResult(s -> receipts.findById(r.getId()).ifPresent(x -> { x.failed("interrupted", now); receipts.save(x); }));
+            tx.executeWithoutResult(s -> receipts.findById(r.getId()).ifPresent(x -> {
+                if (x.getStatus() == Receipt.Status.GENERATING) { x.failed("interrupted", now); receipts.save(x); }
+            }));
         }
-        for (Receipt r : receipts.findByStatusAndUpdatedAtBefore(Receipt.Status.PENDING, now.plusSeconds(1))) generate(r.getId());
-        for (Receipt r : receipts.findByStatusAndNextAttemptAtBefore(Receipt.Status.GENERATION_FAILED, now)) generate(r.getId());
+        long until = System.nanoTime() + ROUND.toNanos();
+        while (System.nanoTime() < until) {
+            List<UUID> batch = claimBatch(BATCH);
+            if (batch.isEmpty()) break;
+            for (UUID id : batch) produce(id);
+        }
         for (Receipt r : receipts.findByStatusAndNotifiedAtIsNullAndUpdatedAtBefore(Receipt.Status.DELIVERY_PENDING, now.minusSeconds(60))) {
             notifyDonor(r.getId());
         }
+    }
+
+    /**
+     * Claims up to n waiting receipts for this copy. Several copies can run (all registered in Eureka): FOR UPDATE
+     * SKIP LOCKED gives each copy different rows without waiting, and the status check makes a claim happen once.
+     * Order: new receipts before retries; across NGOs round-robin (every NGO's oldest first, then their second ...),
+     * so one NGO with a big backlog cannot hold up the others.
+     */
+    List<UUID> claimBatch(int n) {
+        List<UUID> ids = tx.execute(s -> {
+            List<UUID> candidates = jdbc.queryForList("select id from (select id, status, created_at, "
+                    + "row_number() over (partition by ngo_id order by created_at) as rn from donation_receipts "
+                    + "where status = 'PENDING' or (status = 'GENERATION_FAILED' and next_attempt_at <= now())) x "
+                    + "order by case when status = 'PENDING' then 0 else 1 end, rn, created_at limit ?", UUID.class, n * 3);
+            if (candidates.isEmpty()) return List.of();
+            String list = candidates.stream().map(u -> "'" + u + "'").collect(Collectors.joining(","));
+            return jdbc.queryForList("update donation_receipts set status = 'GENERATING', attempts = attempts + 1, updated_at = now(), "
+                    + "version = version + 1 where id in (select id from donation_receipts where id in (" + list + ") and (status = 'PENDING' "
+                    + "or (status = 'GENERATION_FAILED' and next_attempt_at <= now())) order by array_position(array[" + list + "]::uuid[], id) "
+                    + "limit ? for update skip locked) returning id", UUID.class, n);
+        });
+        return ids == null ? List.of() : ids;
     }
 
     // ------------------------------------------------------------------ corrections
@@ -454,19 +548,40 @@ public class ReceiptService {
         if (st.reg12aNumber() != null) v.put("ngo12a", st.reg12aNumber());
         if (st.thankYouNote() != null) v.put("thankYou", st.thankYouNote());
         v.put("verifyCode", "SAMPLE0000");
-        byte[] logo = ngo.get("logoKey") != null ? facts.logo(ngoId) : null;
+        byte[] logo = logo(ngoId, ngo);
         return new PdfRenderer.Data(v, logo, tax80g, settings.forPrinting(ngoId), verifyUrl("SAMPLE0000"));
     }
 
     /** "See a sample": the standard receipt with this NGO's details, signatories and settings and a sample donor. */
     public byte[] previewStandard(UUID ngoId, boolean with80g) {
-        return pdf.standard(sampleData(ngoId, with80g));
+        return preview(ngoId, () -> pdf.standard(sampleData(ngoId, with80g)));
     }
 
     /** Designer preview: exactly how the template prints (sample donor), 80G block shown when the NGO can issue 80G. */
     public byte[] previewTemplate(UUID ngoId, TemplateDefinition def, byte[] background) {
-        PdfRenderer.Data d = sampleData(ngoId, true);
-        return pdf.custom(def, background, d, Map.of("tax80g", String.valueOf(d.tax80g()), "channel", "ONLINE", "hasPan", "true"));
+        return preview(ngoId, () -> {
+            PdfRenderer.Data d = sampleData(ngoId, true);
+            return pdf.custom(def, background, d, Map.of("tax80g", String.valueOf(d.tax80g()), "channel", "ONLINE", "hasPan", "true"));
+        });
+    }
+
+    /** Previews run in their own small lane so designers can never hold up donors' receipts. */
+    private byte[] preview(UUID ngoId, Supplier<byte[]> render) {
+        if (previewCounts.get(ngoId, k -> new AtomicInteger()).incrementAndGet() > 20) {
+            throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, "PREVIEW_LIMIT", "Too many previews in a minute. Please wait a moment.");
+        }
+        boolean got;
+        try { got = previews.tryAcquire(15, TimeUnit.SECONDS); }
+        catch (InterruptedException e) { Thread.currentThread().interrupt(); got = false; }
+        if (!got) throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "PREVIEW_BUSY", "Previews are busy. Please try again.");
+        try {
+            Timer.Sample t = Timer.start(meters);
+            byte[] b = render.get();
+            t.stop(meters.timer("receipts.preview"));
+            return b;
+        } finally {
+            previews.release();
+        }
     }
 
     // ------------------------------------------------------------------ links
