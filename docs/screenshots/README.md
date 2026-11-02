@@ -124,3 +124,20 @@ link; files frozen with their SHA-256 fingerprint, every visit logged, link can 
 <img src="csr-06-visits.png" alt="csr-06-visits" width="270">
 <img src="csr-07-company-page.png" alt="csr-07-company-page" width="270">
 <img src="csr-08-company-page-end.png" alt="csr-08-company-page-end" width="270">
+
+## Reports (2026-11-02, Asha / admin and Sunil / staff, Professional)
+
+Admins and Finance see the NGO report for the financial year (or chosen dates): totals, donations by month, mode and
+campaign, top donors, campaign target vs raised and budget vs spent, staff cash, approvals, PDF / Excel, and the 80G
+register with Form 10BD data for the accountant. Staff (Sunil) see only "My report": what they collected, cash in
+hand, their claims and campaigns.
+
+<img src="reports-01-admin-overview.png" alt="reports-01-admin-overview" width="270">
+<img src="reports-02-admin-by-month-mode-campaign.png" alt="reports-02-admin-by-month-mode-campaign" width="270">
+<img src="reports-03-admin-donors-campaigns.png" alt="reports-03-admin-donors-campaigns" width="270">
+<img src="reports-04-admin-staff-cash.png" alt="reports-04-admin-staff-cash" width="270">
+<img src="reports-05-80g-form-10bd.png" alt="reports-05-80g-form-10bd" width="270">
+<img src="reports-06-80g-excel-saved.png" alt="reports-06-80g-excel-saved" width="270">
+<img src="reports-07-pdf-saved.png" alt="reports-07-pdf-saved" width="270">
+<img src="reports-08-staff-my-report.png" alt="reports-08-staff-my-report" width="270">
+<img src="reports-09-staff-claims-campaigns.png" alt="reports-09-staff-claims-campaigns" width="270">

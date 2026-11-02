@@ -281,7 +281,7 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
 - Dataset: seed-donations adds 3 offline donations recorded by staff (Sunil 2 cash, Priya 1 cheque); see TEST_DATASET.
 - Tests: 12 unit (PeriodTest, Form10bdTest, ReportServiceTest), scripts/test-reports.ps1 37/37 (every figure compared
   with the databases; Asha, Ravi, Priya, Sunil, Meera; plans PROFESSIONAL/GROWTH/COMMUNITY). Emulator walkthrough:
-  .agent/rep-*.png (admin tabs, 80G page, PDF/Excel download, Sunil's My report).
+  docs/screenshots/reports-*.png (admin tabs, 80G page, PDF/Excel download, Sunil's My report).
 - Found, not fixed (owner to decide): donation-payment accepts an 80G request on a cash donation above Rs 2,000,
   which gets no deduction under section 80G(5D); the 10BD data flags it.
 - Campaign "raised" in reports is the campaign's whole-life figure (includes development test credits).

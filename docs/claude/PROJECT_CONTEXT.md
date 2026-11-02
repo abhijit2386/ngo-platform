@@ -36,6 +36,7 @@ notifications (e-mail + in-app, en/hi/mr), CSR suite (Enterprise). Adults only (
 - Build: scripts\build-backend.cmd -pl <modules> (stop those services first). Start: scripts\start-local.ps1
   (never pipe/redirect its output). App: scripts\run-mobile.ps1 -Mode profile [-Analyze]. Emulator 1080x2400,
   UI helper scripts\ui.ps1 (Tap, TypeText, Labels, Shot...). psql needs $env:PGPASSWORD='dev-only-password' and -w.
+- Screenshots: docs/screenshots/<feature>-NN-<what>.png + a section in docs/screenshots/README.md, in the same commit.
 - PowerShell 5.1 misreads non-ASCII (e.g. the rupee sign) in .ps1 command files: avoid it there.
 - Push: git bundle (<last pushed>..main) -> D:\ngo-platform\.sync -> fetched into D:\ngo-git\ngo-platform -> push.
   Last pushed commit: "Reports R1..." (2 Nov 2026; see git log).
