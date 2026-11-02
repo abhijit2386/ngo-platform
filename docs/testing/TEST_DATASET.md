@@ -83,4 +83,6 @@ Priya (finance) can record but not approve. `test-expenses.ps1` uses its own "E2
 | Demo pack | "Compliance documents FY 2026-27" for Sahyadri Industries CSR Foundation (fictional), shared from the app on 2 Nov 2026 |
 | E2E | test-csr creates "E2E ..." packs and "E2E CSR ..." vault files and removes them at the start and end |
 | Utilisation certificate | Demo UC/2026-27/004 for Sahyadri Industries CSR Foundation on "School books for 200 children" (grant Rs 50,000, 24 Oct - 2 Nov 2026), signed by Asha Patil (Chairperson), certified by test CA Meena Joshi, M. No. 123456, UDIN 26123456ABCDEF1234 (fictional) |
+| Funding proposal | Demo PR/2026-27/009 to Sahyadri Industries CSR Foundation (Attn. Ms. Kavita Rao, CSR Head) for "School books for 200 children", ask Rs 2,50,000 for 12 months, 200 people, compliance pack attached; sent 2 Nov 2026 with a note; funded Rs 2,00,000 (ref SCF/2026/14) |
+| Proposal E2E | test-proposals creates "E2E ..." proposals (and a linked UC) and removes them and their vault files at the start and end; it uses the shared pack from seed-csr.ps1 |
 | UC E2E | test-uc creates "E2E ..." certificates on "School books for 200 children" and removes them (and their vault files) at the start and end; it needs the approved expenses from seed-expenses.ps1 |

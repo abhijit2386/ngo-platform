@@ -21,7 +21,7 @@ _Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (ses
 | donor-service | donors, dedupe/merge, import/export, segments, follows, privacy | NOT YET | none | |
 | donation-payment-service | online checkout with test provider, webhooks, ledger, team/80G/campaign rules (2026-10-29); refunds, reconciliation, offline/corrections drafted only | yes (2026-10-29) | 5 unit; e2e test-donations 34/34 | Razorpay adapter not built |
 | receipt-service | receipts after every paid donation (online + offline), numbering PREFIX/<FY>/000001 per NGO and financial year (gap-free), standard A5 PDF (logo, 12A, 80G block, amount in words, up to 3 signatories with signature images, QR verification), e-mail + in-app delivery, donor/guest download, NGO register + search + summary, reissue/void with history, vault entries; Basic designer (own background picture + fields) (2026-11-01) | yes (2026-11-01) | unit 19+; e2e test-receipts | Advanced designer (Enterprise: conditions, several templates, approval UI) not in the app yet; Form 10BD export later |
-| campaign-project-service | campaigns: approval workflow, photos, share page, public discovery, test donations (2026-10-29); campaign accounts: budget, expenses + bills + approval, vendors, staff cash ledger, account sheet PDF/Excel (2026-11-01); CSR utilisation certificates with CA certification (Enterprise, 2026-11-02); projects drafted only | yes (2026-10-29) | 15 unit; e2e test-campaigns 58/58 | projects not reviewed/tested yet |
+| campaign-project-service | campaigns: approval workflow, photos, share page, public discovery, test donations (2026-10-29); campaign accounts: budget, expenses + bills + approval, vendors, staff cash ledger, account sheet PDF/Excel (2026-11-01); CSR utilisation certificates with CA certification and CSR funding proposals (Enterprise, 2026-11-02); projects drafted only | yes (2026-10-29) | 15 unit; e2e test-campaigns 58/58 | projects not reviewed/tested yet |
 | ngo-operations-service | **not started** (volunteers, beneficiaries, expenses/finance) | | | |
 | helpdesk-service | **not started** | | | |
 | notification-service | done: templates en/hi/mr (10 events x e-mail + in-app), event consumer, in-app inbox, e-mail via SMTP (Mailpit), retries with backoff + dead letter + replay, preferences/opt-outs, history, admin template edit/preview | yes (2026-10-29) | 58 unit tests pass; API e2e `scripts/test-notifications.ps1` | push/SMS/WhatsApp adapters not built (interface ready); receipt e-mails wait for receipt-service |
@@ -278,6 +278,31 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
   not crash in either burst. Root cause still open: reproduce with the old jar under -ReceiptJit full / int.
 - Event relay note: HttpOutboxRelay retries forever (nothing lost) but delivers in order, so one unreachable
   subscriber holds up later events for every subscriber until it is back.
+
+### Session 2026-11-02: CSR 3 - funding proposals (campaign-project-service, Enterprise)
+- campaign V6: csr_proposals (+ proposal_counters, numbering PR/<FY>/nnn per NGO), proposal_events (append-only log),
+  guard trigger (sent text and PDF frozen, closed proposals immutable, never deleted); utilisation_certificates gets
+  proposal_id. document V6: vault source CSR_PROPOSAL.
+- Flow: a draft starts from one campaign (title, story as "the need", Schedule VII area guessed from the cause,
+  12 months, location, contact from the NGO profile; ask = what the campaign still needs unless given). Sections:
+  need, objectives, activities, outcomes, monitoring (standard text if empty: quarterly reports + CA-certified UC).
+  Compliance pack: only our own public pack links can be printed. Sending needs need/objectives/activities/outcomes
+  and an unexpired pack link; it stores the PDF as sent (SHA-256, vault category CSR, linked to the campaign) and sets
+  the follow-up date. Notes (calls, meetings) with a new follow-up date while open. Outcome: FUNDED (amount, date,
+  funder reference), DECLINED (reason, only after sending), WITHDRAWN. Copy = new draft with the same text. A funded
+  proposal opens the UC form pre-filled and the UC is linked back (only funded proposals of the same campaign).
+- Pipeline summary on the list: drafts, open (money asked), funded (money won), success % of decided, follow-ups due.
+- ProposalPdf (A4): letterhead, key facts box, five sections, budget by head with spent so far (+ "other expenses"
+  so the total matches the progress), progress so far, organisation details, pack link, contact; DRAFT watermark.
+  Amounts in Indian grouping (2,50,000) in proposal and UC PDFs (UcRules.group; the JDK's en-IN groups in thousands).
+- Writes need CSR_PROPOSALS; reading, notes and recording the outcome stay possible after a downgrade. Admins only.
+- App: CSR documents > Funding proposals: list with pipeline tiles, new sheet (campaign, company, amount), proposal
+  page (stage card, sections, progress with budget, log, linked UCs), editor page (all fields, Schedule VII dropdown,
+  shared-pack picker), mark-sent sheet (then share the PDF), note sheet, funded sheet, decline/withdraw menu, copy.
+  ~100 strings en/hi/mr.
+- Tests: ProposalRulesTest (6), ProposalPdfTest (2); test-proposals.ps1 35/35; test-uc 29, test-csr 39.
+  Emulator walkthrough: PR/2026-27/009 to Sahyadri Industries CSR Foundation drafted, completed, pack attached, sent,
+  note added, funded Rs 2,00,000 (ref SCF/2026/14), UC form pre-filled (demo data, left in place).
 
 ### Session 2026-11-02: CSR 2 - utilisation certificate (campaign-project-service, Enterprise)
 - campaign V5: utilisation_certificates (+ uc_counters, numbering UC/<FY>/nnn per NGO) with guard trigger: no delete,

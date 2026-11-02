@@ -2223,5 +2223,209 @@
         "type": "String"
       }
     }
-  }
+  },
+  "prTitle": "Funding proposals",
+  "prEntryHint": "Write to companies from a campaign; track follow-ups and grants",
+  "prNew": "New proposal",
+  "prNewHint": "The proposal starts from the campaign: its story, budget and progress so far.",
+  "prIntroTitle": "Ask companies for CSR funding",
+  "prIntro": "Yogdaan writes a proposal from your campaign's own records. Mark it sent, keep notes of every call and meeting, and record the outcome. A funded proposal leads straight to its utilisation certificate.",
+  "prEnterpriseOnly": "Funding proposals are part of the Enterprise plan. Existing proposals stay readable.",
+  "prPipeline": "Pipeline",
+  "prOpen": "Waiting",
+  "prWon": "Funded",
+  "prSuccess": "Success",
+  "prDecided": "of {count} decided",
+  "@prDecided": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "prFollowUpsDue": "{count} follow-up(s) due",
+  "@prFollowUpsDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "prProposals": "Proposals",
+  "prNone": "No proposals yet.",
+  "prFollowUpOn": "Follow up on {date}",
+  "@prFollowUpOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "prFunder": "Company / CSR foundation",
+  "prAsk": "Amount requested",
+  "prAskHint": "Leave empty to ask for what the campaign still needs",
+  "prStart": "Start proposal",
+  "prEdit": "Edit proposal",
+  "prCopy": "Copy as a new draft",
+  "prAttn": "Attn. {name}",
+  "@prAttn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "prAsking": "Asking {amount} for {count} months",
+  "@prAsking": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "prPeople": "{count} people",
+  "@prPeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "prStageDraft": "Draft",
+  "prStageDraftReady": "Ready. Check the PDF, send it to the company, then mark it sent: the PDF is then kept exactly as sent.",
+  "prStageDraftMissing": "Fill in before sending:",
+  "prStageSent": "Sent on {date}",
+  "@prStageSent": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "prStageSentText": "Waiting for the company's decision.",
+  "prStageFunded": "Funded: {amount}",
+  "@prStageFunded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "prStageFundedText": "Approved on {date} · reference {ref}",
+  "@prStageFundedText": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "prPackAttached": "Compliance pack: {title} (link valid until {date})",
+  "@prPackAttached": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "prNoPack": "No compliance pack attached. Share one from CSR documents and add it here.",
+  "prTheProposal": "The proposal",
+  "prNeed": "The need",
+  "prObjectives": "Objectives",
+  "prActivities": "Activities",
+  "prOutcomes": "Expected outcomes",
+  "prMonitoring": "Monitoring and reporting",
+  "prEmpty": "Not written yet",
+  "prProgress": "Progress so far",
+  "prRaised": "Raised {raised} of {goal} from {count} donations",
+  "@prRaised": {
+    "placeholders": {
+      "raised": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "prSpent": "Spent {amount} in {count} approved expenses",
+  "@prSpent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "prBudgetHead": "Budget head",
+  "prBudget": "Budget",
+  "prSpentShort": "Spent",
+  "prLog": "Log",
+  "prEventCreated": "Proposal started",
+  "prEventSent": "Sent to the company",
+  "prEventNote": "Note",
+  "prEventFunded": "Funded",
+  "prEventDeclined": "Declined",
+  "prEventWithdrawn": "Withdrawn",
+  "prEventCopied": "Copied",
+  "prMarkSent": "Mark as sent",
+  "prSendHint": "The PDF is kept exactly as it is now and filed in your documents. The text cannot change afterwards (you can copy it into a new draft).",
+  "prSentOn": "Sent on",
+  "prFollowUp": "Follow up on",
+  "prSendConfirm": "Mark sent and keep the PDF",
+  "prAddNote": "Add note",
+  "prNoteHint": "What happened (call, meeting, e-mail)",
+  "prNextFollowUp": "Next follow-up (optional)",
+  "prFunded": "Funded",
+  "prFundedAmount": "Amount approved",
+  "prFundedOn": "Approved on",
+  "prRecordFunded": "Record the grant",
+  "prDeclined": "Declined",
+  "prWithdraw": "Withdraw",
+  "prReason": "Reason",
+  "prPrepareUc": "Prepare utilisation certificate",
+  "prBasics": "Basics",
+  "prProjectTitle": "Project title",
+  "prTitleRequired": "Give the proposal a title (5-160 characters)",
+  "prFunderContact": "Contact person at the company",
+  "prFunderEmail": "Their e-mail (optional)",
+  "prScheduleVii": "Schedule VII area",
+  "prScheduleViiHint": "Companies can count CSR only under these areas (Companies Act 2013)",
+  "prMonths": "Duration (months)",
+  "prMonthsRange": "1 to 60 months",
+  "prBeneficiaries": "People reached",
+  "prLocation": "Location",
+  "prNeedHint": "Who needs help, how many, and why now. Use numbers where you can.",
+  "prObjectivesHint": "What will be different at the end of the grant",
+  "prActivitiesHint": "What you will do, step by step",
+  "prOutcomesHint": "Measurable results (e.g. 200 children with books, attendance up 10%)",
+  "prMonitoringHint": "Leave empty for the standard text: quarterly reports and a CA-certified utilisation certificate",
+  "prComplianceDocs": "Compliance documents",
+  "prPack": "Compliance pack link",
+  "prPackHint": "Its link is printed in the proposal so the company can download your papers",
+  "prNoSharedPack": "No shared pack yet: share one from CSR documents first",
+  "prNoPackChoice": "No pack",
+  "prContact": "Contact",
+  "prContactName": "Name and designation",
+  "prContactDetails": "Phone / e-mail",
+  "prStatusDraft": "Draft",
+  "prStatusSent": "Sent",
+  "prStatusFunded": "Funded",
+  "prStatusDeclined": "Declined",
+  "prStatusWithdrawn": "Withdrawn",
+  "prOtherExpenses": "Other expenses",
+  "prMonitoringDefault": "Standard text: quarterly reports and a CA-certified utilisation certificate"
 }

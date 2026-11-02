@@ -40,9 +40,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UcController {
     public record UcRequest(UUID campaignId, String funderName, String funderReference, String csr1Number, BigDecimal grantAmount,
-                            LocalDate grantReceivedOn, LocalDate periodFrom, LocalDate periodTo, Long version) {
+                            LocalDate grantReceivedOn, LocalDate periodFrom, LocalDate periodTo, UUID proposalId, Long version) {
         UcService.Input input() {
-            return new UcService.Input(campaignId, funderName, funderReference, csr1Number, grantAmount, grantReceivedOn, periodFrom, periodTo);
+            return new UcService.Input(campaignId, funderName, funderReference, csr1Number, grantAmount, grantReceivedOn, periodFrom, periodTo, proposalId);
         }
     }
     public record SignRequest(String signatoryName, String signatoryRole, Long version) {}
@@ -157,6 +157,7 @@ public class UcController {
         m.put("csr1Number", uc.csr1Number());
         m.put("grantReceivedOn", uc.grantReceivedOn());
         m.put("version", uc.version());
+        m.put("proposalId", ucs.proposalOf(uc.id()));
         UcRules.Figures f = ucs.figures(uc);
         Map<String, Object> fig = new LinkedHashMap<>();
         fig.put("grant", f.grant());

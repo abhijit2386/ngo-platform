@@ -99,10 +99,12 @@ class UcListPage extends ConsumerWidget {
 
 /// New certificate, or the details of a draft.
 class UcFormSheet extends ConsumerStatefulWidget {
-  const UcFormSheet({super.key, required this.ngoId, this.campaignId, this.uc});
+  const UcFormSheet({super.key, required this.ngoId, this.campaignId, this.uc, this.prefill});
   final String ngoId;
   final String? campaignId;
   final Map<String, dynamic>? uc;
+  /// From a funded proposal: funderName, funderReference, grantAmount, grantReceivedOn, proposalId.
+  final Map<String, dynamic>? prefill;
 
   @override
   ConsumerState<UcFormSheet> createState() => _UcFormSheetState();
@@ -110,13 +112,14 @@ class UcFormSheet extends ConsumerStatefulWidget {
 
 class _UcFormSheetState extends ConsumerState<UcFormSheet> {
   final _form = GlobalKey<FormState>();
-  late final _funder = TextEditingController(text: widget.uc?['funderName'] as String?);
-  late final _ref = TextEditingController(text: widget.uc?['funderReference'] as String?);
-  late final _csr1 = TextEditingController(text: widget.uc?['csr1Number'] as String?);
-  late final _grant = TextEditingController(text: widget.uc == null ? '' : '${amountOf(widget.uc!['grantAmount']).round()}');
+  late final Map<String, dynamic> _src = widget.uc ?? widget.prefill ?? const {};
+  late final _funder = TextEditingController(text: _src['funderName'] as String?);
+  late final _ref = TextEditingController(text: _src['funderReference'] as String?);
+  late final _csr1 = TextEditingController(text: _src['csr1Number'] as String?);
+  late final _grant = TextEditingController(text: _src['grantAmount'] == null ? '' : '${amountOf(_src['grantAmount']).round()}');
   late String? _campaign = (widget.uc?['campaignId'] as String?) ?? widget.campaignId;
-  late DateTime? _received = DateTime.tryParse('${widget.uc?['grantReceivedOn']}');
-  late DateTime? _from = DateTime.tryParse('${widget.uc?['periodFrom']}');
+  late DateTime? _received = DateTime.tryParse('${_src['grantReceivedOn']}');
+  late DateTime? _from = DateTime.tryParse('${_src['periodFrom'] ?? _src['grantReceivedOn']}');
   late DateTime? _to = DateTime.tryParse('${widget.uc?['periodTo']}') ?? DateUtils.dateOnly(DateTime.now());
   List<Map<String, dynamic>> _campaigns = const [];
 
@@ -220,6 +223,7 @@ class _UcFormSheetState extends ConsumerState<UcFormSheet> {
                   'grantReceivedOn': f.format(_received!),
                   'periodFrom': f.format(_from!),
                   'periodTo': f.format(_to!),
+                  if (!editing && widget.prefill?['proposalId'] != null) 'proposalId': widget.prefill!['proposalId'],
                   if (editing) 'version': widget.uc!['version'],
                 };
                 try {

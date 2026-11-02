@@ -66,6 +66,20 @@ class CsrPage extends ConsumerWidget {
               ],
               const SizedBox(height: AppSpacing.md),
               AppCard(
+                onTap: () => context.push('/ngo/proposals'),
+                child: Row(children: [
+                  const Icon(Icons.campaign_outlined, color: AppColors.primary),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(t.prTitle, style: Theme.of(context).textTheme.titleSmall),
+                      Text(t.prEntryHint, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                    ]),
+                  ),
+                  const Icon(Icons.chevron_right),
+                ]),
+              ),
+              AppCard(
                 onTap: () => context.push('/ngo/ucs'),
                 child: Row(children: [
                   const Icon(Icons.verified_outlined, color: AppColors.primary),

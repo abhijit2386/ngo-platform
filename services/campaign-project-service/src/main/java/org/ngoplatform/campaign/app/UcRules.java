@@ -2,7 +2,6 @@ package org.ngoplatform.campaign.app;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -126,11 +125,25 @@ public final class UcRules {
 
     // ------------------------------------------------------------------ wording
 
-    public static String inr(BigDecimal v) {
-        NumberFormat f = NumberFormat.getNumberInstance(Locale.forLanguageTag("en-IN"));
-        f.setMinimumFractionDigits(2);
-        f.setMaximumFractionDigits(2);
-        return "Rs " + f.format(v);
+    public static String inr(BigDecimal v) { return "Rs " + group(v, true); }
+
+    /** Indian digit grouping (12,34,567.00); the JDK's en-IN format groups in thousands only. */
+    public static String group(BigDecimal v, boolean decimals) {
+        BigDecimal r = v.setScale(decimals ? 2 : 0, java.math.RoundingMode.HALF_UP);
+        String plain = r.abs().toPlainString();
+        String whole = plain.contains(".") ? plain.substring(0, plain.indexOf('.')) : plain;
+        String frac = plain.contains(".") ? plain.substring(plain.indexOf('.')) : "";
+        StringBuilder b = new StringBuilder();
+        if (whole.length() <= 3) b.append(whole);
+        else {
+            String head = whole.substring(0, whole.length() - 3);
+            for (int i = 0; i < head.length(); i++) {
+                if (i > 0 && (head.length() - i) % 2 == 0) b.append(',');
+                b.append(head.charAt(i));
+            }
+            b.append(',').append(whole.substring(whole.length() - 3));
+        }
+        return (r.signum() < 0 ? "-" : "") + b + frac;
     }
 
     /** The certificate paragraph signed by the NGO and certified by the CA (standard UC wording, adapted to CSR). */

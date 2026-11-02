@@ -42,7 +42,7 @@ public class UcService {
                      Instant cancelledAt, UUID createdBy, Instant createdAt, long version) {}
 
     public record Input(UUID campaignId, String funderName, String funderReference, String csr1Number, BigDecimal grantAmount,
-                        LocalDate grantReceivedOn, LocalDate periodFrom, LocalDate periodTo) {}
+                        LocalDate grantReceivedOn, LocalDate periodFrom, LocalDate periodTo, UUID proposalId) {}
 
     private static final String COLS = "id, ngo_id, campaign_id, uc_number, fiscal_year, funder_name, funder_reference, csr1_number, "
             + "grant_amount, grant_received_on, period_from, period_to, status, figures::text as figures, signatory_name, signatory_role, "
@@ -126,16 +126,21 @@ public class UcService {
         Campaign c = campaigns.load(ngoId, in.campaignId());
         BigDecimal grant = UcRules.grant(in.grantAmount());
         UcRules.period(in.periodFrom(), in.periodTo(), in.grantReceivedOn(), c.getStartDate(), campaigns.today());
+        if (in.proposalId() != null) {
+            Integer ok = jdbc.queryForObject("select count(*) from csr_proposals where id = ? and ngo_id = ? and campaign_id = ? and status = 'FUNDED'",
+                    Integer.class, in.proposalId(), ngoId, c.getId());
+            if (ok == null || ok == 0) throw ApiException.rule("PROPOSAL_NOT_FUNDED", "That proposal is not a funded proposal of this campaign");
+        }
         String fy = UcRules.fiscalYear(in.periodTo());
         jdbc.update("insert into uc_counters(ngo_id, fiscal_year) values (?, ?) on conflict do nothing", ngoId, fy);
         Integer n = jdbc.queryForObject("update uc_counters set next_value = next_value + 1 where ngo_id = ? and fiscal_year = ? "
                 + "returning next_value - 1", Integer.class, ngoId, fy);
         UUID id = UUID.randomUUID();
         jdbc.update("insert into utilisation_certificates(id, ngo_id, campaign_id, uc_number, fiscal_year, funder_name, funder_reference, "
-                        + "csr1_number, grant_amount, grant_received_on, period_from, period_to, created_by) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        + "csr1_number, grant_amount, grant_received_on, period_from, period_to, created_by, proposal_id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 id, ngoId, c.getId(), UcRules.number(fy, n), fy, UcRules.funder(in.funderName()),
                 UcRules.optional(in.funderReference(), 120, "REFERENCE"), UcRules.optional(in.csr1Number(), 40, "CSR1"), grant,
-                in.grantReceivedOn(), in.periodFrom(), in.periodTo(), actor);
+                in.grantReceivedOn(), in.periodFrom(), in.periodTo(), actor, in.proposalId());
         audit.record(ngoId, actor, "UC_CREATED", "UTILISATION_CERTIFICATE", id, Map.of("campaign", c.getId().toString()));
         return get(ngoId, id);
     }
@@ -278,6 +283,11 @@ public class UcService {
         p.put("documentDate", uc.periodTo().toString());
         p.put("createdAt", (uc.caCertifiedAt() == null ? clock.instant() : uc.caCertifiedAt()).toString());
         return p;
+    }
+
+    /** The funded proposal this certificate reports on, if any. */
+    public UUID proposalOf(UUID ucId) {
+        return jdbc.queryForObject("select proposal_id from utilisation_certificates where id = ?", UUID.class, ucId);
     }
 
     /** Legal name of the NGO (display name if the legal name is missing). */

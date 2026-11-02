@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -317,12 +316,7 @@ public final class UcPdf {
         return b.toString();
     }
 
-    private String money(BigDecimal v) {
-        NumberFormat nf = NumberFormat.getNumberInstance(Locale.forLanguageTag("en-IN"));
-        nf.setMinimumFractionDigits(2);
-        nf.setMaximumFractionDigits(2);
-        return (rupee ? "₹ " : "Rs ") + nf.format(v);
-    }
+    private String money(BigDecimal v) { return (rupee ? "₹ " : "Rs ") + UcRules.group(v, true); }
 
     private static String str(Object o, String fallback) { return o == null || o.toString().isBlank() ? fallback : o.toString(); }
 
