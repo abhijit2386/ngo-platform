@@ -50,10 +50,10 @@ public class Sources {
                 .retrieve().body(new ParameterizedTypeReference<List<Data.TaxRow>>() {}));
     }
 
-    public Map<String, String> receiptNumbers(UUID ngoId, List<String> donationIds) {
-        if (donationIds.isEmpty()) return Map.of();
+    public Data.ReceiptFacts receiptFacts(UUID ngoId, List<String> donationIds) {
+        if (donationIds.isEmpty()) return new Data.ReceiptFacts(Map.of(), List.of());
         return call("receipts", () -> receipt.post().uri("/internal/v1/ngos/{id}/reports/receipt-numbers", ngoId)
-                .body(donationIds).retrieve().body(new ParameterizedTypeReference<Map<String, String>>() {}));
+                .body(donationIds).retrieve().body(Data.ReceiptFacts.class));
     }
 
     public Data.Operations operations(UUID ngoId) {

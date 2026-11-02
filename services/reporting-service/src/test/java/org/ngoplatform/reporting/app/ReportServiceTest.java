@@ -125,7 +125,7 @@ class ReportServiceTest {
         figures();
         when(sources.taxRows(eq(ngo), any())).thenReturn(List.of(new Data.TaxRow("d1", Instant.parse("2026-05-01T05:00:00Z"), "Meera",
                 "ABCDE1234F", "Pune", "ONLINE", new BigDecimal("1000.00"), "Books")));
-        when(sources.receiptNumbers(eq(ngo), any())).thenReturn(Map.of("d1", "80G/26-27/0001"));
+        when(sources.receiptFacts(eq(ngo), any())).thenReturn(new Data.ReceiptFacts(Map.of("d1", "80G/26-27/0001"), List.of()));
         Reports.TaxReport t = svc.taxReport(ngo, svc.period(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 9, 30)), true);
         assertThat(t.form10bd()).hasSize(1);
         assertThat(t.total()).isEqualByComparingTo("1000.00");

@@ -28,13 +28,15 @@ Status & next steps: `IMPLEMENTATION_STATUS.md` (always read first, update after
 ## Test data rule
 Every feature is built and tested with the standard dataset (>= 2 admins, 2 staff, 3 donors):
 `scripts/seed-dataset.ps1` (+ `seed-campaigns.ps1`, `seed-donations.ps1`, `seed-expenses.ps1`, `seed-documents.ps1`, `seed-receipts.ps1`, `seed-csr.ps1`), described in `docs/testing/TEST_DATASET.md`.
-E2E: test-profile, test-phone, test-notifications, test-campaigns, test-admin-limit, test-donations, test-expenses, test-documents, test-receipts, test-csr, test-uc, test-proposals, test-reports. Load: test-load-receipts (with `start-local.ps1 -ReceiptCopies 3`).
+E2E: test-profile, test-phone, test-notifications, test-campaigns, test-admin-limit, test-donations, test-expenses, test-documents, test-receipts, test-csr, test-uc, test-proposals, test-reports, test-80g-rule. Load: test-load-receipts (with `start-local.ps1 -ReceiptCopies 3`).
 Never pipe or redirect the output of start-local.ps1 in helper commands (started services inherit the handle and the command never ends).
 PC scripts that call psql must set `$env:PGPASSWORD = 'dev-only-password'` and pass `-w` (a password prompt hangs the runner).
 Service-to-service calls: always `InternalClients.forBaseUrl(...)` (cached; one HttpClient per service). Never build a
 `java.net.http.HttpClient` per call: each one keeps a selector thread alive (1,908 leaked threads, 2026-11-02).
 Screenshots: every walkthrough adds its shots to docs/screenshots/<feature>-NN-<what-it-shows>.png (full size) and a
 section in docs/screenshots/README.md (heading with date and user, one-line summary, <img ... width="270">).
+80G rule (owner): a receipt is 80G when the NGO's 80G registration is verified and valid on the donation date; never
+a donor choice.
 Reports: reporting-service keeps no copies; it reads figures from the owning services' `/internal/v1/ngos/{id}/reports/...`
 endpoints (donation-payment, receipt, campaign-project). NGO-wide reports = admins + Finance; others get "My report";
 plan REPORTING_LEVEL BASIC/STANDARD/ADVANCED decides sections (see reporting `Access`). New report figures go in the

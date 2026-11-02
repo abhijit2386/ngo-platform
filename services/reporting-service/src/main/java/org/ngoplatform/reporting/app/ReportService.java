@@ -149,8 +149,8 @@ public class ReportService {
             throw ApiException.entitlement(Entitlements.REPORTING_LEVEL, "The 80G register and Form 10BD data are available on the Professional plan and above.");
         }
         List<Data.TaxRow> rows = sources.taxRows(ngoId, p);
-        Map<String, String> numbers = sources.receiptNumbers(ngoId, rows.stream().map(Data.TaxRow::donationId).toList());
-        List<Form10bd.RegisterLine> register = Form10bd.register(rows, numbers);
+        Data.ReceiptFacts receipts = sources.receiptFacts(ngoId, rows.stream().map(Data.TaxRow::donationId).toList());
+        List<Form10bd.RegisterLine> register = Form10bd.register(rows, receipts);
         List<Form10bd.Line> lines = Form10bd.lines(register);
         BigDecimal total = register.stream().map(Form10bd.RegisterLine::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
         long attention = lines.stream().filter(l -> !l.note().isEmpty()).count();

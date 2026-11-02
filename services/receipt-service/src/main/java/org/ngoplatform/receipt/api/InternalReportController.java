@@ -1,5 +1,6 @@
 package org.ngoplatform.receipt.api;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,17 +20,24 @@ public class InternalReportController {
 
     public InternalReportController(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
-    /** donationId -> number of its current receipt (the newest that is not voided or replaced); max 5,000 ids. */
+    /** eightyG: donationId -> receipt number of its current 80G receipt; plain: donations whose current receipt is not 80G. */
+    public record ReceiptFacts(Map<String, String> eightyG, List<String> plain) {}
+
+    /** For the 80G register: the newest receipt per donation that is not voided or replaced; max 5,000 ids. */
     @PostMapping("/receipt-numbers")
-    public Map<String, String> numbers(@PathVariable UUID ngoId, @RequestBody List<UUID> donationIds) {
-        Map<String, String> out = new HashMap<>();
-        if (donationIds == null || donationIds.isEmpty()) return out;
+    public ReceiptFacts numbers(@PathVariable UUID ngoId, @RequestBody List<UUID> donationIds) {
+        Map<String, String> eightyG = new HashMap<>();
+        List<String> plain = new ArrayList<>();
+        if (donationIds == null || donationIds.isEmpty()) return new ReceiptFacts(eightyG, plain);
         List<UUID> ids = donationIds.size() > 5000 ? donationIds.subList(0, 5000) : donationIds;
-        jdbc.query("select distinct on (donation_id) donation_id::text, receipt_number from donation_receipts "
+        jdbc.query("select distinct on (donation_id) donation_id::text, receipt_number, tax_80g from donation_receipts "
                         + "where ngo_id = ? and donation_id = any(?) and receipt_number is not null "
                         + "and status not in ('VOIDED','REISSUED') order by donation_id, created_at desc",
-                rs -> { out.put(rs.getString(1), rs.getString(2)); },
+                rs -> {
+                    if (rs.getBoolean(3)) eightyG.put(rs.getString(1), rs.getString(2));
+                    else plain.add(rs.getString(1));
+                },
                 ngoId, ids.toArray(new UUID[0]));
-        return out;
+        return new ReceiptFacts(eightyG, plain);
     }
 }

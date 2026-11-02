@@ -44,10 +44,17 @@ public final class Form10bd {
 
     public static boolean validPan(String pan) { return pan != null && PAN.matcher(pan).matches(); }
 
-    public static List<RegisterLine> register(List<Data.TaxRow> rows, Map<String, String> receiptNumbers) {
+    /**
+     * Donations with an 80G receipt, plus those whose receipt is not issued yet (flagged); a donation whose receipt is
+     * not an 80G receipt (the NGO had no valid 80G on that date) is left out. The receipt decides, not a donor choice.
+     */
+    public static List<RegisterLine> register(List<Data.TaxRow> rows, Data.ReceiptFacts receipts) {
+        java.util.Set<String> plain = new java.util.HashSet<>(receipts.plain() == null ? List.of() : receipts.plain());
+        Map<String, String> numbers = receipts.eightyG() == null ? Map.of() : receipts.eightyG();
         List<RegisterLine> out = new ArrayList<>();
         for (Data.TaxRow r : rows) {
-            out.add(new RegisterLine(r.donationId(), r.paidAt(), receiptNumbers.get(r.donationId()), r.donorName(),
+            if (plain.contains(r.donationId())) continue;
+            out.add(new RegisterLine(r.donationId(), r.paidAt(), numbers.get(r.donationId()), r.donorName(),
                     normalisePan(r.pan()), r.address(), mode(r.channel()), r.amount(), r.campaignTitle()));
         }
         return out;

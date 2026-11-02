@@ -113,8 +113,16 @@ Check 'reversed dates are refused (400 BAD_PERIOD)' ($bad.__status -eq 400 -and 
 
 "--- 80G register / Form 10BD (Asha)"
 $t = Api GET "/api/v1/ngos/$NgoId/reports/80g" $asha
-$g80Db = [int](One 'donation' "select count(*) from donations where $paid and wants_80g")
-$g80Total = Dec (One 'donation' "select coalesce(sum(amount - refunded_amount), 0) from donations where $paid and wants_80g")
+# Owner rule (2 Nov 2026): the receipt follows the NGO's 80G registration, not the donor's tick. The register holds the
+# paid donations of the period except those whose current receipt is not an 80G receipt.
+$fyRows = @(Sql 'donation' "select id, (amount - refunded_amount) from donations where $paid")
+$fyIds = ($fyRows | ForEach-Object { "'" + ($_ -split '\|')[0] + "'" }) -join ','
+$plain = @{}
+if ($fyIds) { foreach ($x in (Sql 'receipt' ("select donation_id from (select distinct on (donation_id) donation_id, tax_80g from donation_receipts where donation_id in ($fyIds) " +
+  "and receipt_number is not null and status not in ('VOIDED','REISSUED') order by donation_id, created_at desc) t where not tax_80g"))) { $plain[$x] = $true } }
+$g80Db = 0; $g80Total = [decimal]0
+foreach ($r in $fyRows) { $f = $r -split '\|'; if (-not $plain.ContainsKey($f[0])) { $g80Db++; $g80Total += Dec $f[1] } }
+"80G register expected: $g80Db donations, $g80Total ($($plain.Count) with a non-80G receipt left out)"
 Check '80G register lines and total = database' ([int]$t.donations -eq $g80Db -and (Dec $t.total) -eq $g80Total) "$($t.donations)/$($t.total) vs $g80Db/$g80Total"
 $withReceipt = @($t.register | Where-Object { $_.receiptNumber }).Count
 Check '80G register carries receipt numbers' ($g80Db -eq 0 -or $withReceipt -gt 0) "$withReceipt of $g80Db"

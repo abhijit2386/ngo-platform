@@ -96,10 +96,12 @@ public final class ReceiptRules {
         return b.toString();
     }
 
-    /** 80G text only when the NGO's 80G is verified and valid on the donation date and the donor asked with PAN. */
-    public static boolean eligible80g(boolean ngoVerified, LocalDate validUntil, boolean donorAsked, String donorPan, LocalDate donationDate) {
-        return ngoVerified && donorAsked && donorPan != null && !donorPan.isBlank() && validUntil != null
-                && !validUntil.isBefore(donationDate);
+    /**
+     * 80G receipt when the NGO's 80G registration is verified and valid on the donation date (owner rule, 2 Nov 2026:
+     * the receipt follows the NGO, not a donor choice; a donor without PAN still gets the 80G receipt).
+     */
+    public static boolean eligible80g(boolean ngoVerified, LocalDate validUntil, LocalDate donationDate) {
+        return ngoVerified && validUntil != null && !validUntil.isBefore(donationDate);
     }
 
     public static String channelLabel(String channel) {

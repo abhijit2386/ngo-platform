@@ -20,7 +20,7 @@ class Form10bdTest {
                 row("d2", "Meera Iyer", "ABCDE1234F", "UPI_DIRECT", "500.00"),
                 row("d3", "Meera Iyer", "ABCDE1234F", "CASH", "1000.00"),
                 row("d4", "Kiran Rao", "PQRSX9876Z", "CHEQUE", "2500.00"));
-        var register = Form10bd.register(rows, Map.of("d1", "80G/26-27/0001", "d2", "80G/26-27/0002", "d3", "80G/26-27/0003", "d4", "80G/26-27/0004"));
+        var register = Form10bd.register(rows, new Data.ReceiptFacts(Map.of("d1", "80G/26-27/0001", "d2", "80G/26-27/0002", "d3", "80G/26-27/0003", "d4", "80G/26-27/0004"), List.of()));
         assertThat(register.get(0).pan()).isEqualTo("ABCDE1234F");
         var lines = Form10bd.lines(register);
         assertThat(lines).hasSize(3);
@@ -43,7 +43,7 @@ class Form10bdTest {
                 row("a", "Anil", null, "ONLINE", "300.00"),
                 row("b", "Ravi", "ABCDE1234F", "CASH", "1500.00"),
                 row("c", "Ravi", "ABCDE1234F", "CASH", "2500.00"),
-                row("d", "Sita", "PQRSX9876Z", "IN_KIND_VALUE", "800.00")), Map.of("b", "R-1", "c", "R-2", "d", "R-3")));
+                row("d", "Sita", "PQRSX9876Z", "IN_KIND_VALUE", "800.00")), new Data.ReceiptFacts(Map.of("b", "R-1", "c", "R-2", "d", "R-3"), List.of())));
         assertThat(lines.get(0).note()).contains("PAN missing").contains("Receipt not issued");
         assertThat(lines.get(0).idCode()).isEmpty();
         assertThat(lines.get(1).amount()).isEqualByComparingTo("4000.00");
@@ -52,7 +52,16 @@ class Form10bdTest {
     }
 
     @Test
+    void leavesOutDonationsWhoseReceiptIsNot80g() {
+        var register = Form10bd.register(List.of(row("a", "Meera Iyer", "ABCDE1234F", "ONLINE", "500.00"),
+                row("b", "Kiran Joshi", "PQRSX9876Z", "ONLINE", "700.00"), row("c", "Anil Shah", "LMNOP4321Q", "UPI_DIRECT", "900.00")),
+                new Data.ReceiptFacts(Map.of("a", "80G/1"), List.of("b")));
+        assertThat(register).extracting(Form10bd.RegisterLine::donationId).containsExactly("a", "c");
+        assertThat(Form10bd.lines(register).get(1).note()).contains("Receipt not issued"); // c: no receipt yet
+    }
+
+    @Test
     void ignoresFullyRefundedDonations() {
-        assertThat(Form10bd.lines(Form10bd.register(List.of(row("x", "Meera", "ABCDE1234F", "ONLINE", "0.00")), Map.of()))).isEmpty();
+        assertThat(Form10bd.lines(Form10bd.register(List.of(row("x", "Meera", "ABCDE1234F", "ONLINE", "0.00")), new Data.ReceiptFacts(Map.of(), List.of())))).isEmpty();
     }
 }

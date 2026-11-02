@@ -260,6 +260,19 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
 - Next (agreed phases): phase 2 donor receipts (PDF + QR) in the vault for donors; phase 3 expiry reminders,
   document versions, CA read-only access.
 
+### Session 2026-11-02 (night): 80G receipts follow the NGO (owner rule)
+- Owner rule: when the NGO's 80G registration is verified and valid on the donation date, every receipt is an 80G
+  receipt (shows the 80G number); otherwise none is. The donor's "I want 80G" choice and PAN no longer decide it
+  (ReceiptRules.eligible80g(ngoVerified, validUntil, donationDate)). Issued receipts are not changed.
+- Not done (owner chose rule 1 only): the donation form still has the 80G tick box and asks PAN when ticked; the
+  receipt text does not yet mark cash above Rs 2,000 or in-kind donations as not deductible.
+- Reports: the 80G register / Form 10BD data now lists paid donations whose current receipt is an 80G receipt (plus
+  ones not receipted yet, flagged); receipt-service /reports/receipt-numbers returns {eightyG, plain}.
+- Tests: ReceiptRulesTest (7), Form10bdTest (4, new case), ReportServiceTest (6); scripts/test-80g-rule.ps1 2/2 (no
+  tick, no PAN -> 80G receipt; 80G expired the day before -> plain receipt; validity restored, E2E data cleaned);
+  test-reports 37/37 with the new register rule; test-receipts expectation updated (Kiran's receipt is 80G; not run:
+  it archives the owner's custom receipt design). No UI change, so no walkthrough.
+
 ### Session 2026-11-02 (evening): Reports R1 - reporting-service, Reports tab for admins, Finance and staff
 - Owner decisions: NGO-wide reports for administrators and Finance (the roles with REPORT_EXPORT); everyone else with
   REPORT_VIEW gets "My report". Plan REPORTING_LEVEL: BASIC (Community) = dashboard, donations summary, My report;

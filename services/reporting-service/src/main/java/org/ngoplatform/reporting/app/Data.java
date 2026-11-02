@@ -11,6 +11,8 @@ public final class Data {
     public record Row(String key, String label, BigDecimal amount, long count) {}
     public record DonationSummary(BigDecimal total, long count, long donors, Long newDonors, List<Row> byMonth,
                                   List<Row> byChannel, List<Row> byCampaign, List<Row> topDonors) {}
+    /** eightyG: donationId -> 80G receipt number; plain: donations whose receipt is not an 80G receipt. */
+    public record ReceiptFacts(java.util.Map<String, String> eightyG, List<String> plain) {}
     public record TaxRow(String donationId, Instant paidAt, String donorName, String pan, String address,
                          String channel, BigDecimal amount, String campaignTitle) {}
 

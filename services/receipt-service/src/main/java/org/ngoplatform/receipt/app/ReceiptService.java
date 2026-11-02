@@ -194,7 +194,7 @@ public class ReceiptService {
         LocalDate paidDate = Instant.parse(str(d.get("paidAt"))).atZone(IST).toLocalDate();
         boolean tax80g = ReceiptRules.eligible80g(Boolean.TRUE.equals(ngo.get("tax80gVerified")),
                 ngo.get("tax80gValidUntil") == null ? null : LocalDate.parse(str(ngo.get("tax80gValidUntil"))),
-                Boolean.TRUE.equals(d.get("wants80g")), (String) d.get("donorPan"), paidDate);
+                paidDate);
         Receipt r = tx.execute(s -> {
             Receipt x = receipts.findById(receiptId).orElseThrow();
             if (x.getReceiptNumber() == null) {

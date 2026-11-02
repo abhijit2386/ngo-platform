@@ -55,13 +55,13 @@ class ReceiptRulesTest {
     }
 
     @Test
-    void eightyGOnlyWhenVerifiedValidAskedAndPanGiven() {
+    void eightyGFollowsTheNgoRegistrationOnTheDonationDate() {
         LocalDate d = LocalDate.of(2026, 11, 1);
-        assertThat(ReceiptRules.eligible80g(true, d, true, "ABCDE1234F", d)).isTrue();
-        assertThat(ReceiptRules.eligible80g(true, d.minusDays(1), true, "ABCDE1234F", d)).isFalse();
-        assertThat(ReceiptRules.eligible80g(false, d, true, "ABCDE1234F", d)).isFalse();
-        assertThat(ReceiptRules.eligible80g(true, d, false, "ABCDE1234F", d)).isFalse();
-        assertThat(ReceiptRules.eligible80g(true, d, true, null, d)).isFalse();
+        assertThat(ReceiptRules.eligible80g(true, d, d)).isTrue();               // valid on the donation date
+        assertThat(ReceiptRules.eligible80g(true, d.plusYears(3), d)).isTrue();
+        assertThat(ReceiptRules.eligible80g(true, d.minusDays(1), d)).isFalse(); // expired the day before
+        assertThat(ReceiptRules.eligible80g(false, d, d)).isFalse();             // not verified
+        assertThat(ReceiptRules.eligible80g(true, null, d)).isFalse();           // no validity on record
     }
 
     @Test

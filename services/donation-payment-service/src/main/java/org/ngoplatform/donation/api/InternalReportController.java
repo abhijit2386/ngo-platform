@@ -65,14 +65,14 @@ public class InternalReportController {
                 newDonors, byMonth, byChannel, byCampaign, top);
     }
 
-    /** Donations where the donor asked for an 80G receipt (80G register / Form 10BD data), oldest first. */
+    /** Paid donations for the 80G register / Form 10BD data, oldest first; receipt-service says which got an 80G receipt. */
     @GetMapping("/80g")
     public List<TaxRow> taxRows(@PathVariable UUID ngoId,
                                 @RequestParam("from") String fromParam,
                                 @RequestParam("to") String toParam) {
         Instant from = Instant.parse(fromParam), to = Instant.parse(toParam);
         return jdbc.query("select id::text, paid_at, donor_name, donor_pan, donor_address, channel, " + NET + " as amt, campaign_title "
-                        + "from donations where ngo_id = ? and " + PAID + " and wants_80g and paid_at >= ? and paid_at < ? "
+                        + "from donations where ngo_id = ? and " + PAID + " and paid_at >= ? and paid_at < ? "
                         + "order by paid_at, id",
                 (rs, i) -> new TaxRow(rs.getString(1), rs.getTimestamp(2).toInstant(), rs.getString(3), rs.getString(4),
                         rs.getString(5), rs.getString(6), rs.getBigDecimal(7), rs.getString(8)),

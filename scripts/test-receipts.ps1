@@ -219,7 +219,7 @@ $null = Pay $kiran $co2.orderId 'SUCCESS'
 $r2 = @(WaitFor { $m = @(Mine $kiran $co2.donationId); if ($m.Count -gt 0 -and $m[0].receiptNumber) { $m } } 120)[0]
 Check 'Kiran''s receipt carries his profile name in Devanagari' ($r2.donorName -eq 'किरण राव') "$($r2.donorName)"
 Check 'numbers are consecutive in the financial year' ((Seq $r2.receiptNumber) -eq (Seq $r1.receiptNumber) + 1) "$($r1.receiptNumber) -> $($r2.receiptNumber)"
-Check 'no 80G on Kiran''s receipt (not asked)' (-not $r2.tax80g) (J $r2)
+Check 'Kiran''s receipt is 80G too (the NGO has 80G; owner rule 2 Nov 2026)' ($r2.tax80g) (J $r2)
 $k2 = Get-Bytes "/api/v1/receipts/$($r2.id)/pdf" $kiran
 [IO.File]::WriteAllBytes("$PSScriptRoot\..\.agent\e2e-receipt-kiran.pdf", $k2.bytes)
 $prof.displayName = $kMe.displayName
