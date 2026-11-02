@@ -125,6 +125,51 @@ link; files frozen with their SHA-256 fingerprint, every visit logged, link can 
 <img src="csr-07-company-page.png" alt="csr-07-company-page" width="270">
 <img src="csr-08-company-page-end.png" alt="csr-08-company-page-end" width="270">
 
+## CSR utilisation certificate (2026-11-02, Asha / admin and the CA's public page, Enterprise)
+
+Prepared from the campaign accounts, signed by the NGO, then certified by the CA through a link (UDIN checked); the
+certified PDF goes into the NGO's vault.
+
+<img src="uc-01-list-empty.png" alt="uc-01-list-empty" width="270">
+<img src="uc-02-form.png" alt="uc-02-form" width="270">
+<img src="uc-03-form-filled.png" alt="uc-03-form-filled" width="270">
+<img src="uc-04-datepicker.png" alt="uc-04-datepicker" width="270">
+<img src="uc-05-draft-top.png" alt="uc-05-draft-top" width="270">
+<img src="uc-06-draft-heads.png" alt="uc-06-draft-heads" width="270">
+<img src="uc-07-draft-expenses.png" alt="uc-07-draft-expenses" width="270">
+<img src="uc-08-sign-dialog.png" alt="uc-08-sign-dialog" width="270">
+<img src="uc-09-awaiting-ca.png" alt="uc-09-awaiting-ca" width="270">
+<img src="uc-10-ca-page.png" alt="uc-10-ca-page" width="270">
+<img src="uc-11-ca-page-figures.png" alt="uc-11-ca-page-figures" width="270">
+<img src="uc-12-ca-form.png" alt="uc-12-ca-form" width="270">
+<img src="uc-13-ca-form-filled.png" alt="uc-13-ca-form-filled" width="270">
+<img src="uc-14-ca-done.png" alt="uc-14-ca-done" width="270">
+<img src="uc-15-certified.png" alt="uc-15-certified" width="270">
+
+## CSR funding proposals (2026-11-02, Asha / admin, Enterprise)
+
+Written from a campaign, sent to a company as a frozen PDF, follow-ups logged; when funded, the utilisation
+certificate starts pre-filled.
+
+<img src="proposals-01-csr-page.png" alt="proposals-01-csr-page" width="270">
+<img src="proposals-02-list-empty.png" alt="proposals-02-list-empty" width="270">
+<img src="proposals-03-new.png" alt="proposals-03-new" width="270">
+<img src="proposals-04-draft-top.png" alt="proposals-04-draft-top" width="270">
+<img src="proposals-05-edit-top.png" alt="proposals-05-edit-top" width="270">
+<img src="proposals-06-edit-middle.png" alt="proposals-06-edit-middle" width="270">
+<img src="proposals-07-edit-story.png" alt="proposals-07-edit-story" width="270">
+<img src="proposals-08-edit-pack.png" alt="proposals-08-edit-pack" width="270">
+<img src="proposals-09-ready.png" alt="proposals-09-ready" width="270">
+<img src="proposals-10-send-sheet.png" alt="proposals-10-send-sheet" width="270">
+<img src="proposals-11-share-pdf.png" alt="proposals-11-share-pdf" width="270">
+<img src="proposals-12-sent.png" alt="proposals-12-sent" width="270">
+<img src="proposals-13-note.png" alt="proposals-13-note" width="270">
+<img src="proposals-14-log.png" alt="proposals-14-log" width="270">
+<img src="proposals-15-funded-sheet.png" alt="proposals-15-funded-sheet" width="270">
+<img src="proposals-16-funded.png" alt="proposals-16-funded" width="270">
+<img src="proposals-17-uc-prefilled.png" alt="proposals-17-uc-prefilled" width="270">
+<img src="proposals-18-list.png" alt="proposals-18-list" width="270">
+
 ## Reports (2026-11-02, Asha / admin and Sunil / staff, Professional)
 
 Admins and Finance see the NGO report for the financial year (or chosen dates): totals, donations by month, mode and
