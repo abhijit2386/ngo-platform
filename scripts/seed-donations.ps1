@@ -50,3 +50,22 @@ if ($ps.status -ne 'ACTIVE') {
   $ps = Api PUT "/api/v1/ngos/$NgoId/payment-settings" $asha @{ provider = 'MOCK'; merchantReference = 'mock_ashaseva'; guestCheckoutAllowed = $true; minAmount = '10'; maxAmount = '1000000'; receiptPrefix = 'ASHA' }
 }
 "payments: $($ps.provider) $($ps.status)"
+
+# Offline donations recorded by staff (reports: "My report", cash in the 80G register / Form 10BD data).
+# Skipped when a donation with the same reference exists (re-runnable). DEV DATA ONLY: names and PANs are made up.
+$sunil = Token 'sunil.staff@ngo.test' 'DevTest#2026'
+$priya = Token 'priya.admin@ngo.test' 'DevTest#2026'
+$books = [string](@(& 'D:\tools\pgsql\bin\psql.exe' -w -h localhost -U postgres -d campaign -tAc "select id from campaigns where ngo_id = '$NgoId' and title like 'School books%' limit 1") | Select-Object -First 1)
+$offline = @(
+  @{ who = $sunil; by = 'Sunil'; ref = 'SEED-CASH-001'; body = @{ donorName = 'Shanta Kale'; donorPan = 'ABCPK1234L'; amount = '1500.00'; channel = 'CASH'; wants80g = $true; purpose = 'General donation' } },
+  @{ who = $sunil; by = 'Sunil'; ref = 'SEED-CASH-002'; body = @{ donorName = 'Ganesh Pawar'; donorPan = 'BGHPP4321Q'; amount = '2500.00'; channel = 'CASH'; wants80g = $true; purpose = 'General donation' } },
+  @{ who = $priya; by = 'Priya'; ref = 'SEED-CHQ-001'; body = @{ donorName = 'Pune Traders LLP'; donorPan = 'AAJFP1234K'; amount = '5000.00'; channel = 'CHEQUE'; wants80g = $true; campaignId = $books } }
+)
+foreach ($o in $offline) {
+  $exists = [string](@(& 'D:\tools\pgsql\bin\psql.exe' -w -h localhost -U postgres -d donation -tAc "select count(*) from donations where ngo_id = '$NgoId' and offline_reference = '$($o.ref)' and not voided") | Select-Object -First 1)
+  if ($exists -ne '0') { "offline $($o.ref): already there"; continue }
+  $b = $o.body; $b.reference = $o.ref; $b.receivedOn = (Get-Date).ToString('yyyy-MM-dd')
+  if (-not $b.campaignId) { $b.Remove('campaignId') }
+  $r = Api POST "/api/v1/ngos/$NgoId/donations/offline" $o.who $b
+  "offline $($o.ref): $($b.channel) $($b.amount) by $($o.by) -> $($r.status)$($r.__status)"
+}

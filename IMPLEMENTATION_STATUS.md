@@ -1,6 +1,6 @@
 # Implementation status
 
-_Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (session 1)._ Nothing here is production-ready; see "Verified" column._
+_Last updated: 2026-11-02 (reports session)._ Earlier header: _2026-10-28 (session 1)._ Nothing here is production-ready; see "Verified" column._
 
 ## Environment (developer PC, Windows 11)
 | Item | State |
@@ -26,7 +26,7 @@ _Last updated: 2026-10-29 (campaigns session)._ Earlier header: _2026-10-28 (ses
 | helpdesk-service | **not started** | | | |
 | notification-service | done: templates en/hi/mr (10 events x e-mail + in-app), event consumer, in-app inbox, e-mail via SMTP (Mailpit), retries with backoff + dead letter + replay, preferences/opt-outs, history, admin template edit/preview | yes (2026-10-29) | 58 unit tests pass; API e2e `scripts/test-notifications.ps1` | push/SMS/WhatsApp adapters not built (interface ready); receipt e-mails wait for receipt-service |
 | document-service | CSR compliance pack (Enterprise, 2026-11-02: vault papers shared through one expiring link, frozen files, view log); document vault (one shared private bucket, `ngos/<id>/` prefixes, per-NGO quota, signed 5-minute links, recycle bin, activity log, files of other modules registered by events + backfill) and meetings (AGM/EGM/board/committee/staff, attendance, minutes, numbered resolutions, action items, minutes PDF) (2026-11-01) | yes (2026-11-01) | 16 unit; e2e test-documents 57/57 | expiry reminders, versions, CA read-only access = phase 3 |
-| reporting-service | **not started** (dashboard projections) | | | |
+| reporting-service | done (Reports R1, 2 Nov 2026): dashboard, NGO report, My report, 80G register / Form 10BD data, PDF + Excel | yes | 12 unit + E2E 37 | reads owning services, no copies |
 
 ## Mobile app
 Done: design system, l10n (en/hi/mr, ~245 keys, hi/mr need native review), onboarding (APP-001..009, 012),
@@ -259,6 +259,32 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
 - Regression: test-expenses 66/66, test-campaigns 77/77, test-donations 34/34, test-notifications 26/26.
 - Next (agreed phases): phase 2 donor receipts (PDF + QR) in the vault for donors; phase 3 expiry reminders,
   document versions, CA read-only access.
+
+### Session 2026-11-02 (evening): Reports R1 - reporting-service, Reports tab for admins, Finance and staff
+- Owner decisions: NGO-wide reports for administrators and Finance (the roles with REPORT_EXPORT); everyone else with
+  REPORT_VIEW gets "My report". Plan REPORTING_LEVEL: BASIC (Community) = dashboard, donations summary, My report;
+  STANDARD (Growth) = + donors, campaigns (target vs raised, budget vs actual), staff cash, approvals, PDF/Excel;
+  ADVANCED (Professional, Enterprise) = + 80G register and Form 10BD data.
+- reporting-service (was an empty shell) keeps no copies: it reads figures from new internal endpoints in the owning
+  services - donation-payment `/internal/v1/ngos/{id}/reports/donations|80g`, receipt `.../reports/receipt-numbers`,
+  campaign-project `.../reports/operations|members/{userId}` - so reports are always current. A source that is down
+  gives 503 SOURCE_UNAVAILABLE naming it. Period = India-time days, default the current financial year.
+- API: GET /api/v1/ngos/{id}/dashboard (Reports tab; scope NGO or ME), /reports/summary (+ .pdf, .xlsx), /reports/me,
+  /reports/80g (+ .xlsx: Form 10BD sheet, 80G register, About). Exports need REPORT_EXPORT; exports and every view
+  of the 80G register (PAN data) are audited. Top donors leave the service as names only (keys can be e-mails).
+- Form 10BD data: one line per donor (PAN) and mode (Cash / Kind / Electronic), section 80G, type Others, with
+  receipt numbers and a "check before filing" note (PAN missing, cash donation above Rs 2,000 - section 80G(5D),
+  in kind, receipt not issued). Yogdaan does not file the form; the accountant uploads it.
+- App: new Reports tab (lib/features/reports/reports_pages.dart): period chip (this FY, last FY, this month, custom),
+  tiles, PDF/Excel, approvals, bars by month/mode/campaign/top donors, campaign progress, staff cash, locked-plan card,
+  80G page with download; staff see My report. 43 strings en/hi/mr (hi/mr drafts).
+- Dataset: seed-donations adds 3 offline donations recorded by staff (Sunil 2 cash, Priya 1 cheque); see TEST_DATASET.
+- Tests: 12 unit (PeriodTest, Form10bdTest, ReportServiceTest), scripts/test-reports.ps1 37/37 (every figure compared
+  with the databases; Asha, Ravi, Priya, Sunil, Meera; plans PROFESSIONAL/GROWTH/COMMUNITY). Emulator walkthrough:
+  .agent/rep-*.png (admin tabs, 80G page, PDF/Excel download, Sunil's My report).
+- Found, not fixed (owner to decide): donation-payment accepts an 80G request on a cash donation above Rs 2,000,
+  which gets no deduction under section 80G(5D); the 10BD data flags it.
+- Campaign "raised" in reports is the campaign's whole-life figure (includes development test credits).
 
 ### Session 2026-11-02 (afternoon): memory - thread leak fixed, emulator guard, JVM native caps
 - Measured first (cmd-356): donation-payment-service had 1,908 threads (others ~50); the emulator (qemu) held

@@ -15,6 +15,7 @@ import '../features/notifications/notification_pages.dart';
 import '../features/profile/profile_pages.dart';
 import '../features/ngo/more_page.dart';
 import '../features/ngo/ngo_tabs.dart';
+import '../features/reports/reports_pages.dart';
 import '../features/onboarding/onboarding_pages.dart';
 import '../features/registration/registration_pages.dart';
 import '../features/settings/settings_pages.dart';

@@ -13,7 +13,8 @@ notifications (e-mail + in-app, en/hi/mr), CSR suite (Enterprise). Adults only (
 - services/* Spring Boot 3.5, Java 21, one PostgreSQL DB per service, Flyway; Eureka discovery; api-gateway
   (routes in gateway Routes.java). Services: identity, ngo-registry, subscription, donor, donation-payment, receipt,
   campaign-project (campaigns, accounts, CSR UCs and proposals), document (vault, meetings, CSR packs),
-  notification. Not started: ngo-operations (volunteers, beneficiaries), helpdesk, reporting.
+  notification, reporting (reads owning services' internal report endpoints, keeps no copies).
+  Not started: ngo-operations (volunteers, beneficiaries), helpdesk.
 - shared/platform-commons: errors, JWT security, AccessGuard (membership -> permission -> entitlement), outbox/inbox
   events over HTTP, audit, storage (local files now, S3-compatible later), money.
 - Local stack on the laptop (no containers): PostgreSQL, Keycloak :8180 (realm ngo), Mailpit :8025, gateway :8080.
@@ -37,7 +38,7 @@ notifications (e-mail + in-app, en/hi/mr), CSR suite (Enterprise). Adults only (
   UI helper scripts\ui.ps1 (Tap, TypeText, Labels, Shot...). psql needs $env:PGPASSWORD='dev-only-password' and -w.
 - PowerShell 5.1 misreads non-ASCII (e.g. the rupee sign) in .ps1 command files: avoid it there.
 - Push: git bundle (<last pushed>..main) -> D:\ngo-platform\.sync -> fetched into D:\ngo-git\ngo-platform -> push.
-  Last pushed commit: "Memory: fix HttpClient thread leak..." (2 Nov 2026; see git log).
+  Last pushed commit: "Reports R1..." (2 Nov 2026; see git log).
 
 ## Test data (DEV ONLY)
 NGO "Asha Seva" (id 0cf945f6-1183-42f5-aeb1-20bab9be302b), Professional trial; tests switch to ENTERPRISE via
@@ -45,7 +46,8 @@ PUT /api/v1/ngos/{id}/subscription/trial-plan and back (entitlement cache 30 s).
 Users: asha.admin@ngo.test / DevNgo#2026 (admin), ravi (2nd admin), sunil.staff@ngo.test / DevTest#2026, priya
 (staff), donors meera.donor@ngo.test / DevDonor#2026, kiran, anil. Seeds: scripts/seed-*.ps1. E2E: scripts/test-*.ps1
 (profile, phone, notifications, campaigns, admin-limit, donations, expenses, documents, receipts, csr, uc,
-proposals; load: test-load-receipts with start-local -ReceiptCopies 3).
+proposals, reports; load: test-load-receipts with start-local -ReceiptCopies 3).
+Priya is Finance. seed-donations also adds offline cash/cheque recorded by Sunil and Priya.
 
 ## Status (done)
 Profile + 18+ gate, verified mobile (OTP), campaigns + approval + share page, online and offline donations,
@@ -54,7 +56,8 @@ meetings, Yogdaan rename + master config, CSR 1 compliance pack (expiring public
 certificate (NGO signs, CA certifies via link with UDIN check, PDF in vault), CSR 3 funding proposals (from a
 campaign, frozen PDF when sent, follow-ups, funded -> UC pre-filled, pipeline), memory fix (HttpClient thread leak in
 platform-commons: 1,908 -> 45 threads; JVM native caps ~15% less per service; emulator restarted by run-mobile once
-its commit passes 8 GB - it grows ~12 GB a day).
+its commit passes 8 GB - it grows ~12 GB a day), Reports R1 (Reports tab: NGO-wide for admins + Finance, My report
+for other staff; plan levels Community/Growth/Professional+; PDF/Excel; 80G register + Form 10BD data, audited).
 
 ## Open issues
 - JVM crash (access violation, offset ...6d12, no hs_err; receipt and campaign services, PDF rendering): not seen
@@ -64,15 +67,17 @@ its commit passes 8 GB - it grows ~12 GB a day).
 - test-receipts archives the owner's custom receipt design.
 - S3 region hard-coded (US_EAST_1) in commons S3ObjectStorage: fix before Oracle Cloud.
 - UC page refreshes only on pull-down when the CA certifies.
+- 80G is accepted on cash donations above Rs 2,000 (no deduction, sec. 80G(5D)): owner to decide refuse or warn.
+  Reports flag it in Form 10BD data.
 
 ## Next (suggested order)
 1. Payment gateway (real) or Google/Facebook/Apple sign-in (owner creates the OAuth apps).
 2. Account deletion end to end; unsubscribe links; donor PAN only when 80G is wanted; referral links.
 3. Form 10BD/10BE export, advanced receipt designer, donor receipts in their vault.
-4. Operations (volunteers, beneficiaries), helpdesk, reporting; push notifications.
+4. Operations (volunteers, beneficiaries), helpdesk, push notifications; more reports (donor retention, custom).
 5. Oracle Cloud free tier (A1 2 OCPU/12 GB, Mumbai/Hyderabad, Caddy, one bucket), iOS (needs a Mac), Play release.
 
 ## Owner decisions on record
-CSR = Enterprise for now (flags CSR_COMPLIANCE_PACK, CSR_UTILISATION_CERT, CSR_PROPOSALS, re-decidable). CSR papers
+Reports: NGO-wide = admins + Finance; plan levels as above. CSR = Enterprise for now (flags CSR_COMPLIANCE_PACK, CSR_UTILISATION_CERT, CSR_PROPOSALS, re-decidable). CSR papers
 are linked from the NGO's vault, not copied. Receipts carry "Generated with Yogdaan". No under-18 accounts.
 Gender question pending (recommendation: optional, "Prefer not to say").

@@ -1,7 +1,7 @@
 # Starts the container-free development stack: PostgreSQL, Keycloak, Mailpit, Eureka and the selected services.
 #   -Services identity-service,ngo-registry-service,...  (default: the core set below)
 param([string[]]$Services = @('identity-service', 'ngo-registry-service', 'subscription-service', 'notification-service',
-  'campaign-project-service', 'donation-payment-service', 'receipt-service', 'document-service', 'api-gateway'),
+  'campaign-project-service', 'donation-payment-service', 'receipt-service', 'document-service', 'reporting-service', 'api-gateway'),
   # Extra copies of receipt-service (ports 8097, 8107, ...), all registered in Eureka: the gateway spreads requests over
   # them and their workers share the receipt queue (SKIP LOCKED). Used by the load test.
   [int]$ReceiptCopies = 1,

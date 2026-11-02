@@ -2427,5 +2427,109 @@
   "prStatusDeclined": "Declined",
   "prStatusWithdrawn": "Withdrawn",
   "prOtherExpenses": "Other expenses",
-  "prMonitoringDefault": "Standard text: quarterly reports and a CA-certified utilisation certificate"
+  "prMonitoringDefault": "Standard text: quarterly reports and a CA-certified utilisation certificate",
+  "repThisFy": "This financial year",
+  "repLastFy": "Last financial year",
+  "repThisMonth": "This month",
+  "repCustomDates": "Choose dates",
+  "repTotalReceived": "Total received",
+  "repNewDonors": "New donors",
+  "repByMonth": "By month",
+  "repByMode": "By mode of payment",
+  "repByCampaign": "By campaign",
+  "repGeneral": "General (no campaign)",
+  "repTopDonors": "Top donors",
+  "repCampaigns": "Campaigns",
+  "repRaisedOf": "Raised {raised} of {goal}",
+  "@repRaisedOf": {
+    "placeholders": {
+      "raised": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "repSpentOf": "Spent {spent} of budget {planned}",
+  "@repSpentOf": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "planned": {
+        "type": "String"
+      }
+    }
+  },
+  "repNoBudget": "No budget set",
+  "repStaffCash": "Staff cash",
+  "repSettled": "Settled",
+  "repPendingApprovals": "Waiting for approval",
+  "repPendingExpenses": "Expense claims: {count} ({amount})",
+  "@repPendingExpenses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "repPendingCampaigns": "Campaigns: {count}",
+  "@repPendingCampaigns": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repDownloadReport": "Download report",
+  "repLockedTitle": "More reports on a higher plan",
+  "repLockedGrowth": "Growth adds donors, campaigns, staff cash, approvals and PDF / Excel downloads.",
+  "repLockedPro": "Professional adds the 80G register and Form 10BD data.",
+  "repTax80g": "80G register and Form 10BD",
+  "repTax80gSub": "For your accountant: download, check, upload on the income-tax portal",
+  "repTaxSummary": "{count} donations with 80G · {amount}",
+  "@repTaxSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "repTaxLines": "Form 10BD lines: {count}",
+  "@repTaxLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repTaxAttention": "{count} lines need checking before filing",
+  "@repTaxAttention": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repTaxAllGood": "All lines are ready to check and file",
+  "repTaxNote": "Yogdaan does not file Form 10BD. Your accountant checks each line and uploads it on the income-tax portal.",
+  "repTaxDownload": "Download Excel",
+  "repMyReport": "My report",
+  "repMyCollections": "Collected by me",
+  "repCashInHand": "Cash in hand",
+  "repOwedToYou": "NGO owes you",
+  "repMyClaims": "My claims waiting",
+  "repMyCampaigns": "My campaigns",
+  "repNoClaims": "No claims waiting",
+  "repNoCampaigns": "You have not created a campaign yet",
+  "repNoDonations": "No donations in this period",
+  "repNoAccess": "Reports are not part of your role. Ask an administrator.",
+  "repChannelUpi": "UPI (direct)"
 }

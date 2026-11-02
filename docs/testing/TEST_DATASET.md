@@ -42,6 +42,23 @@ Asha Seva gets a fictional 80G registration (valid to 31 Mar 2031) and online pa
 (no money moves; the app shows a "Test payment" screen). Donors Meera, Kiran and Anil can donate; the NGO's own team
 (Asha, Ravi, Sunil, Priya) cannot (owner rule). `test-donations.ps1` uses its own "E2E" campaign and cleans up.
 
+Offline donations recorded by staff (same script, skipped when the reference exists; made-up names and PANs):
+
+| Reference | Recorded by | Donor | Mode | Amount | 80G | Campaign |
+|---|---|---|---|---|---|---|
+| SEED-CASH-001 | Sunil | Shanta Kale (ABCPK1234L) | Cash | 1,500 | yes | - |
+| SEED-CASH-002 | Sunil | Ganesh Pawar (BGHPP4321Q) | Cash | 2,500 | yes | - |
+| SEED-CHQ-001 | Priya | Pune Traders LLP (AAJFP1234K) | Cheque | 5,000 | yes | School books for 200 children |
+
+On the owner's laptop SEED-CASH-001 exists twice (a second copy was created by mistake on 2 Nov 2026 and kept, since
+financial records are not deleted): Shanta Kale has two cash donations of Rs 1,500 there. SEED-CASH-002 is above
+Rs 2,000 in cash, so the Form 10BD data flags it (no 80G deduction for cash above Rs 2,000).
+
+## Reports (`test-reports.ps1`, read-only)
+Admins (Asha, Ravi) and Finance (Priya) see the NGO-wide report; Sunil sees only "My report" (his cash collections,
+cash in hand Rs 1,800, his pending claim and campaigns); donors have no reports. The script compares every figure with
+the databases and switches the trial plan GROWTH -> COMMUNITY -> back to check the plan levels.
+
 ## Campaign accounts (`seed-expenses.ps1`, idempotent)
 "School books for 200 children" gets a budget (Notebooks 20,000, Textbooks 18,000, School bags 10,000,
 Transport 2,000), three vendors (Sharma Stationers, Pune Book Depot, Patil Tempo Service), a Rs 3,000 cash advance
