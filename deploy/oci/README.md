@@ -60,6 +60,14 @@ or one component at a time (each step can be re-run; it stops with a clear messa
 - Restore a backup: `rclone copy oci:yogdaan-backups/db/<file> /tmp/`, stop the services
   (`systemctl stop 'yogdaan@*' keycloak`), `gunzip -c /tmp/<file> | sudo -u postgres psql`, start them again.
 
+## 3a. Demo data (TEST server only)
+
+`sudo python3 seed-demo.py` (copy it to the server first) loads 6 approved NGOs (3-4 team members each, 2 live
+campaigns each), 36 donors, about 70 online donations through the TEST payment provider and 18 offline cash/cheque/UPI
+donations. It needs `PAYMENTS_MOCK_ENABLED=true` and test mode (OTP codes are read from Mailpit). Re-runnable;
+accounts and passwords are written to `/root/yogdaan-demo-credentials.txt`. All people, PANs and amounts are fictional.
+Never run it on production.
+
 ## 4. Known limits (2 Nov 2026)
 
 - Online payments: only the mock gateway exists; it is OFF in production (it would create real-looking paid
