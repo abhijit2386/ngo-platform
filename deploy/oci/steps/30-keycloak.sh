@@ -94,5 +94,6 @@ if [ ! -f "$ADMIN_MARK" ]; then
 fi
 systemctl restart keycloak
 wait_http http://127.0.0.1:9000/health/ready 180 || die "Keycloak did not become ready (journalctl -u keycloak)"
+bash "$KIT_DIR/kc-required-actions.sh"
 ok "Keycloak ready; admin console only through SSH: ssh -L 8180:127.0.0.1:8180 ... then http://localhost:8180/admin"
 ok "admin user: $KEYCLOAK_ADMIN_USER (password: KEYCLOAK_ADMIN_PASSWORD in $ENV_FILE)"
