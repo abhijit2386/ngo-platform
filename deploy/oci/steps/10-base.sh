@@ -36,6 +36,6 @@ log "user and folders"
 id "$APP_USER" >/dev/null 2>&1 || useradd --system --home-dir "$APP_DIR" --shell /sbin/nologin "$APP_USER"
 install -d -m 0755 -o "$APP_USER" -g "$APP_USER" "$APP_DIR" "$APP_DIR/services"
 install -d -m 0750 -o "$APP_USER" -g "$APP_USER" "$LOG_DIR"
-install -d -m 0750 -o "$APP_USER" -g "$APP_USER" /var/lib/yogdaan
+install -d -m 0750 -o "$APP_USER" -g "$APP_USER" /var/lib/yogdaan /var/lib/yogdaan/files
 timedatectl set-timezone Asia/Kolkata || true
 ok "timezone $(timedatectl show -p Timezone --value 2>/dev/null || echo '?')"

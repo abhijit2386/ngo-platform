@@ -45,10 +45,10 @@ fi
 ES_PASS=$(tr -d '\n' < "$ES_PASS_FILE"); KB_PASS=$(tr -d '\n' < "$KB_PASS_FILE")
 es() { curl -fsS --cacert "$CA" -u "elastic:$ES_PASS" -H 'Content-Type: application/json' "$@"; }
 es -o /dev/null https://127.0.0.1:9200/ || die "cannot log in to Elasticsearch as elastic"
-es -o /dev/null -X PUT https://127.0.0.1:9200/_ilm/policy/yogdaan-logs-30d -d '{"policy":{"phases":{
+es -o /dev/null -X PUT https://127.0.0.1:9200/_ilm/policy/yogdaan-logs -d '{"policy":{"phases":{
   "hot":{"actions":{"rollover":{"max_age":"1d","max_primary_shard_size":"10gb"}}},
-  "delete":{"min_age":"30d","actions":{"delete":{}}}}}}'
-ok "Elasticsearch ready (single node, logs kept 30 days)"
+  "delete":{"min_age":"'"${LOG_DAYS:-14}"'d","actions":{"delete":{}}}}}}'
+ok "Elasticsearch ready (single node, logs kept ${LOG_DAYS:-14} days)"
 
 log "Kibana on 127.0.0.1:5601"
 install -d -m 0750 -o root -g kibana /etc/kibana/certs
@@ -109,7 +109,7 @@ filebeat keystore list >/dev/null 2>&1 || filebeat keystore create --force >/dev
 printf '%s' "$ES_PASS" | filebeat keystore add ES_PWD --stdin --force >/dev/null
 es -o /dev/null -X PUT https://127.0.0.1:9200/_index_template/logs-yogdaan -d '{"index_patterns":["logs-yogdaan-*"],
   "data_stream":{},"priority":300,"composed_of":["logs@mappings","logs@settings","ecs@mappings"],
-  "template":{"settings":{"index.lifecycle.name":"yogdaan-logs-30d"}}}'
+  "template":{"settings":{"index.lifecycle.name":"yogdaan-logs"}}}'
 filebeat test config >/dev/null || die "filebeat config invalid (filebeat test config)"
 systemctl enable filebeat >/dev/null
 systemctl restart filebeat

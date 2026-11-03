@@ -65,7 +65,7 @@ if ($LASTEXITCODE -ne 0) { throw "upload failed (check the IP, port 22 open for 
 $vars = @()
 if ($Only.Count -gt 0) { $vars += "ONLY='$($Only -join ' ')'" }
 if ($Rollback) { $vars += 'ROLLBACK=1' }
-$remote = "set -e; d=/opt/yogdaan-kit/$stamp; sudo mkdir -p `$d; sudo tar -xzf /tmp/yogdaan-kit-$stamp.tgz -C `$d; " +
+$remote = "set -e; d=/opt/yogdaan-kit/$stamp; sudo mkdir -p `$d; sudo tar -xzf /tmp/yogdaan-kit-$stamp.tgz -C `$d; rm -f /tmp/yogdaan-kit-$stamp.tgz; " +
   "sudo ln -sfn `$d /opt/yogdaan-kit/current; sudo chmod -R go-rwx /opt/yogdaan-kit; sudo $($vars -join ' ') bash `$d/install.sh $($Steps -join ' ')"
 Log "running on server: install.sh $($Steps -join ' ') $($vars -join ' ')"
 & $ssh @opts "${User}@${Server}" $remote 2>&1 | ForEach-Object { Log "$_" }

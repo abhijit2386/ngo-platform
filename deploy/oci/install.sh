@@ -22,6 +22,11 @@ run_step() {
   ok "step $1 done"
 }
 [ $# -ge 1 ] || { sed -n '2,13p' "$0"; exit 1; }
+# keep only the two newest deploy kits (each holds all jars, about 1 GB)
+if [ -d /opt/yogdaan-kit ]; then
+  ls -1dt /opt/yogdaan-kit/2*/ 2>/dev/null | tail -n +3 | while read -r old; do [ "${old%/}" != "$KIT_DIR" ] && rm -rf "$old"; done
+fi
+rm -f /tmp/yogdaan-kit-*.tgz
 for s in "$@"; do
   if [ "$s" = all ]; then for x in "${STEPS[@]}"; do run_step "$x"; done; else run_step "$s"; fi
 done

@@ -13,9 +13,15 @@ if ! rpm -q "postgresql${PG_MAJOR}-server" >/dev/null 2>&1; then
   log "install PostgreSQL ${PG_MAJOR}"
   rpm -q pgdg-redhat-repo >/dev/null 2>&1 || \
     dnf -y -q install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-${OSV}-x86_64/pgdg-redhat-repo-latest.noarch.rpm" >/dev/null
+  # PGDG's repo file uses $releasever_major.$releasever_minor; Oracle Linux has no minor value, which gives
+  # ".../rhel-9.-x86_64" (404). Their rhel-<major>-<arch> folders are the same packages.
+  sed -i 's/rhel-\$releasever_major\.\$releasever_minor-/rhel-\$releasever_major-/g' /etc/yum.repos.d/pgdg-redhat-all.repo
+  [ -s /etc/dnf/vars/releasever_major ] || echo "$OSV" > /etc/dnf/vars/releasever_major
   dnf -qy module disable postgresql >/dev/null 2>&1 || true   # use PGDG, not the distribution's module
   dnf_install "postgresql${PG_MAJOR}-server" "postgresql${PG_MAJOR}"
 fi
+# contrib: extensions the services create themselves (document-service: pg_trgm for vault search)
+rpm -q "postgresql${PG_MAJOR}-contrib" >/dev/null 2>&1 || dnf_install "postgresql${PG_MAJOR}-contrib"
 if [ ! -f "$PGDATA/PG_VERSION" ]; then
   PGSETUP_INITDB_OPTIONS="--auth-local=peer --auth-host=scram-sha-256 --encoding=UTF8" \
     "$PGBIN/postgresql-${PG_MAJOR}-setup" initdb >/dev/null

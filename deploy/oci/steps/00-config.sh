@@ -19,6 +19,7 @@ if [ -f "$ENV_FILE" ]; then
     if [ -z "$val" ] && [ -n "$old" ]; then sed -i "s|^${key}=.*|${key}=${old//|/\\|}|" "$tmp"; fi
   done < "$tmp"
 fi
+bash -n "$tmp" || die "settings file has a syntax error (quote values with spaces or brackets: KEY=\"a b\")"
 install -m 0640 -o root -g "$APP_USER" "$tmp" "$ENV_FILE"
 rm -f "$tmp"
 
@@ -28,7 +29,15 @@ for key in KEYCLOAK_ADMIN_PASSWORD KEYCLOAK_ADMIN_CLIENT_SECRET KEYCLOAK_DB_PASS
 done
 
 load_env
-require_env DOMAIN API_HOST AUTH_HOST ACME_EMAIL MAIL_HOST MAIL_USER MAIL_PASSWORD S3_ENDPOINT S3_ACCESS_KEY S3_SECRET_KEY
+require_env DOMAIN API_HOST AUTH_HOST
+# Staged start (owner, 3 Nov 2026): e-mail, bucket and certificate e-mail may come later.
+if [ -z "${S3_ENDPOINT:-}" ] || [ -z "${S3_ACCESS_KEY:-}" ] || [ -z "${S3_SECRET_KEY:-}" ]; then
+  set_env STORAGE_TYPE local
+  set_env STORAGE_ROOT /var/lib/yogdaan/files
+  warn "no bucket keys yet: files are kept on this server (/var/lib/yogdaan/files) until S3_* are set"
+fi
+[ -n "${MAIL_HOST:-}" ] || warn "no SMTP yet: e-mails (sign-up confirmation, receipts) are not sent until MAIL_* are set"
+[ -n "${ACME_EMAIL:-}" ] || warn "ACME_EMAIL empty: needed for the caddy step (HTTPS)"
 [ "${PAYMENTS_MOCK_ENABLED:-false}" = false ] || warn "PAYMENTS_MOCK_ENABLED=true: test payments create real-looking donations"
 [ "${BILLING_MOCK_ENABLED:-false}" = false ] || warn "BILLING_MOCK_ENABLED=true"
 ok "settings in $ENV_FILE (readable by root and the $APP_USER service user only)"

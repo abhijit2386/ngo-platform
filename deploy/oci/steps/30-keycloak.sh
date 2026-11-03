@@ -4,7 +4,7 @@
 # a fresh identity-admin secret and the real SMTP server. Later runs keep the realm (changes go through the console).
 source "$(dirname "$0")/../lib.sh"
 load_env
-require_env AUTH_HOST KEYCLOAK_DB_PASSWORD KEYCLOAK_ADMIN_USER KEYCLOAK_ADMIN_PASSWORD KEYCLOAK_ADMIN_CLIENT_SECRET MAIL_HOST
+require_env AUTH_HOST KEYCLOAK_DB_PASSWORD KEYCLOAK_ADMIN_USER KEYCLOAK_ADMIN_PASSWORD KEYCLOAK_ADMIN_CLIENT_SECRET
 KC_HOME="/opt/keycloak-${KEYCLOAK_VERSION}"
 id keycloak >/dev/null 2>&1 || useradd --system --home-dir /opt/keycloak --shell /sbin/nologin keycloak
 
@@ -42,15 +42,15 @@ MARK=/etc/yogdaan/.keycloak-realm-imported
 if [ ! -f "$MARK" ]; then
   log "production realm (once)"
   [ -f "$KIT_DIR/files/ngo-realm.json" ] || die "files/ngo-realm.json missing in the kit"
-  jq --arg secret "$KEYCLOAK_ADMIN_CLIENT_SECRET" --arg host "$MAIL_HOST" --arg port "${MAIL_PORT:-587}" \
+  jq --arg secret "$KEYCLOAK_ADMIN_CLIENT_SECRET" --arg host "${MAIL_HOST:-}" --arg port "${MAIL_PORT:-587}" \
      --arg user "${MAIL_USER:-}" --arg pw "${MAIL_PASSWORD:-}" --arg from "${MAIL_FROM:-no-reply@yogdaan.co.in}" \
      --arg name "${MAIL_FROM_NAME:-Yogdaan}" '
     del(.users)
     | .sslRequired = "external"
     | .clients |= map(select(.clientId != "ngo-admin-cli"))
     | .clients |= map(if .clientId == "ngo-identity-admin" then .secret = $secret else . end)
-    | .smtpServer = {host: $host, port: $port, from: $from, fromDisplayName: $name, starttls: "true", ssl: "false",
-                     auth: (if $user == "" then "false" else "true" end), user: $user, password: $pw}' \
+    | if $host == "" then del(.smtpServer) else .smtpServer = {host: $host, port: $port, from: $from, fromDisplayName: $name, starttls: "true", ssl: "false",
+                     auth: (if $user == "" then "false" else "true" end), user: $user, password: $pw} end' \
      "$KIT_DIR/files/ngo-realm.json" > /tmp/ngo-realm-prod.json
   chown keycloak:keycloak /tmp/ngo-realm-prod.json; chmod 0600 /tmp/ngo-realm-prod.json
   sudo -u keycloak JAVA_HOME=/opt/java21 "$KC_HOME/bin/kc.sh" import --optimized --file /tmp/ngo-realm-prod.json --override false >/dev/null

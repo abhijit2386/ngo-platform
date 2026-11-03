@@ -260,6 +260,19 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
 - Next (agreed phases): phase 2 donor receipts (PDF + QR) in the vault for donors; phase 3 expiry reminders,
   document versions, CA read-only access.
 
+### Session 2026-11-03: first OCI install (test4, 130.210.11.54, Oracle Linux 9.8, 16 vCPU, 30 GB, 1 TB boot)
+- Two earlier machines dropped: "webtest" ran another app (nginx :80, node :3000) on a 30 GB disk; "test3" stopped
+  answering on port 22. test4: boot volume grown to 1 TB with oci-growfs (no restart).
+- Installed with deploy-cloud.ps1: config, base, postgres, keycloak, services, elk -> DEPLOY OK. Smoke 17/24: all 11
+  services healthy, 10 in Eureka, Keycloak realm (no test users), PDF fonts, test payments off, logs in Elasticsearch.
+  Failing as expected: Caddy/HTTPS (waits for DNS + OCI ports 80/443 + ACME e-mail), rpcbind :111 (OS service,
+  blocked by firewalld).
+- Kit fixes found on the real server: PGDG repo file builds "rhel-9.-x86_64" on Oracle Linux (no minor version) ->
+  rewritten to rhel-9-x86_64; postgresql17-contrib needed (document-service creates pg_trgm); settings values with
+  spaces/brackets must be quoted (bash -n check added); staged start without e-mail/bucket keys (files on the server
+  in /var/lib/yogdaan/files until S3_* are set); LOG_DAYS (default 14, 30 on test4); old kits cleaned (keep 2).
+- Next on the server: DNS + ports 80/443 + ACME_EMAIL -> caddy; MAIL_* and S3_* -> config, keycloak SMTP, backup.
+
 ### Session 2026-11-02 (late night): OCI deployment kit (one Oracle Linux server, no containers)
 - Owner decisions: one OCI machine (8 OCPU / 32 GB, x86_64, Oracle Linux), no Podman/containers, Eureka kept,
   OCI Object Storage for files, Elastic ELK for logs (Filebeat straight to Elasticsearch, no Logstash).
