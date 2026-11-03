@@ -6,8 +6,8 @@ limit. Profile builds: fast, but signed with the debug key - not for the Play St
 
 | File | Built | Server | Notes |
 |---|---|---|---|
-| `yogdaan-cloud-test-arm64.apk` | 3 Nov 2026 | OCI test4 `http://130.210.11.54` (API), `http://130.210.11.54:8081` (sign-in) | TEST MODE: plain HTTP by IP, no test payments; e-mails and OTPs in the test mailbox `http://130.210.11.54:8025` |
+| `yogdaan-cloud-test-arm64.apk` | 3 Nov 2026 | OCI test4: `https://api.130-210-11-54.sslip.io` (API), `https://auth.130-210-11-54.sslip.io` (sign-in) | TEST MODE: HTTPS on sslip.io names (no DNS needed), no test payments; e-mails and OTPs in the test mailbox `https://mail.130-210-11-54.sslip.io` |
 
-Rebuild: `scripts\run-mobile.ps1 -Mode profile -Cloud -ApiUrl http://<ip> -AuthUrl http://<ip>:8081/realms/ngo`
+Rebuild: `scripts\run-mobile.ps1 -Mode profile -Cloud -ApiUrl https://api.<ip-dashes>.sslip.io -AuthUrl https://auth.<ip-dashes>.sslip.io/realms/ngo`
 for the emulator, or the arm64 command in IMPLEMENTATION_STATUS.md (3 Nov 2026) for this folder. Once the domain has
-HTTPS, builds use `https://api.yogdaan.co.in` and this IP build is retired.
+HTTPS, builds use `https://api.yogdaan.co.in` and this sslip.io build is retired.
