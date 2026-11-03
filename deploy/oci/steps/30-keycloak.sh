@@ -55,9 +55,6 @@ if [ ! -f "$MARK" ]; then
   chown keycloak:keycloak /tmp/ngo-realm-prod.json; chmod 0600 /tmp/ngo-realm-prod.json
   sudo -u keycloak JAVA_HOME=/opt/java21 "$KC_HOME/bin/kc.sh" import --optimized --file /tmp/ngo-realm-prod.json --override false >/dev/null
   rm -f /tmp/ngo-realm-prod.json
-  # first start creates the (temporary) master admin from these; removed after the first successful start
-  install -m 0600 -o root -g root /dev/null /etc/yogdaan/keycloak-bootstrap.env
-  printf 'KC_BOOTSTRAP_ADMIN_USERNAME=%s\nKC_BOOTSTRAP_ADMIN_PASSWORD=%s\n' "$KEYCLOAK_ADMIN_USER" "$KEYCLOAK_ADMIN_PASSWORD" > /etc/yogdaan/keycloak-bootstrap.env
   touch "$MARK"
   ok "realm 'ngo' imported (no test users)"
 fi
@@ -73,7 +70,6 @@ Requires=postgresql-${PG_MAJOR}.service
 User=keycloak
 Environment=JAVA_HOME=/opt/java21
 Environment="JAVA_OPTS_KC_HEAP=-Xms256m -Xmx768m"
-EnvironmentFile=-/etc/yogdaan/keycloak-bootstrap.env
 ExecStart=${KC_HOME}/bin/kc.sh start --optimized
 Restart=on-failure
 RestartSec=10
@@ -86,8 +82,17 @@ WantedBy=multi-user.target
 UNIT
 systemctl daemon-reload
 systemctl enable keycloak >/dev/null
+# Admin account for the master realm: the import above already created the master realm, so Keycloak's
+# "admin on first start" never happens; bootstrap-admin creates it (server stopped, once).
+ADMIN_MARK=/etc/yogdaan/.keycloak-admin-created
+if [ ! -f "$ADMIN_MARK" ]; then
+  systemctl stop keycloak 2>/dev/null || true
+  sudo -u keycloak env JAVA_HOME=/opt/java21 KC_ADMIN_U="$KEYCLOAK_ADMIN_USER" KC_ADMIN_P="$KEYCLOAK_ADMIN_PASSWORD" \
+    "$KC_HOME/bin/kc.sh" bootstrap-admin user --optimized --username:env KC_ADMIN_U --password:env KC_ADMIN_P >/dev/null
+  touch "$ADMIN_MARK"
+  ok "master admin $KEYCLOAK_ADMIN_USER created"
+fi
 systemctl restart keycloak
 wait_http http://127.0.0.1:9000/health/ready 180 || die "Keycloak did not become ready (journalctl -u keycloak)"
-rm -f /etc/yogdaan/keycloak-bootstrap.env
 ok "Keycloak ready; admin console only through SSH: ssh -L 8180:127.0.0.1:8180 ... then http://localhost:8180/admin"
 ok "admin user: $KEYCLOAK_ADMIN_USER (password: KEYCLOAK_ADMIN_PASSWORD in $ENV_FILE)"

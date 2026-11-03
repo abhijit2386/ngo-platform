@@ -272,6 +272,14 @@ Community / Growth / Professional / Enterprise; ONE object store for all NGOs (b
   spaces/brackets must be quoted (bash -n check added); staged start without e-mail/bucket keys (files on the server
   in /var/lib/yogdaan/files until S3_* are set); LOG_DAYS (default 14, 30 on test4); old kits cleaned (keep 2).
 - Next on the server: DNS + ports 80/443 + ACME_EMAIL -> caddy; MAIL_* and S3_* -> config, keycloak SMTP, backup.
+- TEST MODE (owner: app test before DNS/HTTPS/e-mail): deploy/oci/test-mode.sh - Caddy plain HTTP :80 (API),
+  :8081 (Keycloak, /admin blocked), :8025 (Mailpit test mailbox, basic auth); realm Require SSL = none; Keycloak
+  hostname http://130.210.11.54:8081; all e-mail to Mailpit. Checked from outside: API 401, issuer by IP, internal
+  paths 404, mailbox 401. Profile builds allow plain HTTP to that IP only (src/profile network config).
+  APK: android-apk/yogdaan-cloud-test-arm64.apk (34 MB; arm64 only, under GitHub's 100 MB limit).
+- Fixed on the way: Keycloak master admin via `kc.sh bootstrap-admin` (the realm import creates the master realm, so
+  no admin was made on first start); Caddy logs to the journal (SELinux blocked its log file); every ssh call uses
+  -n (twice a remote command waited for input and blocked the runner).
 
 ### Session 2026-11-02 (late night): OCI deployment kit (one Oracle Linux server, no containers)
 - Owner decisions: one OCI machine (8 OCPU / 32 GB, x86_64, Oracle Linux), no Podman/containers, Eureka kept,

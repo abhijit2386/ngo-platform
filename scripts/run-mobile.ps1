@@ -53,7 +53,7 @@ if (-not $SkipBuild -and (Test-Path $apk)) {
 }
 if (-not $SkipBuild) {
   $before = if (Test-Path $apk) { (Get-Item $apk).LastWriteTime } else { [datetime]::MinValue }
-  $defines = if ($Cloud) { " --dart-define=API_BASE_URL=$ApiUrl --dart-define=OIDC_ISSUER=$AuthUrl --dart-define=ALLOW_INSECURE=false --dart-define=MOCK_PAYMENTS=false" } else { '' }
+  $defines = if ($Cloud) { " --dart-define=API_BASE_URL=$ApiUrl --dart-define=OIDC_ISSUER=$AuthUrl --dart-define=ALLOW_INSECURE=$(if ($ApiUrl -like 'http:*') { 'true' } else { 'false' }) --dart-define=MOCK_PAYMENTS=false" } else { '' }
   Step 'build' "flutter build apk --$Mode$defines" 60 | Out-Null
   if (-not (Test-Path $apk) -or (Get-Item $apk).LastWriteTime -le $before) { Set-Content "$Repo\logs\run-mobile.status" 'BUILD_FAIL'; exit 1 }
 }

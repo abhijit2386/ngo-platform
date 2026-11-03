@@ -68,7 +68,7 @@ if ($Rollback) { $vars += 'ROLLBACK=1' }
 $remote = "set -e; d=/opt/yogdaan-kit/$stamp; sudo mkdir -p `$d; sudo tar -xzf /tmp/yogdaan-kit-$stamp.tgz -C `$d; rm -f /tmp/yogdaan-kit-$stamp.tgz; " +
   "sudo ln -sfn `$d /opt/yogdaan-kit/current; sudo chmod -R go-rwx /opt/yogdaan-kit; sudo $($vars -join ' ') bash `$d/install.sh $($Steps -join ' ')"
 Log "running on server: install.sh $($Steps -join ' ') $($vars -join ' ')"
-& $ssh @opts "${User}@${Server}" $remote 2>&1 | ForEach-Object { Log "$_" }
+& $ssh -n @opts "${User}@${Server}" $remote  # -n: the server never waits for input from this laptop 2>&1 | ForEach-Object { Log "$_" }
 $code = $LASTEXITCODE
 Log "server exit code: $code"
 if ($code -ne 0) { throw "install failed: see $log" }

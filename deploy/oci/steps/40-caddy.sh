@@ -27,10 +27,7 @@ cat > /etc/caddy/Caddyfile <<CADDY
 		-Server
 	}
 	log {
-		output file /var/log/caddy/access.log {
-			roll_size 20MiB
-			roll_keep 10
-		}
+		output stderr
 	}
 }
 
@@ -58,7 +55,6 @@ ${AUTH_HOST} {
 	reverse_proxy 127.0.0.1:8180
 }
 CADDY
-install -d -o caddy -g caddy /var/log/caddy
 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null 2>&1 || die "Caddyfile invalid: caddy validate --config /etc/caddy/Caddyfile"
 systemctl enable caddy >/dev/null
 systemctl restart caddy
