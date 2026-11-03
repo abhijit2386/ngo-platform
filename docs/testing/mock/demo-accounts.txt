@@ -1,0 +1,59 @@
+YOGDAAN TEST SERVER - DEMO ACCOUNTS (fictional people; test server only)
+Sign in: https://auth.130-210-11-54.sslip.io  (the app uses it automatically)
+
+PLATFORM_ADMIN   Yogdaan platform   Platform Admin         platform.admin@yogdaan.test              Yogdaan#Admin26
+PRIMARY_ADMIN    Asha Shiksha       Asha Kulkarni          asha.kulkarni@asha.test                  Yogdaan#Team26
+SECONDARY_ADMIN  Asha Shiksha       Rohan Deshpande        rohan.deshpande@asha.test                Yogdaan#Team26
+STAFF            Asha Shiksha       Sneha Pawar            sneha.pawar@asha.test                    Yogdaan#Team26
+FINANCE          Asha Shiksha       Vikram Joshi           vikram.joshi@asha.test                   Yogdaan#Team26
+PRIMARY_ADMIN    Jeevan Arogya      Meenal Wagh            meenal.wagh@jeevan.test                  Yogdaan#Team26
+SECONDARY_ADMIN  Jeevan Arogya      Sanjay Bhosale         sanjay.bhosale@jeevan.test               Yogdaan#Team26
+STAFF            Jeevan Arogya      Kavita Shinde          kavita.shinde@jeevan.test                Yogdaan#Team26
+PRIMARY_ADMIN    Harit Dhara        Lakshmi Rao            lakshmi.rao@harit.test                   Yogdaan#Team26
+SECONDARY_ADMIN  Harit Dhara        Arjun Hegde            arjun.hegde@harit.test                   Yogdaan#Team26
+STAFF            Harit Dhara        Divya Shetty           divya.shetty@harit.test                  Yogdaan#Team26
+PRIMARY_ADMIN    Annapurna Bhojan   Pooja Sharma           pooja.sharma@annapurna.test              Yogdaan#Team26
+SECONDARY_ADMIN  Annapurna Bhojan   Manish Agarwal         manish.agarwal@annapurna.test            Yogdaan#Team26
+STAFF            Annapurna Bhojan   Neha Meena             neha.meena@annapurna.test                Yogdaan#Team26
+PRIMARY_ADMIN    Sakhi Mahila       Sunita Verma           sunita.verma@sakhi.test                  Yogdaan#Team26
+SECONDARY_ADMIN  Sakhi Mahila       Rekha Choudhary        rekha.choudhary@sakhi.test               Yogdaan#Team26
+STAFF            Sakhi Mahila       Anjali Tiwari          anjali.tiwari@sakhi.test                 Yogdaan#Team26
+PRIMARY_ADMIN    Pashu Raksha       Hetal Patel            hetal.patel@pashu.test                   Yogdaan#Team26
+SECONDARY_ADMIN  Pashu Raksha       Kunal Shah             kunal.shah@pashu.test                    Yogdaan#Team26
+STAFF            Pashu Raksha       Bhavin Desai           bhavin.desai@pashu.test                  Yogdaan#Team26
+DONOR            -                  Aarav Sharma           aarav.sharma@donor.test                  Yogdaan#Donor26
+DONOR            -                  Vivaan Iyer            vivaan.iyer@donor.test                   Yogdaan#Donor26
+DONOR            -                  Aditya Nair            aditya.nair@donor.test                   Yogdaan#Donor26
+DONOR            -                  Ishaan Reddy           ishaan.reddy@donor.test                  Yogdaan#Donor26
+DONOR            -                  Kabir Gupta            kabir.gupta@donor.test                   Yogdaan#Donor26
+DONOR            -                  Reyansh Mehta          reyansh.mehta@donor.test                 Yogdaan#Donor26
+DONOR            -                  Ananya Banerjee        ananya.banerjee@donor.test               Yogdaan#Donor26
+DONOR            -                  Diya Das               diya.das@donor.test                      Yogdaan#Donor26
+DONOR            -                  Saanvi Kapoor          saanvi.kapoor@donor.test                 Yogdaan#Donor26
+DONOR            -                  Aadhya Malhotra        aadhya.malhotra@donor.test               Yogdaan#Donor26
+DONOR            -                  Myra Pillai            myra.pillai@donor.test                   Yogdaan#Donor26
+DONOR            -                  Kiara Menon            kiara.menon@donor.test                   Yogdaan#Donor26
+DONOR            -                  Rahul Jain             rahul.jain@donor.test                    Yogdaan#Donor26
+DONOR            -                  Amit Saxena            amit.saxena@donor.test                   Yogdaan#Donor26
+DONOR            -                  Suresh Mishra          suresh.mishra@donor.test                 Yogdaan#Donor26
+DONOR            -                  Ramesh Pandey          ramesh.pandey@donor.test                 Yogdaan#Donor26
+DONOR            -                  Deepak Kulkarni        deepak.kulkarni@donor.test               Yogdaan#Donor26
+DONOR            -                  Nikhil Gokhale         nikhil.gokhale@donor.test                Yogdaan#Donor26
+DONOR            -                  Priyanka Chavan        priyanka.chavan@donor.test               Yogdaan#Donor26
+DONOR            -                  Shreya Naik            shreya.naik@donor.test                   Yogdaan#Donor26
+DONOR            -                  Pallavi Bose           pallavi.bose@donor.test                  Yogdaan#Donor26
+DONOR            -                  Swati Sen              swati.sen@donor.test                     Yogdaan#Donor26
+DONOR            -                  Gaurav Arora           gaurav.arora@donor.test                  Yogdaan#Donor26
+DONOR            -                  Harsh Bhatia           harsh.bhatia@donor.test                  Yogdaan#Donor26
+DONOR            -                  Tanvi Rao              tanvi.rao@donor.test                     Yogdaan#Donor26
+DONOR            -                  Ritu Qureshi           ritu.qureshi@donor.test                  Yogdaan#Donor26
+DONOR            -                  Farhan Khan            farhan.khan@donor.test                   Yogdaan#Donor26
+DONOR            -                  Zoya Dsouza            zoya.dsouza@donor.test                   Yogdaan#Donor26
+DONOR            -                  Joseph Fernandes       joseph.fernandes@donor.test              Yogdaan#Donor26
+DONOR            -                  Maria Gill             maria.gill@donor.test                    Yogdaan#Donor26
+DONOR            -                  Gurpreet Kaur          gurpreet.kaur@donor.test                 Yogdaan#Donor26
+DONOR            -                  Simran Rajan           simran.rajan@donor.test                  Yogdaan#Donor26
+DONOR            -                  Arvind Murthy          arvind.murthy@donor.test                 Yogdaan#Donor26
+DONOR            -                  Lata Thakur            lata.thakur@donor.test                   Yogdaan#Donor26
+DONOR            -                  Mohan Lal              mohan.lal@donor.test                     Yogdaan#Donor26
+DONOR            -                  Usha Devi              usha.devi@donor.test                     Yogdaan#Donor26
