@@ -16,6 +16,8 @@ if [ ! -x "$KC_HOME/bin/kc.sh" ]; then
   rm -rf "$tmp"
 fi
 ln -sfn "$KC_HOME" /opt/keycloak
+# Yogdaan sign-in look (infrastructure/keycloak/themes): copied on every run, Keycloak restarted below
+if [ -d "$KIT_DIR/files/themes" ]; then cp -r "$KIT_DIR/files/themes/." "$KC_HOME/themes/"; ok "themes: $(ls "$KIT_DIR/files/themes" | tr '\n' ' ')"; fi
 chown -R keycloak:keycloak "$KC_HOME"
 
 log "configuration"

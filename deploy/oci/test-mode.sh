@@ -107,7 +107,7 @@ KCADM=/opt/keycloak/bin/kcadm.sh
 export JAVA_HOME=/opt/java21
 CFG=$(mktemp)
 $KCADM config credentials --config "$CFG" --server http://127.0.0.1:8180 --realm master --user "$KEYCLOAK_ADMIN_USER" --password "$KEYCLOAK_ADMIN_PASSWORD" >/dev/null
-$KCADM update realms/"${KEYCLOAK_REALM:-ngo}" --config "$CFG" -s sslRequired=external -s loginTheme=keycloak \
+$KCADM update realms/"${KEYCLOAK_REALM:-ngo}" --config "$CFG" -s sslRequired=external -s loginTheme=yogdaan \
   -s 'smtpServer.host=127.0.0.1' -s 'smtpServer.port=1025' -s 'smtpServer.from=no-reply@yogdaan.co.in' \
   -s 'smtpServer.fromDisplayName=Yogdaan (test)' -s 'smtpServer.auth=false' -s 'smtpServer.starttls=false' -s 'smtpServer.ssl=false'
 rm -f "$CFG"

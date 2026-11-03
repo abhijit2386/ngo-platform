@@ -24,7 +24,7 @@
     "mr"
   ],
   "defaultLocale": "en",
-  "loginTheme": "keycloak",
+  "loginTheme": "yogdaan",
   "smtpServer": {
     "host": "localhost",
     "port": "1025",

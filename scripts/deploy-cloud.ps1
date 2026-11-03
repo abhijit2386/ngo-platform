@@ -42,6 +42,7 @@ Get-ChildItem $work -Recurse -Include *.sh | ForEach-Object {     # bash needs L
 $envText = [IO.File]::ReadAllText($envProd).Replace("`r`n", "`n")
 [IO.File]::WriteAllText("$work\files\yogdaan.env.prod", $envText)
 Copy-Item "$Repo\infrastructure\keycloak\ngo-realm.json" "$work\files\ngo-realm.json"
+if (Test-Path "$Repo\infrastructure\keycloak\themes") { Copy-Item "$Repo\infrastructure\keycloak\themes" "$work\files\themes" -Recurse -Force }
 $needJars = ($Steps -contains 'all' -or $Steps -contains 'services') -and -not $Rollback
 if ($needJars) {
   foreach ($s in $services) {

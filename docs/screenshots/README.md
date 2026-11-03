@@ -186,3 +186,11 @@ hand, their claims and campaigns.
 <img src="reports-07-pdf-saved.png" alt="reports-07-pdf-saved" width="270">
 <img src="reports-08-staff-my-report.png" alt="reports-08-staff-my-report" width="270">
 <img src="reports-09-staff-claims-campaigns.png" alt="reports-09-staff-claims-campaigns" width="270">
+
+## Sign-in pages, Yogdaan look (2026-11-03, cloud test server, Android Chrome)
+
+Keycloak's sign-in, register and password pages with the app's colours and brand mark (CSS-only theme
+`infrastructure/keycloak/themes/yogdaan`). Registration asks for the password after the e-mail is verified (Keycloak 26.7).
+
+<img src="signin-01-login.png" alt="signin-01-login" width="270">
+<img src="signin-02-register.png" alt="signin-02-register" width="270">

@@ -1,0 +1,81 @@
+/* Yogdaan look for Keycloak's login pages (sign in, register, forgot password, verify e-mail, update password).
+   Colours from apps/mobile/lib/design_system/tokens.dart. */
+:root {
+  --yd-primary: #087A4B; --yd-primary-dark: #064E3B; --yd-soft: #E6F3EC; --yd-bg: #FAFBF7;
+  --yd-text: #14213D; --yd-muted: #5B6478; --yd-outline: #E3E7DF; --yd-error: #C62828;
+}
+html, .login-pf, .login-pf body, body {
+  background: linear-gradient(180deg, var(--yd-soft) 0%, var(--yd-bg) 38%) !important;
+  color: var(--yd-text);
+  font-family: "Noto Sans", Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.login-pf-page { padding-top: 24px; }
+
+/* brand mark + name */
+#kc-header { color: var(--yd-primary-dark); margin-bottom: 8px; }
+#kc-header-wrapper {
+  color: var(--yd-primary-dark); font-size: 22px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  text-align: center; padding: 0; line-height: 1.2; white-space: normal;
+}
+#kc-header-wrapper::before {
+  content: ""; display: block; width: 72px; height: 72px; margin: 0 auto 14px;
+  background: url("../img/brand.svg") center / contain no-repeat;
+  filter: drop-shadow(0 10px 18px rgba(8, 122, 75, 0.25));
+}
+
+/* the card */
+.login-pf-page .card-pf, .card-pf {
+  background: #fff; border: 1px solid var(--yd-outline); border-top: 1px solid var(--yd-outline);
+  border-radius: 20px; box-shadow: 0 8px 30px rgba(20, 33, 61, 0.08); padding: 28px 22px;
+  margin-left: auto; margin-right: auto; max-width: 460px;
+}
+@media (max-width: 767px) {
+  .login-pf-page .card-pf, .card-pf { margin: 0 14px; padding: 22px 18px; }
+}
+#kc-page-title { color: var(--yd-text); font-weight: 600; font-size: 22px; }
+.login-pf-page .login-pf-header { margin-bottom: 18px; }
+label, .pf-c-form__label, .control-label { color: var(--yd-text); font-weight: 600; font-size: 14px; }
+.required, .pf-c-form__label-required { color: var(--yd-primary); }
+
+/* fields */
+.pf-c-form-control, input.form-control, .form-control, select.pf-c-form-control {
+  border: 1px solid var(--yd-outline) !important; border-radius: 12px !important; background: #fff;
+  min-height: 48px; padding: 10px 14px; font-size: 16px; color: var(--yd-text); box-shadow: none;
+}
+.pf-c-form-control:focus, .form-control:focus, .pf-c-form-control:hover {
+  border-color: var(--yd-primary) !important; box-shadow: 0 0 0 3px rgba(8, 122, 75, 0.15) !important; outline: none;
+}
+.pf-c-form-control[aria-invalid="true"] { border-color: var(--yd-error) !important; }
+.pf-c-input-group { gap: 6px; }
+.pf-c-input-group .pf-c-button.pf-m-control {
+  border: 1px solid var(--yd-outline); border-radius: 12px; background: #fff; color: var(--yd-muted); min-width: 48px;
+}
+.pf-c-input-group .pf-c-button.pf-m-control::after { border: none; }
+input[type="checkbox"] { accent-color: var(--yd-primary); width: 18px; height: 18px; }
+
+/* buttons */
+.pf-c-button.pf-m-primary, .btn-primary, #kc-login, input[type="submit"].pf-c-button {
+  background: var(--yd-primary) !important; border: none !important; border-radius: 14px !important;
+  min-height: 52px; font-size: 16px; font-weight: 600; color: #fff !important; box-shadow: 0 6px 16px rgba(8, 122, 75, 0.25);
+}
+.pf-c-button.pf-m-primary:hover, .btn-primary:hover, #kc-login:hover,
+.pf-c-button.pf-m-primary:focus, .btn-primary:focus { background: var(--yd-primary-dark) !important; }
+.pf-c-button.pf-m-primary::after { border: none !important; }
+.pf-c-button.pf-m-secondary, .btn-default {
+  border: 1px solid var(--yd-primary) !important; color: var(--yd-primary) !important; background: #fff !important;
+  border-radius: 14px !important; min-height: 48px;
+}
+
+/* links, footer, language */
+a, .pf-c-button.pf-m-link { color: var(--yd-primary); font-weight: 600; }
+a:hover, a:focus { color: var(--yd-primary-dark); }
+#kc-registration, #kc-info-wrapper { color: var(--yd-muted); }
+/* "New user? Register" area: keep the divider inside the card (the parent theme pulls it to the card edges) */
+#kc-info { background: transparent; border-top: none; margin: 0 !important; padding: 0 !important; }
+#kc-info-wrapper { border-top: 1px solid var(--yd-outline); margin: 22px 0 0 !important; padding: 16px 0 0 !important; text-align: center; }
+#kc-locale-dropdown a, #kc-current-locale-link, .pf-c-dropdown__toggle { color: var(--yd-primary-dark) !important; font-weight: 600; }
+
+/* messages */
+.alert-error, .pf-c-alert.pf-m-danger { border-radius: 12px; }
+.alert-success, .pf-c-alert.pf-m-success { border-radius: 12px; }
+.alert-info, .pf-c-alert.pf-m-info { border-radius: 12px; }
